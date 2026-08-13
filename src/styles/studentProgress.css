@@ -1,0 +1,997 @@
+/* =========================================================
+   PHO3NIX V2 - Student Progress / Nutrition
+   ========================================================= */
+
+.student-progress-page {
+  overflow: hidden;
+}
+
+.student-progress-main {
+  padding: 16px;
+}
+
+.student-progress-inner {
+  position: relative;
+  z-index: 1;
+  width: min(1680px, 100%);
+  margin: 0 auto;
+}
+
+.student-progress-hero,
+.student-progress-card,
+.student-progress-error {
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 72%, rgba(255,255,255,.08));
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--phx-color-primary) 12%, transparent), transparent 34%),
+    color-mix(in srgb, var(--phx-color-surface) 76%, transparent);
+  box-shadow: 0 24px 65px rgba(0,0,0,.3);
+  backdrop-filter: blur(18px);
+}
+
+.student-progress-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  gap: 18px;
+  align-items: center;
+  min-height: 150px;
+  border-radius: 26px;
+  padding: 22px 26px;
+}
+
+.student-progress-hero p,
+.student-progress-card header p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: .68rem;
+  font-weight: 1000;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+}
+
+.student-progress-hero h1 {
+  margin: 7px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(2.2rem, 4.4vw, 4rem);
+  font-weight: 1000;
+  line-height: .9;
+  letter-spacing: -.05em;
+  text-transform: uppercase;
+}
+
+.student-progress-hero > div > span {
+  display: block;
+  margin-top: 12px;
+  max-width: 720px;
+  color: var(--phx-color-text-muted);
+  font-size: .86rem;
+  line-height: 1.5;
+}
+
+.student-progress-score {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  align-items: end;
+  min-height: 108px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, rgba(255,255,255,.08));
+  border-radius: 22px;
+  padding: 16px;
+  text-align: center;
+  background: color-mix(in srgb, var(--phx-color-background) 68%, transparent);
+}
+
+.student-progress-score > span {
+  grid-column: 1 / -1;
+  color: var(--phx-color-primary);
+  font-size: .62rem;
+  font-weight: 1000;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.student-progress-score strong {
+  color: var(--phx-color-text);
+  font-size: 2.65rem;
+  line-height: .9;
+}
+
+.student-progress-score small {
+  color: var(--phx-color-text-muted);
+  font-weight: 900;
+}
+
+.student-progress-score i {
+  --progress-score: 0%;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--phx-color-primary) var(--progress-score), rgba(255,255,255,.08) 0);
+}
+
+.student-progress-error {
+  margin-top: 10px;
+  border-color: rgba(239,68,68,.35);
+  border-radius: 16px;
+  padding: 11px 14px;
+  color: #fecaca;
+  background: rgba(127,29,29,.24);
+  font-size: .8rem;
+  font-weight: 800;
+}
+
+.student-progress-columns {
+  display: grid;
+  grid-template-columns: minmax(330px, .82fr) minmax(0, 1.18fr);
+  gap: 12px;
+  min-height: 0;
+  margin-top: 12px;
+}
+
+.student-progress-column {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.student-progress-card {
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 22px;
+  padding: 15px;
+}
+
+.student-progress-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.student-progress-card header h2 {
+  margin: 4px 0 0;
+  color: var(--phx-color-text);
+  font-size: 1.05rem;
+  font-weight: 1000;
+}
+
+.student-progress-card header > button {
+  border: 0;
+  color: var(--phx-color-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: .72rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-progress-card header > span {
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 30%, transparent);
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  font-size: .62rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-athlete-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-athlete-identity > img,
+.student-athlete-identity > span {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 35%, rgba(255,255,255,.08));
+  border-radius: 999px;
+  object-fit: cover;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 12%, transparent);
+  font-size: 1.35rem;
+  font-weight: 1000;
+}
+
+.student-athlete-identity div {
+  min-width: 0;
+}
+
+.student-athlete-identity strong,
+.student-athlete-identity small {
+  display: block;
+}
+
+.student-athlete-identity strong {
+  overflow: hidden;
+  color: var(--phx-color-text);
+  font-size: .96rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-athlete-identity small {
+  margin-top: 3px;
+  color: var(--phx-color-text-muted);
+  font-size: .67rem;
+}
+
+.student-athlete-measurements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.student-athlete-measurements > div,
+.student-reference-metrics > div,
+.student-analysis-dates > div {
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+  border-radius: 15px;
+  padding: 11px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 54%, transparent);
+}
+
+.student-athlete-measurements small,
+.student-reference-metrics small,
+.student-analysis-dates small {
+  display: block;
+  color: var(--phx-color-text-muted);
+  font-size: .6rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.student-athlete-measurements strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--phx-color-text);
+  font-size: 1.25rem;
+}
+
+.student-athlete-measurements b {
+  color: var(--phx-color-text-muted);
+  font-size: .68rem;
+}
+
+.student-reference-main {
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, transparent);
+  border-radius: 17px;
+  padding: 13px;
+  text-align: center;
+  background: color-mix(in srgb, var(--phx-color-primary) 9%, transparent);
+}
+
+.student-reference-main small {
+  color: var(--phx-color-primary);
+  font-size: .62rem;
+  font-weight: 1000;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.student-reference-main strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--phx-color-text);
+  font-size: 1.35rem;
+}
+
+.student-reference-metrics,
+.student-analysis-dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.student-reference-metrics strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--phx-color-primary);
+  font-size: 1.03rem;
+}
+
+.student-reference-metrics span {
+  display: block;
+  margin-top: 3px;
+  color: var(--phx-color-text-muted);
+  font-size: .6rem;
+  font-weight: 800;
+}
+
+.student-reference-metrics .is-success span { color: #86efac; }
+.student-reference-metrics .is-warning span { color: #fbbf24; }
+.student-reference-metrics .is-danger span { color: #fca5a5; }
+.student-reference-metrics .is-info span { color: #7dd3fc; }
+
+.student-reference-note,
+.student-goal-card > p,
+.student-analysis-card > p {
+  margin: 10px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: .66rem;
+  line-height: 1.45;
+}
+
+.student-progress-empty,
+.student-ai-empty {
+  border: 1px dashed color-mix(in srgb, var(--phx-color-border) 75%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  padding: 18px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 40%, transparent);
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.student-goal-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.student-goal-options button {
+  display: grid;
+  grid-template-columns: 30px minmax(0,1fr);
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 62%, rgba(255,255,255,.08));
+  border-radius: 15px;
+  padding: 9px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 45%, transparent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.student-goal-options button.is-active {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 48%, transparent);
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-primary) 11%, transparent);
+}
+
+.student-goal-options button:disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+.student-goal-options button > span {
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.student-goal-options strong,
+.student-goal-options small {
+  display: block;
+}
+
+.student-goal-options strong {
+  color: inherit;
+  font-size: .72rem;
+}
+
+.student-goal-options small {
+  margin-top: 2px;
+  font-size: .57rem;
+  line-height: 1.25;
+}
+
+.student-summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.student-summary-metrics > div {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+  border-radius: 17px;
+  padding: 11px 7px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 50%, transparent);
+  text-align: center;
+}
+
+.student-summary-metrics span {
+  font-size: 1.15rem;
+}
+
+.student-summary-metrics strong {
+  margin-top: 4px;
+  color: var(--phx-color-text);
+  font-size: 1.35rem;
+}
+
+.student-summary-metrics small {
+  margin-top: 3px;
+  color: var(--phx-color-text-muted);
+  font-size: .58rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.student-summary-card footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--phx-color-text-muted);
+  font-size: .67rem;
+}
+
+.student-summary-card footer strong {
+  color: var(--phx-color-text);
+}
+
+.student-analysis-dates strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--phx-color-text);
+  font-size: .72rem;
+}
+
+.student-analysis-lock {
+  margin: 9px 0 0;
+  border-radius: 13px;
+  padding: 8px 10px;
+  color: #fde68a;
+  background: rgba(245,158,11,.1);
+  font-size: .68rem;
+}
+
+.student-analysis-card > button {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 14px;
+  color: #0a0a0a;
+  background: var(--phx-color-primary);
+  cursor: pointer;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-analysis-card > button:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+.student-ai-card {
+  min-height: 300px;
+}
+
+.student-ai-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.student-ai-grid section {
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+  border-radius: 15px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 45%, transparent);
+}
+
+.student-ai-grid h3 {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: .61rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.student-ai-grid p,
+.student-ai-alert p,
+.student-ai-empty p {
+  margin: 5px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
+.student-ai-empty strong {
+  color: var(--phx-color-text);
+}
+
+.student-ai-alert {
+  margin-top: 8px;
+  border: 1px solid rgba(245,158,11,.25);
+  border-radius: 15px;
+  padding: 10px;
+  background: rgba(245,158,11,.08);
+}
+
+.student-ai-alert strong {
+  color: #fbbf24;
+  font-size: .61rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.student-progress-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(250px, .75fr);
+  gap: 12px;
+}
+
+.student-evolution-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px;
+  margin-bottom: 7px;
+  color: var(--phx-color-text-muted);
+  font-size: .61rem;
+  font-weight: 900;
+}
+
+.student-evolution-legend span::before {
+  display: inline-block;
+  width: 20px;
+  height: 3px;
+  margin-right: 5px;
+  border-radius: 999px;
+  content: "";
+  vertical-align: middle;
+}
+
+.student-evolution-legend .is-weight::before { background: var(--phx-color-primary); }
+.student-evolution-legend .is-bmi::before { background: #84cc16; }
+.student-evolution-legend .is-limit::before { background: #fdba74; }
+
+.student-evolution-chart {
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  padding: 5px;
+  background: color-mix(in srgb, var(--phx-color-background) 58%, transparent);
+}
+
+.student-evolution-chart svg {
+  display: block;
+  width: 100%;
+  min-width: 520px;
+}
+
+.student-evolution-chart line {
+  stroke: rgba(255,255,255,.08);
+  stroke-width: 1;
+}
+
+.student-evolution-chart text {
+  fill: rgba(255,255,255,.43);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.student-evolution-chart polyline {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.student-evolution-chart polyline.is-weight { stroke: var(--phx-color-primary); stroke-width: 4; }
+.student-evolution-chart polyline.is-bmi { stroke: #84cc16; stroke-width: 4; }
+.student-evolution-chart polyline.is-weight-limit { stroke: #fdba74; stroke-width: 2; stroke-dasharray: 7 5; }
+.student-evolution-chart polyline.is-bmi-limit { stroke: #38bdf8; stroke-width: 2; stroke-dasharray: 7 5; }
+.student-evolution-chart circle.is-weight { fill: var(--phx-color-primary); }
+.student-evolution-chart circle.is-bmi { fill: #84cc16; }
+
+.student-evolution-chart .student-evolution-value {
+  fill: var(--phx-color-text);
+}
+
+.student-evolution-table,
+.student-history-list {
+  display: grid;
+  margin-top: 8px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+  border-radius: 15px;
+}
+
+.student-evolution-table > div,
+.student-history-list > div {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--phx-color-border) 42%, transparent);
+  padding: 8px 10px;
+}
+
+.student-evolution-table > div:last-child,
+.student-history-list > div:last-child {
+  border-bottom: 0;
+}
+
+.student-evolution-table > div {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  color: var(--phx-color-text-muted);
+  font-size: .64rem;
+}
+
+.student-evolution-table strong {
+  color: var(--phx-color-primary);
+}
+
+.student-evolution-table b {
+  color: #84cc16;
+}
+
+.student-history-list > div {
+  grid-template-columns: minmax(0,1fr) auto;
+}
+
+.student-history-list span,
+.student-history-list strong,
+.student-history-list small {
+  display: block;
+  min-width: 0;
+}
+
+.student-history-list strong {
+  overflow: hidden;
+  color: var(--phx-color-text);
+  font-size: .67rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-history-list small {
+  margin-top: 3px;
+  color: var(--phx-color-text-muted);
+  font-size: .59rem;
+}
+
+.student-history-list b {
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, transparent);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 9%, transparent);
+  font-size: .6rem;
+}
+
+.student-progress-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0,0,0,.75);
+  backdrop-filter: blur(8px);
+}
+
+.student-progress-modal > section {
+  width: min(100%, 440px);
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 34%, rgba(255,255,255,.08));
+  border-radius: 26px;
+  padding: 18px;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-background) 94%, #111);
+  box-shadow: 0 30px 90px rgba(0,0,0,.7);
+}
+
+.student-progress-modal header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.student-progress-modal header p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: .65rem;
+  font-weight: 1000;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.student-progress-modal header h2 {
+  margin: 5px 0 0;
+  font-size: 1.2rem;
+}
+
+.student-progress-modal header span {
+  display: block;
+  margin-top: 4px;
+  color: var(--phx-color-text-muted);
+  font-size: .72rem;
+}
+
+.student-progress-modal header button {
+  width: 38px;
+  height: 38px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 65%, rgba(255,255,255,.08));
+  border-radius: 12px;
+  color: var(--phx-color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+.student-progress-modal-fields {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.student-progress-modal-fields label > span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--phx-color-text-muted);
+  font-size: .66rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.student-progress-modal-fields label > div {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 70%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  padding: 0 12px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 55%, transparent);
+}
+
+.student-progress-modal-fields input {
+  min-width: 0;
+  height: 44px;
+  border: 0;
+  color: var(--phx-color-text);
+  background: transparent;
+  outline: 0;
+  font: inherit;
+  font-weight: 900;
+}
+
+.student-progress-modal-fields b {
+  color: var(--phx-color-primary);
+  font-size: .7rem;
+}
+
+.student-progress-modal footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.student-progress-modal footer button {
+  min-height: 42px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 70%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  color: var(--phx-color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-progress-modal footer button:last-child {
+  border-color: transparent;
+  color: #080808;
+  background: var(--phx-color-primary);
+}
+
+.student-progress-loading {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 20px;
+  color: var(--phx-color-text);
+  background: var(--phx-color-background);
+}
+
+.student-progress-loading > div {
+  display: grid;
+  justify-items: center;
+  width: min(100%, 380px);
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 25%, rgba(255,255,255,.08));
+  border-radius: 28px;
+  padding: 30px;
+  background: color-mix(in srgb, var(--phx-color-surface) 76%, transparent);
+  text-align: center;
+}
+
+.student-progress-loading span {
+  color: var(--phx-color-primary);
+  font-size: 2.2rem;
+}
+
+.student-progress-loading strong {
+  margin-top: 10px;
+  font-size: 1.15rem;
+}
+
+.student-progress-loading p {
+  margin: 8px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: .78rem;
+}
+
+@media (min-width: 1181px) {
+  .student-progress-main {
+    max-height: 100dvh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 1180px) {
+  .student-progress-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .student-progress-bottom-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .student-progress-page {
+    display: block;
+    min-height: 100dvh;
+    overflow: visible;
+    padding-bottom: 84px;
+  }
+
+  .student-progress-main {
+    max-height: none;
+    min-height: 100dvh;
+    overflow: visible;
+    padding: 12px;
+  }
+
+  .student-progress-hero {
+    grid-template-columns: 1fr 112px;
+    min-height: 132px;
+    padding: 17px;
+  }
+
+  .student-progress-hero h1 {
+    font-size: 2.25rem;
+  }
+
+  .student-progress-score {
+    min-height: 92px;
+    padding: 11px;
+  }
+
+  .student-progress-score strong {
+    font-size: 2rem;
+  }
+
+  .student-progress-columns,
+  .student-progress-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-progress-column {
+    display: contents;
+  }
+
+  .student-athlete-data { order: 1; }
+  .student-reference-card { order: 2; }
+  .student-goal-card { order: 3; }
+  .student-summary-card { order: 4; }
+  .student-analysis-card { order: 5; }
+  .student-ai-card { order: 6; }
+  .student-progress-bottom-grid { order: 7; }
+
+  .student-ai-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .student-progress-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .student-progress-score {
+    grid-template-columns: auto auto;
+    min-height: 84px;
+  }
+
+  .student-goal-options,
+  .student-summary-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .student-summary-metrics > div {
+    padding: 10px 6px;
+  }
+
+  .student-progress-card {
+    border-radius: 19px;
+    padding: 13px;
+  }
+}
+
+/* Traducción bajo demanda del análisis IA */
+.student-ai-translating {
+  display: grid;
+  justify-items: center;
+  min-height: 220px;
+  place-content: center;
+  border: 1px dashed color-mix(in srgb, var(--phx-color-primary) 28%, rgba(255,255,255,.08));
+  border-radius: 18px;
+  padding: 22px;
+  text-align: center;
+  background: color-mix(in srgb, var(--phx-color-primary) 5%, transparent);
+}
+
+.student-ai-translating i {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(255,255,255,.1);
+  border-top-color: var(--phx-color-primary);
+  border-radius: 50%;
+  animation: student-ai-translation-spin .8s linear infinite;
+}
+
+.student-ai-translating strong {
+  margin-top: 13px;
+  color: var(--phx-color-text);
+  font-size: .78rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-ai-translating p {
+  max-width: 360px;
+  margin: 7px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
+.student-ai-translation-warning {
+  margin-bottom: 9px;
+  border: 1px solid rgba(245,158,11,.3);
+  border-radius: 14px;
+  padding: 9px 11px;
+  background: rgba(245,158,11,.08);
+}
+
+.student-ai-translation-warning strong {
+  color: #fbbf24;
+  font-size: .62rem;
+  font-weight: 1000;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.student-ai-translation-warning p {
+  margin: 4px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: .64rem;
+}
+
+@keyframes student-ai-translation-spin {
+  to { transform: rotate(360deg); }
+}
+

@@ -1,0 +1,292 @@
+/* =========================================================
+   PHO3NIX V2 - Auth/Login
+   Responsive, bilingüe y conectado al theme central.
+   ========================================================= */
+
+.phx-login-page,
+.phx-auth-state-page {
+  position: relative;
+  display: grid;
+  min-height: calc(100dvh - 72px);
+  place-items: center;
+  padding: clamp(18px, 4vw, 56px);
+  color: var(--phx-color-text);
+  overflow: hidden;
+}
+
+.phx-login-page::before,
+.phx-auth-state-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--phx-color-primary) 22%, transparent), transparent 32%),
+    radial-gradient(circle at 84% 16%, color-mix(in srgb, var(--phx-color-accent) 16%, transparent), transparent 30%),
+    var(--phx-login-image-url),
+    var(--phx-home-background-url),
+    var(--phx-color-background);
+  background-size: cover;
+  background-position: center;
+}
+
+.phx-login-page::after,
+.phx-auth-state-page::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--phx-color-background) 94%, transparent), color-mix(in srgb, var(--phx-color-background) 74%, transparent)),
+    linear-gradient(180deg, transparent, var(--phx-color-background));
+}
+
+.phx-login-card,
+.phx-auth-state-card {
+  position: relative;
+  width: min(460px, 100%);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 34%, var(--phx-color-border));
+  border-radius: var(--phx-radius-card);
+  background:
+    radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--phx-color-primary) 16%, transparent), transparent 34%),
+    color-mix(in srgb, var(--phx-color-surface) 88%, transparent);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.46),
+    0 0 54px color-mix(in srgb, var(--phx-color-primary) 12%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.phx-login-card {
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.phx-login-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.phx-login-logo {
+  display: block;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  background-image: var(--phx-logo-url);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--phx-color-primary) 32%, transparent));
+}
+
+.phx-login-brand p,
+.phx-auth-state-card p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.phx-login-brand h1,
+.phx-auth-state-card h1 {
+  margin: 4px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(2rem, 8vw, 3.8rem);
+  font-weight: 1000;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+.phx-login-description {
+  margin: 22px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+
+.phx-login-error {
+  margin-top: 18px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-accent) 48%, rgba(255, 255, 255, 0.08));
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-accent) 15%, transparent);
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.phx-login-form {
+  display: grid;
+  gap: 15px;
+  margin-top: 24px;
+}
+
+.phx-login-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.phx-login-form label span {
+  color: var(--phx-color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 1000;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.phx-login-form input {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 72%, rgba(255, 255, 255, 0.08));
+  border-radius: var(--phx-radius-button);
+  padding: 0 15px;
+  outline: none;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-background) 56%, transparent);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.phx-login-form input:focus {
+  border-color: var(--phx-color-primary);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--phx-color-primary) 16%, transparent);
+  background: color-mix(in srgb, var(--phx-color-background) 72%, transparent);
+}
+
+.phx-login-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  border: 0;
+  border-radius: var(--phx-radius-button);
+  color: var(--phx-color-background);
+  background: linear-gradient(135deg, var(--phx-color-primary), var(--phx-color-secondary));
+  cursor: pointer;
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--phx-color-primary) 26%, transparent);
+  font-weight: 1000;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  transition: transform 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+
+.phx-login-submit:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.phx-login-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.64;
+  transform: none;
+}
+
+.phx-login-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.phx-login-footer small {
+  color: var(--phx-color-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.phx-login-footer a {
+  flex: 0 0 auto;
+  color: var(--phx-color-primary);
+  font-size: 0.78rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.phx-auth-state-card {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 30px;
+  text-align: center;
+}
+
+.phx-auth-state-orb {
+  width: 52px;
+  height: 52px;
+  border: 3px solid color-mix(in srgb, var(--phx-color-primary) 20%, transparent);
+  border-top-color: var(--phx-color-primary);
+  border-radius: 999px;
+  animation: phx-auth-spin 850ms linear infinite;
+}
+
+.phx-auth-state-card small {
+  color: var(--phx-color-text-muted);
+}
+
+@keyframes phx-auth-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .phx-login-page,
+  .phx-auth-state-page {
+    min-height: calc(100dvh - 58px);
+    padding: 14px;
+    place-items: center;
+  }
+
+  .phx-login-card {
+    border-radius: 22px;
+    padding: 18px;
+  }
+
+  .phx-login-logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .phx-login-brand {
+    gap: 10px;
+  }
+
+  .phx-login-brand p,
+  .phx-auth-state-card p {
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+  }
+
+  .phx-login-brand h1,
+  .phx-auth-state-card h1 {
+    font-size: clamp(1.8rem, 12vw, 2.65rem);
+  }
+
+  .phx-login-description {
+    margin-top: 16px;
+    font-size: 0.82rem;
+    line-height: 1.48;
+  }
+
+  .phx-login-form {
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .phx-login-form input,
+  .phx-login-submit {
+    min-height: 46px;
+    border-radius: 14px;
+  }
+
+  .phx-login-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

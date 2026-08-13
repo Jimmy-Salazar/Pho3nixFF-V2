@@ -1,0 +1,333 @@
+/* =========================================================
+   PHO3NIX V2 - Aviso personalizado de cumpleaños
+   ========================================================= */
+
+.student-birthday-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 16px;
+  isolation: isolate;
+}
+
+.student-birthday-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background:
+    radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--phx-color-primary) 22%, transparent), transparent 34%),
+    rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(10px);
+  cursor: default;
+}
+
+.student-birthday-card {
+  position: relative;
+  width: min(100%, 520px);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 42%, rgba(255,255,255,.08));
+  border-radius: 30px;
+  padding: clamp(24px, 5vw, 38px);
+  color: var(--phx-color-text, #fff);
+  background:
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--phx-color-primary) 18%, transparent), transparent 34%),
+    linear-gradient(145deg, rgba(18,18,18,.99), rgba(4,4,4,.99));
+  box-shadow:
+    0 34px 110px rgba(0,0,0,.78),
+    0 0 55px color-mix(in srgb, var(--phx-color-primary) 15%, transparent);
+  text-align: center;
+}
+
+.student-birthday-glow {
+  position: absolute;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(55px);
+  pointer-events: none;
+}
+
+.student-birthday-glow-a {
+  top: -80px;
+  right: -80px;
+  width: 210px;
+  height: 210px;
+  background: color-mix(in srgb, var(--phx-color-primary) 28%, transparent);
+}
+
+.student-birthday-glow-b {
+  bottom: -95px;
+  left: -85px;
+  width: 230px;
+  height: 230px;
+  background: color-mix(in srgb, var(--phx-color-accent) 18%, transparent);
+}
+
+.student-birthday-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+  color: rgba(255,255,255,.66);
+  background: rgba(255,255,255,.05);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: .2s ease;
+}
+
+.student-birthday-close:hover {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 42%, transparent);
+  color: var(--phx-color-text, #fff);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+}
+
+.student-birthday-brand {
+  display: grid;
+  justify-items: center;
+  color: var(--phx-color-text, #fff);
+}
+
+.student-birthday-brand > span {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 34%, transparent);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--phx-color-primary) 11%, transparent);
+  box-shadow: 0 0 30px color-mix(in srgb, var(--phx-color-primary) 14%, transparent);
+  font-size: 1.8rem;
+}
+
+.student-birthday-brand strong {
+  margin-top: 10px;
+  font-size: 1.15rem;
+  font-weight: 1000;
+  letter-spacing: .13em;
+}
+
+.student-birthday-brand strong span {
+  color: var(--phx-color-primary, #f97316);
+}
+
+.student-birthday-brand small {
+  margin-top: 2px;
+  color: var(--phx-color-primary, #f97316);
+  font-size: .55rem;
+  font-weight: 1000;
+  letter-spacing: .25em;
+}
+
+.student-birthday-avatar {
+  display: grid;
+  width: 92px;
+  height: 92px;
+  margin: 22px auto 0;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid color-mix(in srgb, var(--phx-color-primary) 55%, rgba(255,255,255,.12));
+  border-radius: 50%;
+  color: var(--phx-color-primary, #f97316);
+  background:
+    radial-gradient(circle at 35% 25%, color-mix(in srgb, var(--phx-color-primary) 24%, transparent), transparent 52%),
+    rgba(255,255,255,.04);
+  box-shadow:
+    0 0 0 7px color-mix(in srgb, var(--phx-color-primary) 7%, transparent),
+    0 0 38px color-mix(in srgb, var(--phx-color-primary) 18%, transparent);
+  font-size: 1.65rem;
+  font-weight: 1000;
+}
+
+.student-birthday-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-birthday-eyebrow {
+  margin: 21px 0 0;
+  color: var(--phx-color-primary, #f97316);
+  font-size: .65rem;
+  font-weight: 1000;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.student-birthday-card h2 {
+  margin: 8px 0 0;
+  color: var(--phx-color-text, #fff);
+  font-size: clamp(2rem, 7vw, 3.2rem);
+  font-weight: 1000;
+  line-height: .95;
+  letter-spacing: -.045em;
+}
+
+.student-birthday-card h3 {
+  margin: 10px 0 0;
+  color: var(--phx-color-primary, #f97316);
+  font-size: clamp(1.15rem, 4vw, 1.55rem);
+  font-weight: 900;
+}
+
+.student-birthday-message {
+  margin: 20px auto 0;
+  max-width: 430px;
+  color: rgba(255,255,255,.72);
+  font-size: .88rem;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.student-birthday-footer {
+  margin-top: 18px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 18px;
+  padding: 13px 15px;
+  color: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.04);
+  font-size: .76rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.student-birthday-footer span {
+  color: var(--phx-color-primary, #f97316);
+}
+
+.student-birthday-thanks {
+  min-width: 170px;
+  min-height: 46px;
+  margin-top: 22px;
+  border: 0;
+  border-radius: 15px;
+  color: #080808;
+  background:
+    linear-gradient(
+      135deg,
+      var(--phx-color-primary, #f97316),
+      color-mix(in srgb, var(--phx-color-primary, #f97316) 68%, #fbbf24)
+    );
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--phx-color-primary) 22%, transparent);
+  cursor: pointer;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.student-birthday-thanks:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.student-birthday-confetti {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.student-birthday-confetti i {
+  position: absolute;
+  top: -24px;
+  left: var(--birthday-left);
+  width: 9px;
+  height: 15px;
+  border-radius: 2px;
+  background: var(--birthday-color);
+  opacity: .9;
+  transform: rotate(var(--birthday-rotation));
+  animation:
+    student-birthday-fall var(--birthday-duration) linear var(--birthday-delay) infinite;
+}
+
+@keyframes student-birthday-fall {
+  0% {
+    transform:
+      translate3d(0, -28px, 0)
+      rotate(var(--birthday-rotation));
+    opacity: 0;
+  }
+
+  12% {
+    opacity: .95;
+  }
+
+  100% {
+    transform:
+      translate3d(var(--birthday-shift), calc(100dvh + 48px), 0)
+      rotate(calc(var(--birthday-rotation) + 620deg));
+    opacity: .18;
+  }
+}
+
+@media (max-width: 560px) {
+  .student-birthday-popup {
+    padding: 10px;
+  }
+
+  .student-birthday-card {
+    border-radius: 24px;
+    padding: 25px 18px 21px;
+  }
+
+  .student-birthday-close {
+    top: 11px;
+    right: 11px;
+  }
+
+  .student-birthday-brand > span {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    font-size: 1.55rem;
+  }
+
+  .student-birthday-avatar {
+    width: 80px;
+    height: 80px;
+    margin-top: 17px;
+  }
+
+  .student-birthday-message {
+    margin-top: 16px;
+    font-size: .8rem;
+    line-height: 1.58;
+  }
+
+  .student-birthday-footer {
+    margin-top: 14px;
+    font-size: .7rem;
+  }
+
+  .student-birthday-thanks {
+    width: 100%;
+    margin-top: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-birthday-confetti i {
+    animation: none;
+  }
+
+  .student-birthday-thanks,
+  .student-birthday-close {
+    transition: none;
+  }
+}

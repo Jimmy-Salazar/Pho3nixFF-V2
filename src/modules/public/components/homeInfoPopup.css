@@ -1,0 +1,437 @@
+/* =========================================================
+   PHO3NIX V2 - Home Info Popup
+   Popups separados y responsive, con información migrada desde Home V1.
+   ========================================================= */
+
+.home-info-popup-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.home-info-popup-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.76);
+  cursor: default;
+  backdrop-filter: blur(14px);
+}
+
+.home-info-popup-card {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  max-height: min(88dvh, 740px);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 34%, rgba(255, 255, 255, 0.1));
+  border-radius: 28px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 88% 0%, color-mix(in srgb, var(--phx-color-primary) 16%, transparent), transparent 34%),
+    rgba(5, 8, 16, 0.96);
+  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.64);
+}
+
+.home-info-popup-glow {
+  position: absolute;
+  right: -90px;
+  top: -90px;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--phx-color-primary) 20%, transparent);
+  filter: blur(44px);
+  pointer-events: none;
+}
+
+.home-info-popup-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.home-info-popup-header p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.home-info-popup-header h2 {
+  margin: 5px 0 0;
+  color: #fff;
+  font-size: clamp(1.45rem, 3vw, 2.35rem);
+  font-weight: 1000;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.home-info-popup-close {
+  display: grid;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  font-size: 1.55rem;
+  line-height: 1;
+  transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.home-info-popup-close:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--phx-color-primary) 60%, rgba(255, 255, 255, 0.16));
+  color: var(--phx-color-primary);
+}
+
+.home-info-popup-body {
+  position: relative;
+  z-index: 1;
+  max-height: calc(88dvh - 102px);
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.home-info-popup-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.home-info-popup-lead,
+.home-info-popup-muted {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+
+.home-info-popup-value-grid,
+.home-info-popup-schedule-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.home-info-popup-value-card,
+.home-info-popup-schedule-card,
+.home-info-popup-partner-card,
+.home-info-popup-news-card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.home-info-popup-value-card,
+.home-info-popup-schedule-card {
+  padding: 16px;
+}
+
+.home-info-popup-value-card span {
+  display: block;
+  font-size: 1.65rem;
+}
+
+.home-info-popup-value-card h3,
+.home-info-popup-schedule-card h3,
+.home-info-popup-partner-card h3,
+.home-info-popup-news-card h3 {
+  margin: 10px 0 0;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 1000;
+  line-height: 1.12;
+  text-transform: uppercase;
+}
+
+.home-info-popup-value-card p,
+.home-info-popup-partner-card p,
+.home-info-popup-news-card p {
+  margin: 7px 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.home-info-popup-schedule-card div {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.home-info-popup-schedule-card p {
+  margin: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 10px;
+  color: rgba(255, 255, 255, 0.78);
+  background: rgba(0, 0, 0, 0.26);
+  font-size: 0.86rem;
+}
+
+.home-info-popup-partner-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+}
+
+.home-info-popup-partner-logo {
+  display: block;
+  width: 150px;
+  height: 42px;
+  flex: 0 0 auto;
+  background-image: var(--phx-home-partner-logo-url), var(--phx-partner-logo-url);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: grayscale(1) brightness(1.55);
+}
+
+.home-info-popup-news-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.home-info-popup-news-card {
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr);
+  gap: 14px;
+  padding: 16px;
+}
+
+.home-info-popup-news-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 999px;
+  color: #020617;
+  background: var(--phx-color-primary);
+  font-weight: 1000;
+}
+
+@media (max-width: 720px) {
+  .home-info-popup-shell {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .home-info-popup-card {
+    width: 100%;
+    max-height: 90dvh;
+    border-radius: 22px;
+  }
+
+  .home-info-popup-header {
+    padding: 18px 16px 14px;
+  }
+
+  .home-info-popup-header p {
+    font-size: 0.62rem;
+  }
+
+  .home-info-popup-header h2 {
+    font-size: 1.42rem;
+  }
+
+  .home-info-popup-close {
+    width: 38px;
+    height: 38px;
+  }
+
+  .home-info-popup-body {
+    max-height: calc(90dvh - 86px);
+    padding: 16px;
+  }
+
+  .home-info-popup-lead,
+  .home-info-popup-muted {
+    font-size: 0.88rem;
+    line-height: 1.58;
+  }
+
+  .home-info-popup-value-grid,
+  .home-info-popup-schedule-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .home-info-popup-value-card,
+  .home-info-popup-schedule-card {
+    padding: 13px;
+  }
+
+  .home-info-popup-value-card h3,
+  .home-info-popup-schedule-card h3,
+  .home-info-popup-partner-card h3,
+  .home-info-popup-news-card h3 {
+    font-size: 0.82rem;
+  }
+
+  .home-info-popup-value-card p,
+  .home-info-popup-partner-card p,
+  .home-info-popup-news-card p {
+    font-size: 0.76rem;
+  }
+
+  .home-info-popup-partner-card {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .home-info-popup-partner-logo {
+    width: 118px;
+    height: 34px;
+    background-position: left center;
+  }
+
+  .home-info-popup-news-card {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 10px;
+    padding: 13px;
+  }
+
+  .home-info-popup-news-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 0.82rem;
+  }
+}
+
+/* =========================================================
+   PHO3NIX V2 - Popup centered and active theme
+   Centrado en todos los dispositivos y conectado al tema activo.
+   ========================================================= */
+.home-info-popup-shell {
+  display: grid !important;
+  place-items: center !important;
+  align-items: center !important;
+  justify-items: center !important;
+  padding: clamp(12px, 3vw, 24px) !important;
+}
+
+.home-info-popup-backdrop {
+  background:
+    radial-gradient(circle at 50% 16%, color-mix(in srgb, var(--phx-color-primary) 16%, transparent), transparent 34%),
+    color-mix(in srgb, var(--phx-color-background) 78%, rgba(0, 0, 0, 0.82)) !important;
+  backdrop-filter: blur(16px) !important;
+}
+
+.home-info-popup-card {
+  width: min(760px, calc(100vw - 24px)) !important;
+  max-height: min(88dvh, 740px) !important;
+  border-color: color-mix(in srgb, var(--phx-color-primary) 42%, var(--phx-color-border)) !important;
+  border-radius: var(--phx-radius-card) !important;
+  color: var(--phx-color-text) !important;
+  background:
+    radial-gradient(circle at 88% 0%, color-mix(in srgb, var(--phx-color-primary) 18%, transparent), transparent 34%),
+    linear-gradient(180deg, color-mix(in srgb, var(--phx-color-surface) 92%, transparent), var(--phx-color-background)) !important;
+  box-shadow:
+    0 34px 110px rgba(0, 0, 0, 0.64),
+    0 0 54px color-mix(in srgb, var(--phx-color-primary) 14%, transparent) !important;
+}
+
+.home-info-popup-glow {
+  background: color-mix(in srgb, var(--phx-color-primary) 22%, transparent) !important;
+}
+
+.home-info-popup-header {
+  border-bottom-color: color-mix(in srgb, var(--phx-color-border) 68%, rgba(255, 255, 255, 0.08)) !important;
+}
+
+.home-info-popup-header p,
+.home-info-popup-close:hover,
+.home-info-popup-news-card h3,
+.home-info-popup-schedule-card h3 {
+  color: var(--phx-color-primary) !important;
+}
+
+.home-info-popup-header h2,
+.home-info-popup-value-card h3,
+.home-info-popup-partner-card h3 {
+  color: var(--phx-color-text) !important;
+}
+
+.home-info-popup-lead,
+.home-info-popup-muted,
+.home-info-popup-value-card p,
+.home-info-popup-partner-card p,
+.home-info-popup-news-card p {
+  color: var(--phx-color-text-muted) !important;
+}
+
+.home-info-popup-value-card,
+.home-info-popup-schedule-card,
+.home-info-popup-partner-card,
+.home-info-popup-news-card {
+  border-color: color-mix(in srgb, var(--phx-color-border) 76%, rgba(255, 255, 255, 0.08)) !important;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 68%, transparent) !important;
+}
+
+.home-info-popup-schedule-card p {
+  border-color: color-mix(in srgb, var(--phx-color-border) 52%, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--phx-color-text) !important;
+  background: color-mix(in srgb, var(--phx-color-background) 72%, transparent) !important;
+}
+
+.home-info-popup-news-icon {
+  color: var(--phx-color-background) !important;
+  background: var(--phx-color-primary) !important;
+}
+
+.home-info-popup-close {
+  border-color: color-mix(in srgb, var(--phx-color-border) 72%, rgba(255, 255, 255, 0.12)) !important;
+  color: var(--phx-color-text) !important;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 72%, transparent) !important;
+}
+
+.home-info-popup-close:hover {
+  border-color: var(--phx-color-primary) !important;
+}
+
+@media (max-width: 720px) {
+  .home-info-popup-shell {
+    display: grid !important;
+    place-items: center !important;
+    align-items: center !important;
+    justify-items: center !important;
+    padding: 12px !important;
+  }
+
+  .home-info-popup-card {
+    width: min(100%, calc(100vw - 24px)) !important;
+    max-height: 86dvh !important;
+    border-radius: 22px !important;
+  }
+
+  .home-info-popup-body {
+    max-height: calc(86dvh - 86px) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .home-info-popup-card {
+    max-height: 84dvh !important;
+  }
+
+  .home-info-popup-body {
+    max-height: calc(84dvh - 84px) !important;
+  }
+}

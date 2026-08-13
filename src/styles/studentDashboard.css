@@ -1,0 +1,1533 @@
+/* =========================================================
+   PHO3NIX V2 - Student Dashboard
+   Adaptado de V1, responsive, bilingüe y con theme central.
+   ========================================================= */
+
+.student-dashboard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  min-height: 100dvh;
+  color: var(--phx-color-text);
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--phx-color-primary) 18%, transparent), transparent 30%),
+    radial-gradient(circle at 88% 4%, color-mix(in srgb, var(--phx-color-accent) 14%, transparent), transparent 30%),
+    var(--phx-color-background);
+  overflow: hidden;
+}
+
+.student-dashboard * {
+  box-sizing: border-box;
+}
+
+.student-sidebar {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 100dvh;
+  border-right: 1px solid color-mix(in srgb, var(--phx-color-primary) 18%, rgba(255, 255, 255, 0.08));
+  padding: 20px 14px;
+  background: color-mix(in srgb, var(--phx-color-background) 72%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.student-sidebar-brand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.student-dashboard-logo {
+  display: block;
+  width: 58px;
+  height: 58px;
+  background-image: var(--phx-logo-url);
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  filter: drop-shadow(0 0 20px color-mix(in srgb, var(--phx-color-primary) 30%, transparent));
+}
+
+.student-sidebar-brand strong,
+.student-dashboard-brand strong {
+  color: var(--phx-color-text);
+  font-size: 1.22rem;
+  font-weight: 1000;
+  letter-spacing: 0.15em;
+}
+
+.student-sidebar-brand small,
+.student-dashboard-brand small {
+  color: var(--phx-color-primary);
+  font-size: 0.64rem;
+  font-weight: 1000;
+  letter-spacing: 0.17em;
+}
+
+.student-sidebar-nav {
+  display: grid;
+  gap: 7px;
+}
+
+.student-sidebar-nav button,
+.student-sidebar-logout,
+.student-dashboard-logout,
+.student-mobile-nav button {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.student-sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  padding: 0 12px;
+  color: var(--phx-color-text-muted);
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.student-sidebar-nav button.is-active,
+.student-sidebar-nav button[aria-current="page"],
+.student-sidebar-nav button:hover {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 26%, transparent);
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 11%, transparent);
+}
+
+.student-sidebar-nav span {
+  width: 22px;
+  text-align: center;
+}
+
+.student-sidebar-membership {
+  margin-top: auto;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, rgba(255, 255, 255, 0.08));
+  border-radius: 22px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--phx-color-surface) 70%, transparent);
+}
+
+.student-sidebar-membership small,
+.student-membership-card small {
+  display: block;
+  color: var(--phx-color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.student-sidebar-membership strong,
+.student-membership-card strong {
+  display: block;
+  margin-top: 5px;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-sidebar-membership span,
+.student-membership-card p {
+  display: block;
+  margin: 5px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.student-sidebar-logout,
+.student-dashboard-logout {
+  min-height: 40px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 80%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 55%, transparent);
+  font-size: 0.78rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-dashboard-main {
+  position: relative;
+  min-width: 0;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.student-dashboard-orb {
+  position: fixed;
+  z-index: 0;
+  width: 360px;
+  height: 360px;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(70px);
+}
+
+.student-dashboard-orb-a {
+  top: -120px;
+  left: 240px;
+  background: color-mix(in srgb, var(--phx-color-primary) 16%, transparent);
+}
+
+.student-dashboard-orb-b {
+  right: -110px;
+  bottom: 8%;
+  background: color-mix(in srgb, var(--phx-color-accent) 13%, transparent);
+}
+
+.student-dashboard-header,
+.student-dashboard-hero,
+.student-dashboard-grid,
+.student-dashboard-error {
+  position: relative;
+  z-index: 1;
+}
+
+.student-dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.student-dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-dashboard-brand .student-dashboard-logo {
+  width: 42px;
+  height: 42px;
+}
+
+.student-dashboard-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-dashboard-avatar {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 38%, rgba(255,255,255,.1));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--phx-color-primary) 13%, transparent);
+  color: var(--phx-color-primary);
+  font-weight: 1000;
+}
+
+.student-dashboard-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-dashboard-error {
+  margin-bottom: 14px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-accent) 42%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-accent) 14%, transparent);
+  font-weight: 800;
+}
+
+.student-dashboard-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 440px);
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.student-dashboard-hero > div:first-child,
+.student-membership-card,
+.student-section,
+.student-motivation-card,
+.student-loading-card {
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 72%, rgba(255,255,255,.08));
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--phx-color-primary) 12%, transparent), transparent 34%),
+    color-mix(in srgb, var(--phx-color-surface) 76%, transparent);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(18px);
+}
+
+.student-dashboard-hero > div:first-child {
+  min-height: 190px;
+  border-radius: var(--phx-radius-card);
+  padding: clamp(20px, 3vw, 32px);
+}
+
+.student-dashboard-kicker {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: 0.74rem;
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.student-dashboard-hero h1 {
+  margin: 10px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(2.25rem, 5vw, 4.4rem);
+  font-weight: 1000;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+}
+
+.student-dashboard-hero p {
+  max-width: 560px;
+  color: var(--phx-color-text-muted);
+  line-height: 1.65;
+}
+
+.student-membership-card {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  min-height: 190px;
+  border-radius: var(--phx-radius-card);
+  padding: 20px;
+}
+
+.student-membership-ring {
+  --ring-color: var(--phx-color-primary);
+  display: grid;
+  width: 68px;
+  height: 68px;
+  place-items: center;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--phx-color-background) 88%, transparent) 0 57%, transparent 58%),
+    conic-gradient(var(--ring-color) var(--membership-progress), color-mix(in srgb, var(--phx-color-border) 52%, transparent) 0);
+  box-shadow: 0 0 26px color-mix(in srgb, var(--ring-color) 22%, transparent);
+}
+
+.student-membership-ring span {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--ring-color) 36%, transparent);
+  border-radius: 999px;
+  color: var(--ring-color);
+  background: color-mix(in srgb, var(--phx-color-background) 76%, transparent);
+  font-size: 0.78rem;
+  font-weight: 1000;
+}
+
+.student-membership-card em {
+  color: var(--phx-color-text);
+  font-style: normal;
+  font-size: 0.8rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-membership-card.is-active {
+  border-color: rgba(34, 197, 94, 0.42);
+  background:
+    radial-gradient(circle at 78% 20%, rgba(34, 197, 94, 0.2), transparent 32%),
+    color-mix(in srgb, var(--phx-color-surface) 76%, transparent);
+}
+
+.student-membership-card.is-active .student-membership-ring {
+  --ring-color: #4ade80;
+}
+
+.student-sidebar-membership.is-active strong {
+  color: #4ade80;
+}
+
+.student-membership-card.is-warning {
+  border-color: rgba(245, 158, 11, 0.48);
+}
+
+.student-membership-card.is-warning .student-membership-ring {
+  --ring-color: #fbbf24;
+}
+
+.student-sidebar-membership.is-warning strong {
+  color: #fbbf24;
+}
+
+.student-membership-card.is-expired {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.student-membership-card.is-expired .student-membership-ring {
+  --ring-color: #f87171;
+}
+
+.student-sidebar-membership.is-expired strong {
+  color: #f87171;
+}
+
+.student-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.85fr);
+  gap: 16px;
+}
+
+.student-dashboard-column {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+}
+
+.student-section,
+.student-motivation-card {
+  border-radius: 24px;
+  padding: 18px;
+}
+
+.student-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.student-section-header h2 {
+  margin: 0;
+  color: var(--phx-color-text);
+  font-size: 0.86rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.student-section-header button {
+  border: 0;
+  color: var(--phx-color-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.student-metric-card {
+  display: grid;
+  gap: 6px;
+  min-height: 128px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+  border-radius: 20px;
+  padding: 14px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 54%, transparent);
+}
+
+.student-metric-card span {
+  color: var(--phx-color-primary);
+  font-size: 1.6rem;
+}
+
+.student-metric-card p,
+.student-metric-card small {
+  margin: 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.student-metric-card strong {
+  color: var(--phx-color-text);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  line-height: 1;
+}
+
+.student-wod-card {
+  display: grid;
+  grid-template-columns: 170px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 230px;
+  overflow: hidden;
+  border-radius: 22px;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--phx-color-background) 92%, transparent), color-mix(in srgb, var(--phx-color-surface) 70%, transparent)),
+    var(--phx-home-background-url);
+  background-size: cover;
+  background-position: center;
+}
+
+.student-wod-visual {
+  display: grid;
+  min-height: 230px;
+  place-items: center;
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+}
+
+.student-wod-visual span {
+  display: grid;
+  width: 94px;
+  height: 94px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 40%, rgba(255,255,255,.08));
+  border-radius: 999px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-background) 48%, transparent);
+  font-size: 2.4rem;
+}
+
+.student-wod-content {
+  min-width: 0;
+  padding: 18px 18px 18px 0;
+}
+
+.student-wod-content small {
+  color: var(--phx-color-primary);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-wod-content h2 {
+  margin: 10px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.student-wod-content p {
+  margin: 12px 0 0;
+  max-width: 680px;
+  color: var(--phx-color-text-muted);
+  white-space: pre-line;
+  line-height: 1.55;
+}
+
+.student-wod-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.student-wod-actions button {
+  min-height: 42px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 34%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  padding: 0 14px;
+  cursor: pointer;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-wod-actions button:first-child {
+  border-color: transparent;
+  color: var(--phx-color-background);
+  background: var(--phx-color-primary);
+}
+
+.student-wod-actions button:last-child {
+  color: var(--phx-color-primary);
+  background: transparent;
+}
+
+.student-wod-actions button:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.student-week-card {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 220px;
+  gap: 18px;
+  align-items: center;
+}
+
+.student-week-summary strong {
+  color: var(--phx-color-text);
+  font-size: 3.2rem;
+  line-height: 1;
+}
+
+.student-week-summary p,
+.student-week-summary small {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--phx-color-text-muted);
+}
+
+.student-week-dots {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.student-week-dots span {
+  display: grid;
+  gap: 7px;
+  justify-items: center;
+}
+
+.student-week-dots em {
+  color: var(--phx-color-text-muted);
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 900;
+}
+
+.student-week-dots b {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 70%, rgba(255,255,255,.08));
+  border-radius: 999px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 48%, transparent);
+  font-size: 0.78rem;
+}
+
+.student-week-dots span.is-done b {
+  border-color: rgba(34, 197, 94, 0.42);
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.student-week-chart {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  height: 110px;
+  border-left: 1px solid color-mix(in srgb, var(--phx-color-border) 52%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--phx-color-border) 52%, transparent);
+  padding: 10px 10px 0;
+}
+
+.student-week-chart span {
+  flex: 1;
+  min-height: 8px;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(180deg, var(--phx-color-primary), color-mix(in srgb, var(--phx-color-primary) 26%, transparent));
+}
+
+.student-list,
+.student-birthday-list {
+  display: grid;
+  gap: 10px;
+}
+
+.student-list article,
+.student-birthday-list article {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 45%, rgba(255,255,255,.08));
+  border-radius: 18px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 40%, transparent);
+}
+
+.student-list img,
+.student-list > article > span,
+.student-birthday-list > article > span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: 15px;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--phx-color-primary) 12%, transparent);
+  color: var(--phx-color-primary);
+  font-weight: 1000;
+}
+
+.student-list strong,
+.student-birthday-list strong {
+  display: block;
+  color: var(--phx-color-text);
+  font-size: 0.88rem;
+}
+
+.student-list p,
+.student-birthday-list p {
+  margin: 4px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.student-empty-state {
+  border: 1px dashed color-mix(in srgb, var(--phx-color-border) 52%, rgba(255,255,255,.08));
+  border-radius: 18px;
+  padding: 18px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 34%, transparent);
+  font-size: 0.86rem;
+}
+
+.student-motivation-card {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.student-motivation-card span {
+  font-size: 2rem;
+}
+
+.student-motivation-card strong {
+  color: var(--phx-color-primary);
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.student-motivation-card small {
+  color: var(--phx-color-text-muted);
+  letter-spacing: 0.2em;
+}
+
+.student-mobile-nav {
+  display: none;
+}
+
+.student-dashboard-loading {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  padding: 18px;
+}
+
+.student-loading-card {
+  display: grid;
+  width: min(420px, 100%);
+  justify-items: center;
+  gap: 8px;
+  border-radius: var(--phx-radius-card);
+  padding: 34px;
+  text-align: center;
+}
+
+.student-loading-card span {
+  width: 48px;
+  height: 48px;
+  border: 3px solid color-mix(in srgb, var(--phx-color-primary) 24%, transparent);
+  border-top-color: var(--phx-color-primary);
+  border-radius: 999px;
+  animation: student-dashboard-spin 850ms linear infinite;
+}
+
+.student-loading-card p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+}
+
+.student-loading-card h1 {
+  margin: 0;
+  color: var(--phx-color-text);
+  text-transform: uppercase;
+}
+
+.student-loading-card small {
+  color: var(--phx-color-text-muted);
+}
+
+@keyframes student-dashboard-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.student-language-switch {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 58%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  padding: 4px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 48%, transparent);
+}
+
+.student-language-switch button {
+  min-height: 28px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--phx-color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+}
+
+.student-language-switch button.is-active {
+  color: var(--phx-color-background);
+  background: var(--phx-color-primary);
+}
+
+.student-language-switch.is-compact {
+  width: 76px;
+}
+
+.student-language-switch.is-compact button {
+  min-height: 30px;
+  font-size: 0.66rem;
+}
+
+.student-logout-icon {
+  display: none;
+}
+
+@media (max-width: 1180px) {
+  .student-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .student-sidebar {
+    display: none;
+  }
+
+  .student-dashboard-main {
+    max-height: none;
+    min-height: 100dvh;
+    padding: 14px 14px 92px;
+  }
+
+  .student-dashboard-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-dashboard-column-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-motivation-card {
+    grid-column: 1 / -1;
+  }
+
+  .student-mobile-nav {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 10px;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, rgba(255,255,255,.08));
+    border-radius: 24px;
+    padding: 8px;
+    background: color-mix(in srgb, var(--phx-color-background) 78%, transparent);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(18px);
+  }
+
+  .student-mobile-nav button {
+    display: grid;
+    gap: 4px;
+    place-items: center;
+    min-height: 48px;
+    border-radius: 18px;
+    color: var(--phx-color-text-muted);
+    background: transparent;
+  }
+
+  .student-mobile-nav button.is-active,
+  .student-mobile-nav button[aria-current="page"] {
+    color: var(--phx-color-primary);
+    background: color-mix(in srgb, var(--phx-color-primary) 12%, transparent);
+  }
+
+  .student-mobile-nav span {
+    font-size: 1.1rem;
+  }
+
+  .student-mobile-nav small {
+    font-size: 0.62rem;
+    font-weight: 900;
+  }
+}
+
+@media (max-width: 760px) {
+  .student-dashboard-main {
+    padding: 10px 10px 92px;
+  }
+
+  .student-dashboard-header {
+    margin-bottom: 12px;
+  }
+
+  .student-dashboard-brand .student-dashboard-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .student-dashboard-brand strong {
+    font-size: 1rem;
+  }
+
+  .student-dashboard-brand small {
+    font-size: 0.52rem;
+  }
+
+  .student-dashboard-logout {
+    display: none;
+  }
+
+  .student-dashboard-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .student-dashboard-hero {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .student-dashboard-hero > div:first-child {
+    min-height: 150px;
+    border-radius: 22px;
+    padding: 18px;
+  }
+
+  .student-dashboard-hero h1 {
+    font-size: clamp(2.25rem, 13vw, 3.4rem);
+  }
+
+  .student-dashboard-hero p {
+    font-size: 0.86rem;
+    line-height: 1.48;
+  }
+
+  .student-membership-card {
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    min-height: auto;
+    border-radius: 22px;
+    padding: 14px;
+  }
+
+  .student-membership-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.15rem;
+  }
+
+  .student-membership-card strong {
+    font-size: 0.95rem;
+  }
+
+  .student-membership-card p,
+  .student-membership-card em {
+    font-size: 0.72rem;
+  }
+
+  .student-dashboard-column {
+    gap: 10px;
+  }
+
+  .student-section,
+  .student-motivation-card {
+    border-radius: 20px;
+    padding: 13px;
+  }
+
+  .student-section-header {
+    margin-bottom: 10px;
+  }
+
+  .student-section-header h2 {
+    font-size: 0.74rem;
+  }
+
+  .student-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .student-metric-card {
+    min-height: 108px;
+    border-radius: 16px;
+    padding: 11px;
+  }
+
+  .student-metric-card span {
+    font-size: 1.3rem;
+  }
+
+  .student-metric-card strong {
+    font-size: 1.65rem;
+  }
+
+  .student-metric-card p,
+  .student-metric-card small {
+    font-size: 0.68rem;
+  }
+
+  .student-wod-card {
+    grid-template-columns: 1fr;
+    gap: 0;
+    min-height: auto;
+    border-radius: 18px;
+  }
+
+  .student-wod-visual {
+    min-height: 96px;
+  }
+
+  .student-wod-visual span {
+    width: 64px;
+    height: 64px;
+    font-size: 1.65rem;
+  }
+
+  .student-wod-content {
+    padding: 14px;
+  }
+
+  .student-wod-content h2 {
+    font-size: 1.75rem;
+  }
+
+  .student-wod-content p {
+    font-size: 0.82rem;
+  }
+
+  .student-wod-actions button {
+    flex: 1;
+    min-height: 38px;
+    font-size: 0.72rem;
+  }
+
+  .student-week-card {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .student-week-summary {
+    text-align: center;
+  }
+
+  .student-week-summary strong {
+    font-size: 2.6rem;
+  }
+
+  .student-week-dots {
+    gap: 5px;
+  }
+
+  .student-week-dots b {
+    width: 30px;
+    height: 30px;
+  }
+
+  .student-week-chart {
+    height: 96px;
+  }
+
+  .student-dashboard-column-side {
+    grid-template-columns: 1fr;
+  }
+
+  .student-list article,
+  .student-birthday-list article {
+    grid-template-columns: 44px minmax(0, 1fr);
+    border-radius: 15px;
+  }
+
+  .student-list img,
+  .student-list > article > span,
+  .student-birthday-list > article > span {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+  }
+
+  .student-motivation-card strong {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .student-stat-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .student-membership-card {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .student-membership-card em {
+    grid-column: 1 / -1;
+    margin-left: 56px;
+  }
+
+  .student-mobile-nav {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    padding: 6px;
+  }
+
+  .student-mobile-nav button {
+    min-height: 44px;
+  }
+
+  .student-mobile-nav small {
+    font-size: 0.56rem;
+  }
+}
+
+/* =========================================================
+   PHO3NIX V2 - Mobile compact V1 refinement
+   Letras más pequeñas, menos tosco, logout visible y botón idioma.
+   ========================================================= */
+@media (max-width: 760px) {
+  .student-dashboard-main {
+    padding: 8px 8px 86px !important;
+  }
+
+  .student-dashboard-header {
+    margin-bottom: 8px !important;
+    gap: 8px !important;
+  }
+
+  .student-dashboard-brand {
+    gap: 8px !important;
+  }
+
+  .student-dashboard-brand .student-dashboard-logo {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .student-dashboard-brand strong {
+    font-size: 0.82rem !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  .student-dashboard-brand small {
+    font-size: 0.42rem !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  .student-dashboard-profile {
+    gap: 6px !important;
+  }
+
+  .student-language-switch.is-compact {
+    width: 64px !important;
+    padding: 3px !important;
+    border-radius: 12px !important;
+  }
+
+  .student-language-switch.is-compact button {
+    min-height: 26px !important;
+    border-radius: 9px !important;
+    font-size: 0.56rem !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  .student-dashboard-logout {
+    display: grid !important;
+    width: 32px !important;
+    min-height: 32px !important;
+    place-items: center !important;
+    border-radius: 11px !important;
+    padding: 0 !important;
+  }
+
+  .student-logout-text {
+    display: none !important;
+  }
+
+  .student-logout-icon {
+    display: inline !important;
+    color: var(--phx-color-primary);
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .student-dashboard-avatar {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.68rem !important;
+  }
+
+  .student-dashboard-hero {
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .student-dashboard-hero > div:first-child {
+    min-height: 118px !important;
+    border-radius: 18px !important;
+    padding: 13px !important;
+  }
+
+  .student-dashboard-kicker {
+    font-size: 0.56rem !important;
+    letter-spacing: 0.12em !important;
+  }
+
+  .student-dashboard-hero h1 {
+    margin-top: 6px !important;
+    font-size: clamp(1.62rem, 8.8vw, 2.35rem) !important;
+    line-height: 0.96 !important;
+    letter-spacing: -0.04em !important;
+  }
+
+  .student-dashboard-hero p {
+    margin-top: 7px !important;
+    font-size: 0.7rem !important;
+    line-height: 1.34 !important;
+  }
+
+  .student-membership-card {
+    grid-template-columns: 52px minmax(0, 1fr) auto !important;
+    gap: 9px !important;
+    border-radius: 18px !important;
+    padding: 10px !important;
+  }
+
+  .student-membership-ring {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  .student-membership-ring span {
+    width: 35px !important;
+    height: 35px !important;
+    font-size: 0.58rem !important;
+  }
+
+  .student-membership-card small {
+    font-size: 0.5rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .student-membership-card strong {
+    margin-top: 2px !important;
+    font-size: 0.78rem !important;
+    line-height: 1.08 !important;
+  }
+
+  .student-membership-card p {
+    margin-top: 2px !important;
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .student-membership-card em {
+    font-size: 0.58rem !important;
+    line-height: 1.08 !important;
+  }
+
+  .student-dashboard-column {
+    gap: 8px !important;
+  }
+
+  .student-section,
+  .student-motivation-card {
+    border-radius: 16px !important;
+    padding: 10px !important;
+  }
+
+  .student-section-header {
+    margin-bottom: 8px !important;
+  }
+
+  .student-section-header h2 {
+    font-size: 0.62rem !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .student-section-header button {
+    font-size: 0.6rem !important;
+  }
+
+  .student-stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+  }
+
+  .student-metric-card {
+    min-height: 80px !important;
+    border-radius: 13px !important;
+    padding: 7px !important;
+    gap: 3px !important;
+  }
+
+  .student-metric-card span {
+    font-size: 0.98rem !important;
+  }
+
+  .student-metric-card p {
+    font-size: 0.5rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .student-metric-card strong {
+    font-size: 1.08rem !important;
+    line-height: 0.98 !important;
+  }
+
+  .student-metric-card small {
+    font-size: 0.49rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .student-wod-card {
+    border-radius: 15px !important;
+  }
+
+  .student-wod-visual {
+    min-height: 64px !important;
+  }
+
+  .student-wod-visual span {
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 1.12rem !important;
+  }
+
+  .student-wod-content {
+    padding: 10px !important;
+  }
+
+  .student-wod-content small {
+    font-size: 0.54rem !important;
+  }
+
+  .student-wod-content h2 {
+    margin-top: 6px !important;
+    font-size: 1.22rem !important;
+    line-height: 1 !important;
+  }
+
+  .student-wod-content p {
+    margin-top: 7px !important;
+    font-size: 0.68rem !important;
+    line-height: 1.3 !important;
+  }
+
+  .student-wod-actions {
+    gap: 6px !important;
+    margin-top: 10px !important;
+  }
+
+  .student-wod-actions button {
+    min-height: 32px !important;
+    border-radius: 10px !important;
+    padding: 0 9px !important;
+    font-size: 0.58rem !important;
+    letter-spacing: 0.03em !important;
+  }
+
+  .student-week-card {
+    gap: 9px !important;
+  }
+
+  .student-week-summary strong {
+    font-size: 1.8rem !important;
+  }
+
+  .student-week-summary p,
+  .student-week-summary small {
+    margin-top: 3px !important;
+    font-size: 0.62rem !important;
+  }
+
+  .student-week-dots {
+    gap: 4px !important;
+  }
+
+  .student-week-dots em {
+    font-size: 0.54rem !important;
+  }
+
+  .student-week-dots b {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.6rem !important;
+  }
+
+  .student-week-chart {
+    height: 66px !important;
+    gap: 5px !important;
+  }
+
+  .student-list,
+  .student-birthday-list {
+    gap: 7px !important;
+  }
+
+  .student-list article,
+  .student-birthday-list article {
+    grid-template-columns: 36px minmax(0, 1fr) !important;
+    gap: 8px !important;
+    border-radius: 12px !important;
+    padding: 7px !important;
+  }
+
+  .student-list img,
+  .student-list > article > span,
+  .student-birthday-list > article > span {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    font-size: 0.72rem !important;
+  }
+
+  .student-list strong,
+  .student-birthday-list strong {
+    font-size: 0.7rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .student-list p,
+  .student-birthday-list p {
+    margin-top: 2px !important;
+    font-size: 0.6rem !important;
+    line-height: 1.2 !important;
+  }
+
+  .student-empty-state {
+    border-radius: 12px !important;
+    padding: 11px !important;
+    font-size: 0.66rem !important;
+  }
+
+  .student-motivation-card {
+    gap: 4px !important;
+  }
+
+  .student-motivation-card span {
+    font-size: 1.25rem !important;
+  }
+
+  .student-motivation-card strong {
+    font-size: 0.6rem !important;
+    letter-spacing: 0.11em !important;
+  }
+
+  .student-motivation-card small {
+    font-size: 0.54rem !important;
+  }
+
+  .student-mobile-nav {
+    left: 9px !important;
+    right: 9px !important;
+    bottom: 8px !important;
+    border-radius: 18px !important;
+    padding: 6px !important;
+  }
+
+  .student-mobile-nav button {
+    min-height: 40px !important;
+    border-radius: 13px !important;
+    gap: 2px !important;
+  }
+
+  .student-mobile-nav span {
+    font-size: 0.92rem !important;
+  }
+
+  .student-mobile-nav small {
+    font-size: 0.5rem !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .student-dashboard-main {
+    padding-left: 7px !important;
+    padding-right: 7px !important;
+  }
+
+  .student-stat-grid {
+    gap: 4px !important;
+  }
+
+  .student-metric-card {
+    min-height: 76px !important;
+    padding: 6px !important;
+  }
+
+  .student-metric-card strong {
+    font-size: 1rem !important;
+  }
+
+  .student-metric-card p,
+  .student-metric-card small {
+    font-size: 0.46rem !important;
+  }
+
+  .student-membership-card {
+    grid-template-columns: 45px minmax(0, 1fr) !important;
+  }
+
+  .student-membership-card em {
+    grid-column: 2 !important;
+    margin-left: 0 !important;
+    font-size: 0.52rem !important;
+  }
+}
+
+/* =========================================================
+   PHO3NIX V2 · ATLETA MOBILE NAV
+   Una sola fila horizontal deslizable
+   ========================================================= */
+@media (max-width: 1180px) {
+  .student-mobile-nav {
+    display: flex !important;
+    grid-template-columns: none !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x;
+    scrollbar-width: none;
+  }
+
+  .student-mobile-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .student-mobile-nav button {
+    flex: 0 0 78px !important;
+    min-width: 78px !important;
+  }
+}
+

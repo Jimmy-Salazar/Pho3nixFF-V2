@@ -1,0 +1,105 @@
+{
+  "app": {
+    "brand": "PHO3NIX",
+    "tagline": "Functional Fitness",
+    "version": "Versión 2"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "goHome": "Ir al inicio",
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "Inglés",
+    "theme": "Tema",
+    "remoteTheme": "Tema remoto",
+    "localTheme": "Tema local",
+    "enter": "Entrar",
+    "comingSoon": "Próximamente"
+  },
+  "home": {
+    "kicker": "Más que un gimnasio, somos una comunidad",
+    "headline": {
+      "line1": "Renace.",
+      "line2": "Entrena.",
+      "line3": "Supérate."
+    },
+    "subtitle": "Entrena con propósito, vive con pasión y renace más fuerte cada día.",
+    "primaryAction": "Iniciar Sesión",
+    "secondaryAction": "Comunidad",
+    "topFeaturesLabel": "Fortalezas PHO3NIX",
+    "cardsLabel": "Secciones principales",
+    "cardAction": "Ver más",
+    "partnerText": "Partner oficial",
+    "partnerName": "LYCAN Ecuador",
+    "copyright": "© 2025 PHO3NIX Functional Fitness",
+    "socialLabel": "Redes sociales",
+    "topFeatures": {
+      "challenges": {
+        "title": "Desafíos",
+        "text": "Todo el año"
+      },
+      "results": {
+        "title": "Resultados",
+        "text": "Transforma tu vida"
+      },
+      "passion": {
+        "title": "Pasión",
+        "text": "Estilo PHO3NIX"
+      },
+      "community": {
+        "title": "Comunidad",
+        "text": "Entrena acompañado"
+      }
+    },
+    "cards": {
+      "about": {
+        "title": "¿Quiénes somos?",
+        "text": "Conoce nuestra historia, valores y lo que nos mueve."
+      },
+      "schedule": {
+        "title": "Horarios",
+        "text": "Descubre nuestros horarios y programaciones."
+      },
+      "partners": {
+        "title": "Partners",
+        "text": "Conoce a nuestros aliados que hacen esto posible."
+      },
+      "news": {
+        "title": "Novedades",
+        "text": "Entérate de anuncios, eventos y promociones."
+      }
+    }
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "subtitle": "Accede a tu cuenta PHO3NIX.",
+    "email": "Correo",
+    "password": "Contraseña",
+    "submit": "Ingresar",
+    "demoNotice": "Pantalla base de V2."
+  },
+  "admin": {
+    "dashboardTitle": "Dashboard Admin",
+    "dashboardSubtitle": "Panel profesional base para gestión del box.",
+    "metrics": {
+      "students": "Alumnos",
+      "wods": "WODs",
+      "memberships": "Mensualidades",
+      "reports": "Reportes"
+    }
+  },
+  "student": {
+    "dashboardTitle": "Dashboard Alumno",
+    "dashboardSubtitle": "Experiencia tipo app para el alumno.",
+    "cards": {
+      "todayWod": "WOD del día",
+      "personalRecords": "Mis PR",
+      "nutrition": "Nutrición",
+      "progress": "Progreso"
+    }
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "subtitle": "La ruta solicitada no existe en PHO3NIX V2."
+  }
+}

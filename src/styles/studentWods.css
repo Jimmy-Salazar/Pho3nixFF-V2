@@ -1,0 +1,1632 @@
+/* PHO3NIX V2 - WOD Atletas con reglas V1 aplicadas */
+
+.student-wods-dashboard-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 270px minmax(0, 1fr);
+  min-height: 100dvh;
+  overflow: hidden;
+  color: var(--phx-color-text);
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--phx-color-primary) 18%, transparent), transparent 30%),
+    radial-gradient(circle at 88% 4%, color-mix(in srgb, var(--phx-color-accent) 14%, transparent), transparent 30%),
+    var(--phx-color-background);
+}
+
+.student-wods-dashboard-layout * {
+  box-sizing: border-box;
+}
+
+.student-wods-content {
+  position: relative;
+  min-width: 0;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.student-wods-inner {
+  position: relative;
+  z-index: 1;
+  width: min(1680px, 100%);
+  margin: 0 auto;
+}
+
+.student-wods-orb {
+  position: fixed;
+  z-index: 0;
+  width: 360px;
+  height: 360px;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(70px);
+}
+
+.student-wods-orb-a {
+  top: -120px;
+  left: 240px;
+  background: color-mix(in srgb, var(--phx-color-primary) 16%, transparent);
+}
+
+.student-wods-orb-b {
+  right: -110px;
+  bottom: 8%;
+  background: color-mix(in srgb, var(--phx-color-accent) 13%, transparent);
+}
+
+.student-wods-title {
+  display: flex;
+  justify-content: flex-start;
+  margin: 0 0 16px;
+}
+
+.student-wods-title h1 {
+  margin: 6px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(2.25rem, 5vw, 4.4rem);
+  font-weight: 1000;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+
+.student-wods-title p {
+  margin: 8px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.94rem;
+}
+
+.student-wods-kicker,
+.student-wods-card header p,
+.student-wods-panel-header p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: 0.7rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.student-wods-error {
+  margin-bottom: 14px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-accent) 42%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-accent) 14%, transparent);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.student-wods-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(330px, 0.65fr);
+  gap: 16px;
+}
+
+.student-wods-main,
+.student-wods-side,
+.student-wods-lower,
+.student-wods-archive-area {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.student-wods-lower {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: 16px;
+}
+
+.student-wods-archive-area {
+  margin-top: 16px;
+}
+
+.student-wods-card,
+.student-wods-hero {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 72%, rgba(255,255,255,.08));
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--phx-color-primary) 12%, transparent), transparent 34%),
+    color-mix(in srgb, var(--phx-color-surface) 76%, transparent);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(18px);
+}
+
+.student-wods-hero {
+  position: relative;
+  min-height: 390px;
+}
+
+.student-wods-hero-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image: var(--phx-home-background-url);
+  background-size: cover;
+  background-position: center;
+}
+
+.student-wods-hero::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background:
+    radial-gradient(circle at 80% 24%, color-mix(in srgb, var(--phx-color-primary) 24%, transparent), transparent 34%),
+    linear-gradient(90deg, color-mix(in srgb, var(--phx-color-background) 98%, transparent), color-mix(in srgb, var(--phx-color-background) 82%, transparent), color-mix(in srgb, var(--phx-color-surface) 48%, transparent));
+}
+
+.student-wods-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 390px;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(20px, 3vw, 32px);
+}
+
+.student-wods-date {
+  margin: 9px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-wods-hero h1 {
+  max-width: 720px;
+  margin: 9px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(2.2rem, 5vw, 4.2rem);
+  font-weight: 1000;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+.student-wods-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 13px;
+}
+
+.student-wods-badges span {
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, rgba(255,255,255,.08));
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  font-size: 0.66rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-wods-description {
+  max-width: 760px;
+  margin: 16px 0 0;
+  color: var(--phx-color-text-muted);
+  white-space: pre-line;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.student-wods-hero small {
+  margin-top: 12px;
+  color: var(--phx-color-text-muted);
+  font-size: 0.8rem;
+}
+
+.student-wods-hero button,
+.student-wods-panel-header button,
+.student-wods-list button,
+.student-wods-wod-list button,
+.student-wods-form-card button,
+.student-wods-form-card input,
+.student-wods-form-card textarea,
+.student-wods-form-card select,
+.student-wods-wide-action {
+  font: inherit;
+}
+
+.student-wods-hero button {
+  width: min(340px, 100%);
+  min-height: 46px;
+  margin-top: 18px;
+  border: 0;
+  border-radius: 15px;
+  color: var(--phx-color-background);
+  background: var(--phx-color-primary);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+  box-shadow: 0 0 26px color-mix(in srgb, var(--phx-color-primary) 22%, transparent);
+}
+
+.student-wods-hero button.is-saved {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.38);
+}
+
+.student-wods-hero button:disabled,
+.student-wods-wod-list button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
+.student-wods-card {
+  padding: 18px;
+}
+
+.student-wods-card header,
+.student-wods-panel-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.student-wods-card header h2,
+.student-wods-panel-header h2 {
+  margin: 5px 0 0;
+  color: var(--phx-color-text);
+  font-size: 1rem;
+  font-weight: 1000;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.student-wods-card header > span,
+.student-wods-panel-header > span {
+  display: grid;
+  min-width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 26%, transparent);
+  border-radius: 14px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  font-weight: 1000;
+}
+
+.student-wods-calories strong {
+  display: block;
+  margin-top: 28px;
+  color: var(--phx-color-text);
+  font-size: clamp(2.9rem, 6vw, 5rem);
+  line-height: 0.9;
+}
+
+.student-wods-calories > small,
+.student-wods-calories-range,
+.student-wods-bars small,
+.student-wods-weekly footer {
+  color: var(--phx-color-text-muted);
+}
+
+.student-wods-calories > small {
+  font-size: 0.82rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-wods-calories-range {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 22px;
+  border-top: 1px solid color-mix(in srgb, var(--phx-color-border) 52%, transparent);
+  padding-top: 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.student-wods-progress {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--phx-color-border) 38%, transparent);
+}
+
+.student-wods-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--phx-color-primary);
+}
+
+.student-wods-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 7px;
+  height: 150px;
+  margin-top: 16px;
+}
+
+.student-wods-bars div {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  align-items: center;
+  justify-content: end;
+}
+
+.student-wods-bars span {
+  width: 100%;
+  min-height: 6px;
+  border-radius: 999px 999px 0 0;
+  background: linear-gradient(180deg, var(--phx-color-primary), color-mix(in srgb, var(--phx-color-primary) 26%, transparent));
+}
+
+.student-wods-bars small,
+.student-wods-weekly footer {
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.student-wods-weekly footer {
+  margin-top: 10px;
+}
+
+.student-wods-list,
+.student-wods-wod-list,
+.student-wods-archive-groups {
+  display: grid;
+  gap: 8px;
+}
+
+.student-wods-archive-shell > .student-wods-archive-groups > .student-wods-card {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 45%, transparent);
+}
+
+.student-wods-list article,
+.student-wods-wod-list article {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 48%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 42%, transparent);
+}
+
+.student-wods-list article {
+  grid-template-columns: 42px minmax(0, 1fr) auto auto;
+}
+
+.student-wods-wod-list article {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.student-wods-list article.is-mine {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 35%, transparent);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+}
+
+.student-wods-list article > span {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 999px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 12%, transparent);
+  font-size: 0.76rem;
+  font-weight: 1000;
+}
+
+.student-wods-list strong,
+.student-wods-wod-list strong {
+  display: block;
+  color: var(--phx-color-text);
+  font-size: 0.82rem;
+}
+
+.student-wods-list small,
+.student-wods-wod-list small,
+.student-wods-wod-list p {
+  display: block;
+  margin: 3px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.68rem;
+}
+
+.student-wods-list b,
+.student-wods-wod-list b {
+  display: grid;
+  gap: 2px;
+  color: var(--phx-color-text);
+  font-size: 0.82rem;
+  text-align: right;
+}
+
+.student-wods-list b small {
+  color: var(--phx-color-primary);
+  font-size: 0.62rem;
+}
+
+.student-wods-row-actions {
+  display: flex;
+  justify-content: end;
+  gap: 6px;
+}
+
+.student-wods-list button,
+.student-wods-wod-list button {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, transparent);
+  border-radius: 11px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 9%, transparent);
+  cursor: pointer;
+}
+
+.student-wods-wide-action {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 12px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 35%, transparent);
+  border-radius: 14px;
+  color: var(--phx-color-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-wods-empty {
+  border: 1px dashed color-mix(in srgb, var(--phx-color-border) 52%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  padding: 16px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 34%, transparent);
+  font-size: 0.82rem;
+}
+
+
+
+/* Ranking por WOD - diseño solamente, usando data existente */
+.student-wods-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(390px, 0.95fr);
+  gap: 16px;
+  min-width: 0;
+}
+
+.student-wods-ranking-card {
+  min-height: 390px;
+}
+
+.student-wods-ranking-filters {
+  display: grid;
+  grid-template-columns: 0.95fr 1.35fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.student-wods-filter-group {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.student-wods-filter-group small {
+  color: var(--phx-color-primary);
+  font-size: 0.58rem;
+  font-weight: 1000;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.student-wods-filter-group div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.student-wods-filter-group button {
+  min-height: 28px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 52%, transparent);
+  border-radius: 9px;
+  padding: 0 10px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 42%, transparent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.student-wods-filter-group button.is-active {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 46%, transparent);
+  color: var(--phx-color-background);
+  background: var(--phx-color-primary);
+}
+
+.student-wods-ranking-table {
+  display: grid;
+  gap: 6px;
+}
+
+.student-wods-ranking-head {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 104px 78px;
+  gap: 8px;
+  padding: 0 8px 4px;
+  color: var(--phx-color-text-muted);
+  font-size: 0.58rem;
+  font-weight: 1000;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.student-wods-ranking-table article {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) 104px 78px;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 44%, rgba(255,255,255,.08));
+  border-radius: 13px;
+  padding: 8px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 38%, transparent);
+}
+
+.student-wods-ranking-table article.is-mine {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 36%, transparent);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+}
+
+.student-wods-ranking-table article > b {
+  color: var(--phx-color-text);
+  font-size: 0.92rem;
+  font-weight: 1000;
+}
+
+.student-wods-ranking-athlete {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-wods-ranking-athlete > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 32%, transparent);
+  border-radius: 999px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  font-size: 0.64rem;
+  font-weight: 1000;
+}
+
+.student-wods-ranking-athlete img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.student-wods-ranking-athlete div {
+  min-width: 0;
+}
+
+.student-wods-ranking-athlete strong {
+  display: block;
+  overflow: hidden;
+  color: var(--phx-color-text);
+  font-size: 0.74rem;
+  font-weight: 1000;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-wods-ranking-athlete small {
+  display: block;
+  overflow: hidden;
+  color: var(--phx-color-text-muted);
+  font-size: 0.56rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-wods-ranking-table em {
+  justify-self: start;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, transparent);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  font-size: 0.6rem;
+  font-style: normal;
+  font-weight: 1000;
+}
+
+.student-wods-ranking-table em.is-sc {
+  border-color: color-mix(in srgb, #22d3ee 42%, transparent);
+  color: #67e8f9;
+  background: color-mix(in srgb, #22d3ee 12%, transparent);
+}
+
+.student-wods-ranking-table em.is-pr {
+  border-color: color-mix(in srgb, #22c55e 42%, transparent);
+  color: #86efac;
+  background: color-mix(in srgb, #22c55e 12%, transparent);
+}
+
+.student-wods-ranking-score {
+  justify-self: end;
+  color: var(--phx-color-text);
+  font-size: 0.76rem;
+  font-weight: 1000;
+  text-align: right;
+}
+
+.student-wods-ranking-card footer {
+  margin-top: 10px;
+  color: var(--phx-color-text-muted);
+  font-size: 0.66rem;
+}
+
+
+/* Archivo comprimible por mes */
+.student-wods-accordion {
+  display: grid;
+  gap: 8px;
+}
+
+.student-wods-accordion-item {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 48%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 36%, transparent);
+}
+
+.student-wods-accordion-trigger {
+  display: flex;
+  width: 100%;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  padding: 12px 14px;
+  color: var(--phx-color-text);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.student-wods-accordion-trigger span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.student-wods-accordion-trigger strong {
+  color: var(--phx-color-text);
+  font-size: 0.86rem;
+  font-weight: 1000;
+  text-transform: capitalize;
+}
+
+.student-wods-accordion-trigger small {
+  color: var(--phx-color-text-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.student-wods-accordion-trigger b {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 30%, transparent);
+  border-radius: 11px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.student-wods-accordion-item.is-open {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 34%, transparent);
+  background: color-mix(in srgb, var(--phx-color-primary) 7%, transparent);
+}
+
+.student-wods-accordion-content {
+  border-top: 1px solid color-mix(in srgb, var(--phx-color-border) 42%, transparent);
+  padding: 8px;
+}
+
+.student-wods-accordion-content > .student-wods-card {
+  border: 0;
+  border-radius: 14px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--phx-color-background) 24%, transparent);
+  box-shadow: none;
+}
+
+
+
+/* Modal centrado para rankings de WODs pasados */
+.student-wods-ranking-modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.student-wods-ranking-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.76);
+  backdrop-filter: blur(14px);
+}
+
+.student-wods-ranking-modal-card {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(860px, calc(100vw - 28px));
+  max-height: min(760px, calc(100dvh - 32px));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 32%, rgba(255,255,255,.08));
+  border-radius: 24px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--phx-color-primary) 12%, transparent), transparent 34%),
+    color-mix(in srgb, var(--phx-color-surface) 94%, var(--phx-color-background));
+  box-shadow: 0 42px 130px rgba(0, 0, 0, 0.68);
+}
+
+.student-wods-ranking-modal-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.student-wods-ranking-modal-header p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-size: 0.72rem;
+  font-weight: 1000;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.student-wods-ranking-modal-header h2 {
+  margin: 5px 0 0;
+  color: var(--phx-color-text);
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+  font-weight: 1000;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.student-wods-ranking-modal-header small {
+  color: var(--phx-color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.student-wods-ranking-modal-header button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, transparent);
+  border-radius: 13px;
+  color: var(--phx-color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.35rem;
+}
+
+.student-wods-ranking-filters.is-modal {
+  margin-bottom: 14px;
+}
+
+.student-wods-ranking-modal-list {
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.student-wods-ranking-head.is-modal,
+.student-wods-ranking-modal-list article {
+  grid-template-columns: 34px minmax(0, 1fr) 122px 94px;
+}
+
+.student-wods-ranking-modal-list article {
+  display: grid;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 44%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  padding: 10px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 38%, transparent);
+}
+
+.student-wods-ranking-modal-list article + article {
+  margin-top: 7px;
+}
+
+.student-wods-ranking-modal-list article.is-mine {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 36%, transparent);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+}
+
+.student-wods-ranking-modal-list article > b {
+  color: var(--phx-color-text);
+  font-size: 1rem;
+  font-weight: 1000;
+}
+
+.student-wods-ranking-modal-empty {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  border: 1px dashed color-mix(in srgb, var(--phx-color-border) 52%, rgba(255,255,255,.08));
+  border-radius: 16px;
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 34%, transparent);
+  text-align: center;
+  font-size: 0.86rem;
+}
+
+
+/* Modal / form */
+.student-wods-form-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 14px;
+}
+
+.student-wods-form-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.student-wods-form-card {
+  position: relative;
+  z-index: 1;
+  width: min(620px, 100%);
+  max-height: min(760px, calc(100dvh - 28px));
+  overflow-y: auto;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 28%, rgba(255,255,255,.08));
+  border-radius: 24px;
+  padding: 18px;
+  background: color-mix(in srgb, var(--phx-color-surface) 92%, var(--phx-color-background));
+  box-shadow: 0 36px 110px rgba(0, 0, 0, 0.62);
+}
+
+.student-wods-form-card > header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.student-wods-form-card header p,
+.student-wods-form-card header small {
+  margin: 0;
+  color: var(--phx-color-text-muted);
+  font-size: 0.75rem;
+}
+
+.student-wods-form-card header h2 {
+  margin: 5px 0;
+  color: var(--phx-color-text);
+  font-size: 1.35rem;
+  text-transform: uppercase;
+}
+
+.student-wods-form-card header button {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 60%, transparent);
+  border-radius: 12px;
+  color: var(--phx-color-text-muted);
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.35rem;
+}
+
+.student-wods-form-card form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.student-wods-form-card label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.student-wods-form-card label.is-full,
+.student-wods-form-card form > button,
+.student-wods-form-error {
+  grid-column: 1 / -1;
+}
+
+.student-wods-form-card label span {
+  color: var(--phx-color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.student-wods-form-card input,
+.student-wods-form-card textarea,
+.student-wods-form-card select {
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 64%, rgba(255,255,255,.08));
+  border-radius: 14px;
+  padding: 12px;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-background) 52%, transparent);
+  outline: none;
+  font-size: 0.86rem;
+}
+
+.student-wods-form-card textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.student-wods-form-card form > button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 14px;
+  color: var(--phx-color-background);
+  background: var(--phx-color-primary);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.student-wods-form-card form > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.student-wods-form-error {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--phx-color-accent) 42%, transparent);
+  border-radius: 12px;
+  padding: 10px;
+  color: var(--phx-color-text);
+  background: color-mix(in srgb, var(--phx-color-accent) 12%, transparent);
+  font-size: 0.76rem;
+}
+
+.student-wods-detail-body {
+  display: grid;
+  gap: 10px;
+  color: var(--phx-color-text-muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.student-wods-detail-body strong {
+  color: var(--phx-color-text);
+}
+
+.student-wods-detail-body .is-description {
+  white-space: pre-line;
+}
+
+/* Loading */
+.student-wods-loading {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 18px;
+  color: var(--phx-color-text);
+  background: var(--phx-color-background);
+}
+
+.student-wods-loading section {
+  display: grid;
+  width: min(420px, 100%);
+  justify-items: center;
+  gap: 8px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border) 62%, rgba(255,255,255,.08));
+  border-radius: var(--phx-radius-card);
+  padding: 34px;
+  background: color-mix(in srgb, var(--phx-color-surface) 76%, transparent);
+  text-align: center;
+}
+
+.student-wods-loading section > span {
+  width: 46px;
+  height: 46px;
+  border: 3px solid color-mix(in srgb, var(--phx-color-primary) 24%, transparent);
+  border-top-color: var(--phx-color-primary);
+  border-radius: 999px;
+  animation: student-wods-spin 850ms linear infinite;
+}
+
+.student-wods-loading p {
+  margin: 0;
+  color: var(--phx-color-primary);
+  font-weight: 1000;
+  letter-spacing: 0.18em;
+}
+
+.student-wods-loading h1 {
+  margin: 0;
+  color: var(--phx-color-text);
+  text-transform: uppercase;
+}
+
+.student-wods-loading small {
+  color: var(--phx-color-text-muted);
+}
+
+@keyframes student-wods-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1180px) {
+  .student-wods-dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .student-wods-content {
+    max-height: none;
+    min-height: 100dvh;
+    padding: 14px 14px 92px;
+  }
+
+  .student-wods-layout,
+  .student-wods-lower {
+    grid-template-columns: 1fr;
+  }
+
+  .student-wods-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .student-wods-content {
+    padding: 8px 8px 88px;
+  }
+
+  .student-wods-title {
+    margin-bottom: 8px;
+  }
+
+  .student-wods-title h1 {
+    margin-top: 4px;
+    font-size: 1.45rem;
+  }
+
+  .student-wods-title p {
+    margin-top: 4px;
+    font-size: 0.68rem;
+  }
+
+  .student-wods-main,
+  .student-wods-side,
+  .student-wods-lower,
+  .student-wods-layout,
+  .student-wods-archive-area {
+    gap: 8px;
+  }
+
+  .student-wods-card,
+  .student-wods-hero {
+    border-radius: 16px;
+  }
+
+  .student-wods-card {
+    padding: 10px;
+  }
+
+  .student-wods-hero {
+    min-height: auto;
+  }
+
+  .student-wods-hero-content {
+    min-height: 280px;
+    padding: 14px;
+  }
+
+  .student-wods-kicker,
+  .student-wods-card header p,
+  .student-wods-panel-header p {
+    font-size: 0.54rem;
+    letter-spacing: 0.1em;
+  }
+
+  .student-wods-date {
+    margin-top: 6px;
+    font-size: 0.58rem;
+  }
+
+  .student-wods-hero h1 {
+    margin-top: 6px;
+    font-size: clamp(1.55rem, 9vw, 2.35rem);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+  }
+
+  .student-wods-badges {
+    gap: 5px;
+    margin-top: 9px;
+  }
+
+  .student-wods-badges span {
+    padding: 5px 8px;
+    font-size: 0.52rem;
+  }
+
+  .student-wods-description {
+    margin-top: 10px;
+    font-size: 0.68rem;
+    line-height: 1.32;
+  }
+
+  .student-wods-hero small {
+    margin-top: 8px;
+    font-size: 0.62rem;
+  }
+
+  .student-wods-hero button {
+    min-height: 36px;
+    margin-top: 12px;
+    border-radius: 12px;
+    font-size: 0.58rem;
+  }
+
+  .student-wods-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-wods-card header,
+  .student-wods-panel-header {
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .student-wods-card header h2,
+  .student-wods-panel-header h2 {
+    margin-top: 3px;
+    font-size: 0.72rem;
+  }
+
+  .student-wods-card header > span,
+  .student-wods-panel-header > span {
+    min-width: 30px;
+    height: 30px;
+    border-radius: 11px;
+    font-size: 0.68rem;
+  }
+
+  .student-wods-calories strong {
+    margin-top: 18px;
+    font-size: 2.1rem;
+  }
+
+  .student-wods-calories > small,
+  .student-wods-calories-range {
+    font-size: 0.58rem;
+  }
+
+  .student-wods-calories-range {
+    margin-top: 14px;
+    padding-top: 9px;
+  }
+
+  .student-wods-weekly header h2 {
+    font-size: 0.9rem;
+  }
+
+  .student-wods-progress {
+    height: 6px;
+  }
+
+  .student-wods-bars {
+    height: 90px;
+    gap: 4px;
+    margin-top: 10px;
+  }
+
+  .student-wods-bars small,
+  .student-wods-weekly footer {
+    font-size: 0.52rem;
+  }
+
+  .student-wods-list,
+  .student-wods-wod-list,
+  .student-wods-archive-groups {
+    gap: 6px;
+  }
+
+  .student-wods-list article {
+    grid-template-columns: 34px minmax(0, 1fr) auto 62px;
+    gap: 7px;
+    border-radius: 13px;
+    padding: 7px;
+  }
+
+  .student-wods-wod-list article {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    border-radius: 13px;
+    padding: 8px;
+  }
+
+  .student-wods-wod-list b {
+    text-align: left;
+  }
+
+  .student-wods-list article > span {
+    width: 34px;
+    height: 34px;
+    font-size: 0.62rem;
+  }
+
+  .student-wods-list strong,
+  .student-wods-wod-list strong {
+    font-size: 0.68rem;
+  }
+
+  .student-wods-list small,
+  .student-wods-wod-list small,
+  .student-wods-wod-list p {
+    font-size: 0.56rem;
+  }
+
+  .student-wods-list b,
+  .student-wods-wod-list b {
+    font-size: 0.66rem;
+  }
+
+  .student-wods-row-actions {
+    justify-content: flex-start;
+  }
+
+  .student-wods-list button,
+  .student-wods-wod-list button {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    font-size: 0.66rem;
+  }
+
+  .student-wods-empty {
+    border-radius: 12px;
+    padding: 11px;
+    font-size: 0.64rem;
+  }
+
+
+
+  .student-wods-top-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .student-wods-ranking-card {
+    min-height: auto;
+  }
+
+  .student-wods-ranking-filters {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .student-wods-filter-group small {
+    font-size: 0.52rem;
+  }
+
+  .student-wods-filter-group button {
+    min-height: 25px;
+    border-radius: 8px;
+    padding: 0 8px;
+    font-size: 0.54rem;
+  }
+
+  .student-wods-ranking-head {
+    grid-template-columns: 24px minmax(0, 1fr) 70px 66px;
+    gap: 6px;
+    font-size: 0.48rem;
+  }
+
+  .student-wods-ranking-table article {
+    grid-template-columns: 24px minmax(0, 1fr) 70px 66px;
+    gap: 6px;
+    border-radius: 11px;
+    padding: 6px;
+  }
+
+  .student-wods-ranking-table article > b {
+    font-size: 0.7rem;
+  }
+
+  .student-wods-ranking-athlete {
+    gap: 6px;
+  }
+
+  .student-wods-ranking-athlete > span {
+    width: 28px;
+    height: 28px;
+    font-size: 0.52rem;
+  }
+
+  .student-wods-ranking-athlete strong {
+    font-size: 0.6rem;
+  }
+
+  .student-wods-ranking-athlete small {
+    font-size: 0.48rem;
+  }
+
+  .student-wods-ranking-table em {
+    padding: 3px 6px;
+    font-size: 0.48rem;
+  }
+
+  .student-wods-ranking-score {
+    font-size: 0.58rem;
+  }
+
+  .student-wods-ranking-card footer {
+    font-size: 0.52rem;
+  }
+
+
+  .student-wods-accordion {
+    gap: 6px;
+  }
+
+  .student-wods-accordion-item {
+    border-radius: 13px;
+  }
+
+  .student-wods-accordion-trigger {
+    min-height: 48px;
+    padding: 9px 10px;
+  }
+
+  .student-wods-accordion-trigger strong {
+    font-size: 0.68rem;
+  }
+
+  .student-wods-accordion-trigger small {
+    font-size: 0.54rem;
+  }
+
+  .student-wods-accordion-trigger b {
+    width: 28px;
+    height: 28px;
+    border-radius: 9px;
+    font-size: 1rem;
+  }
+
+  .student-wods-accordion-content {
+    padding: 6px;
+  }
+
+
+
+  .student-wods-ranking-modal-shell {
+    padding: 10px;
+  }
+
+  .student-wods-ranking-modal-card {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+    border-radius: 18px;
+    padding: 12px;
+  }
+
+  .student-wods-ranking-modal-header {
+    margin-bottom: 10px;
+  }
+
+  .student-wods-ranking-modal-header p {
+    font-size: 0.56rem;
+  }
+
+  .student-wods-ranking-modal-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .student-wods-ranking-modal-header small {
+    font-size: 0.62rem;
+  }
+
+  .student-wods-ranking-modal-header button {
+    width: 32px;
+    height: 32px;
+    border-radius: 11px;
+    font-size: 1.1rem;
+  }
+
+  .student-wods-ranking-head.is-modal,
+  .student-wods-ranking-modal-list article {
+    grid-template-columns: 24px minmax(0, 1fr) 72px 62px;
+  }
+
+  .student-wods-ranking-modal-list article {
+    gap: 6px;
+    border-radius: 11px;
+    padding: 7px;
+  }
+
+  .student-wods-ranking-modal-list article > b {
+    font-size: 0.72rem;
+  }
+
+  .student-wods-ranking-modal-empty {
+    min-height: 120px;
+    border-radius: 13px;
+    font-size: 0.68rem;
+  }
+
+
+  .student-wods-form-card {
+    border-radius: 18px;
+    padding: 12px;
+  }
+
+  .student-wods-form-card header h2 {
+    font-size: 1rem;
+  }
+
+  .student-wods-form-card header p,
+  .student-wods-form-card header small {
+    font-size: 0.62rem;
+  }
+
+  .student-wods-form-card form {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .student-wods-form-card input,
+  .student-wods-form-card textarea,
+  .student-wods-form-card select {
+    border-radius: 12px;
+    padding: 10px;
+    font-size: 0.74rem;
+  }
+
+  .student-wods-form-card label span {
+    font-size: 0.62rem;
+  }
+
+  .student-wods-form-card form > button {
+    min-height: 38px;
+    font-size: 0.66rem;
+  }
+}
+
+
+/* Ranking solo por género: sin filtro ni columna de modalidad */
+.student-wods-ranking-filters.is-gender-only {
+  grid-template-columns: 1fr;
+}
+
+.student-wods-ranking-table.is-gender-only .student-wods-ranking-head,
+.student-wods-ranking-table.is-gender-only article {
+  grid-template-columns: 28px minmax(0, 1fr) 92px;
+}
+
+.student-wods-ranking-modal-list.is-gender-only .student-wods-ranking-head.is-modal,
+.student-wods-ranking-modal-list.is-gender-only article {
+  grid-template-columns: 34px minmax(0, 1fr) 110px;
+}
+
+@media (max-width: 760px) {
+  .student-wods-ranking-table.is-gender-only .student-wods-ranking-head,
+  .student-wods-ranking-table.is-gender-only article {
+    grid-template-columns: 24px minmax(0, 1fr) 62px;
+  }
+
+  .student-wods-ranking-modal-list.is-gender-only .student-wods-ranking-head.is-modal,
+  .student-wods-ranking-modal-list.is-gender-only article {
+    grid-template-columns: 24px minmax(0, 1fr) 62px;
+  }
+}
+
+
+/* Paginación del modal de ranking */
+.student-wods-ranking-pagination {
+  display: grid;
+  grid-template-columns: 126px minmax(0, 1fr) 126px;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--phx-color-border) 44%, rgba(255,255,255,.08));
+}
+
+.student-wods-ranking-pagination button {
+  min-height: 38px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary) 30%, transparent);
+  border-radius: 12px;
+  color: var(--phx-color-primary);
+  background: color-mix(in srgb, var(--phx-color-primary) 10%, transparent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 1000;
+}
+
+.student-wods-ranking-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.student-wods-ranking-pagination span {
+  display: grid;
+  justify-items: center;
+  color: var(--phx-color-text);
+  font-size: 0.76rem;
+  font-weight: 1000;
+  text-align: center;
+}
+
+.student-wods-ranking-pagination small {
+  margin-top: 2px;
+  color: var(--phx-color-text-muted);
+  font-size: 0.58rem;
+  font-weight: 800;
+}
+
+@media (max-width: 760px) {
+  .student-wods-ranking-pagination {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+  }
+
+  .student-wods-ranking-pagination button {
+    min-height: 32px;
+    border-radius: 10px;
+    font-size: 0.58rem;
+  }
+
+  .student-wods-ranking-pagination span {
+    order: -1;
+    font-size: 0.62rem;
+  }
+
+  .student-wods-ranking-pagination small {
+    font-size: 0.5rem;
+  }
+}

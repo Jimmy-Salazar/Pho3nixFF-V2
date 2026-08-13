@@ -1,0 +1,678 @@
+/* ============================================================
+   PHO3NIX V2 · PDA ATHLETE
+   Reuses the normal athlete shell: sidebar + header + mobile nav.
+   All visual accents inherit the centralized PHO3NIX theme tokens.
+   ============================================================ */
+
+.student-pda-page {
+  min-height: 100dvh;
+  color: var(--phx-color-text);
+}
+
+.student-pda-main {
+  position: relative;
+  min-width: 0;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  background: transparent;
+}
+
+.student-pda-inner {
+  position: relative;
+  z-index: 2;
+  width: min(1500px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  padding: 18px 24px 120px;
+}
+
+.student-pda-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 28px 0 18px;
+}
+
+.student-pda-kicker,
+.student-pda-section-head span,
+.student-pda-hero-copy > span {
+  margin: 0 0 6px;
+  color: var(--phx-color-primary, #f97316);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.student-pda-heading h1 {
+  margin: 0;
+  font-size: clamp(30px, 4.2vw, 58px);
+  font-weight: 950;
+  line-height: .96;
+  letter-spacing: -.045em;
+}
+
+.student-pda-heading > div > p:last-child {
+  max-width: 760px;
+  margin: 10px 0 0;
+  color: var(--phx-color-text-muted);
+  line-height: 1.55;
+}
+
+.student-pda-dev-notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary, #f97316) 28%, transparent);
+  border-radius: 18px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--phx-color-primary, #f97316) 7%, transparent);
+}
+
+.student-pda-dev-notice > span {
+  flex: 0 0 auto;
+  border-radius: 10px;
+  padding: 8px 9px;
+  background: var(--phx-color-primary, #f97316);
+  color: var(--phx-color-background, #050505);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.student-pda-dev-notice strong {
+  display: block;
+  color: var(--phx-color-primary, #f97316);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.student-pda-dev-notice p {
+  margin: 3px 0 0;
+  color: var(--phx-color-text-muted);
+  font-size: 12px;
+}
+
+.student-pda-error {
+  margin-bottom: 18px;
+  border: 1px solid rgba(239,68,68,.3);
+  border-radius: 16px;
+  padding: 12px 14px;
+  color: #fecaca;
+  background: rgba(127,29,29,.18);
+  font-size: 13px;
+}
+
+.student-pda-loading-card {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent);
+  border-radius: var(--phx-radius-card, 26px);
+  padding: 26px;
+  background: color-mix(in srgb, var(--phx-color-surface, #111111) 70%, transparent);
+}
+
+.student-pda-loading-card {
+  min-height: 46dvh;
+  flex-direction: column;
+  text-align: center;
+}
+
+.student-pda-loader-mark {
+  display: grid;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary, #f97316) 34%, transparent);
+  border-radius: 22px;
+  color: var(--phx-color-primary, #f97316);
+  background: color-mix(in srgb, var(--phx-color-primary, #f97316) 8%, transparent);
+  font-weight: 950;
+  animation: pdaPulse 1.2s ease-in-out infinite alternate;
+}
+
+.student-pda-loading-card h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.student-pda-loading-card p {
+  margin: 5px 0 0;
+  color: var(--phx-color-text-muted);
+}
+
+
+.student-pda-coming {
+  display: grid;
+  grid-template-columns: minmax(280px, 560px) minmax(260px, 1fr);
+  align-items: center;
+  gap: clamp(24px, 5vw, 64px);
+  padding: 10px 0 30px;
+}
+
+.student-pda-poster-frame {
+  width: min(100%, 540px);
+  margin: 0 auto;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary, #f97316) 24%, transparent);
+  border-radius: var(--phx-radius-card, 28px);
+  padding: 8px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--phx-color-text, #fff) 4%, transparent), color-mix(in srgb, var(--phx-color-primary, #f97316) 5%, transparent));
+  box-shadow: 0 30px 90px rgba(0,0,0,.42);
+}
+
+.student-pda-poster-frame img {
+  display: block;
+  width: 100%;
+  max-height: 68dvh;
+  border-radius: 21px;
+  object-fit: contain;
+  background: var(--phx-color-background, #050505);
+}
+
+.student-pda-coming-copy > span,
+.student-pda-edition-state span,
+.student-pda-wod-meta span {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 5px 9px;
+  color: var(--phx-color-primary, #f97316);
+  background: color-mix(in srgb, var(--phx-color-primary, #f97316) 9%, transparent);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.student-pda-coming-copy h2 {
+  margin: 16px 0 10px;
+  font-size: clamp(44px, 7vw, 92px);
+  font-weight: 950;
+  line-height: .88;
+  letter-spacing: -.055em;
+}
+
+.student-pda-coming-copy p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--phx-color-text-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.student-pda-hero {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(420px, 1fr);
+  gap: 24px;
+  margin-bottom: 18px;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary, #f97316) 22%, transparent);
+  border-radius: var(--phx-radius-card, 28px);
+  padding: clamp(20px,3vw,30px);
+  background:
+    linear-gradient(120deg, color-mix(in srgb, var(--phx-color-primary, #f97316) 10%, transparent), color-mix(in srgb, var(--phx-color-surface-soft) 36%, transparent) 40%, rgba(0,0,0,.18)),
+    var(--phx-color-surface, #111111);
+  box-shadow: 0 22px 70px rgba(0,0,0,.25);
+}
+
+.student-pda-hero-copy h2 {
+  margin: 0;
+  font-size: clamp(28px,4vw,46px);
+  font-weight: 950;
+  letter-spacing: -.04em;
+}
+
+.student-pda-hero-copy p {
+  max-width: 670px;
+  margin: 11px 0 0;
+  color: var(--phx-color-text-muted);
+  line-height: 1.6;
+}
+
+.student-pda-edition-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.student-pda-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 9px;
+}
+
+.student-pda-hero-stats article {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent);
+  border-radius: 19px;
+  padding: 15px 11px;
+  background: rgba(0,0,0,.28);
+}
+
+.student-pda-hero-stats small {
+  color: var(--phx-color-text-muted);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.student-pda-hero-stats strong {
+  margin-top: 7px;
+  overflow: hidden;
+  color: var(--phx-color-primary, #f97316);
+  font-size: clamp(16px,2vw,25px);
+  font-weight: 950;
+  text-overflow: ellipsis;
+}
+
+.student-pda-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.55fr) minmax(300px,.75fr);
+  gap: 18px;
+}
+
+.student-pda-card {
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent);
+  border-radius: var(--phx-radius-card, 26px);
+  background: color-mix(in srgb, var(--phx-color-surface, #111111) 72%, transparent);
+  box-shadow: 0 20px 60px rgba(0,0,0,.18);
+  backdrop-filter: blur(18px);
+}
+
+.student-pda-section-head {
+  padding: 21px 21px 14px;
+}
+
+.student-pda-section-head h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 950;
+}
+
+.student-pda-wod-list {
+  display: grid;
+  gap: 10px;
+  padding: 0 13px 15px;
+}
+
+.student-pda-wod {
+  display: grid;
+  grid-template-columns: 70px minmax(0,1fr) 170px;
+  gap: 13px;
+  align-items: stretch;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent);
+  border-radius: 21px;
+  padding: 11px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 42%, transparent);
+}
+
+.student-pda-wod.is-today,
+.student-pda-wod.is-completed {
+  border-color: color-mix(in srgb, var(--phx-color-primary, #f97316) 34%, transparent);
+  background: color-mix(in srgb, var(--phx-color-primary, #f97316) 5%, transparent);
+}
+
+.student-pda-wod-number {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--phx-color-surface, #111111) 88%, var(--phx-color-primary, #f97316));
+}
+
+.student-pda-wod-number small {
+  color: var(--phx-color-text-muted);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.student-pda-wod-number strong {
+  color: var(--phx-color-primary, #f97316);
+  font-size: 27px;
+  font-weight: 950;
+}
+
+.student-pda-wod-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.student-pda-wod-meta .is-draft {
+  color: #fcd34d;
+  background: rgba(245,158,11,.10);
+}
+
+.student-pda-wod-meta .is-published {
+  color: #86efac;
+  background: rgba(34,197,94,.10);
+}
+
+.student-pda-wod-body h3 {
+  margin: 8px 0 4px;
+  font-size: 19px;
+  font-weight: 950;
+}
+
+.student-pda-wod-body > p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: var(--phx-color-text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.student-pda-wod-result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: 11px;
+}
+
+.student-pda-wod-result small {
+  color: var(--phx-color-text-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.student-pda-wod-result strong {
+  font-size: 15px;
+}
+
+.student-pda-wod-result span {
+  color: var(--phx-color-primary, #f97316);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.student-pda-wod-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+}
+
+.student-pda-primary,
+.student-pda-secondary {
+  min-height: 38px;
+  border-radius: 12px;
+  padding: 9px 11px;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.student-pda-primary {
+  border: 1px solid var(--phx-color-primary, #f97316);
+  color: var(--phx-color-background, #050505);
+  background: var(--phx-color-primary, #f97316);
+}
+
+.student-pda-primary:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+.student-pda-secondary {
+  border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 70%, transparent);
+  color: var(--phx-color-text-muted);
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 55%, transparent);
+}
+
+
+.student-pda-ranking-list {
+  display: grid;
+  gap: 7px;
+  padding: 0 12px 14px;
+}
+
+.student-pda-ranking-list article {
+  display: grid;
+  grid-template-columns: 38px minmax(0,1fr) auto;
+  gap: 9px;
+  align-items: center;
+  border: 1px solid color-mix(in srgb, var(--phx-color-text, #fff) 6%, transparent);
+  border-radius: 16px;
+  padding: 9px;
+  background: color-mix(in srgb, var(--phx-color-surface-soft) 42%, transparent);
+}
+
+.student-pda-ranking-list article.is-me {
+  border-color: color-mix(in srgb, var(--phx-color-primary, #f97316) 35%, transparent);
+  background: color-mix(in srgb, var(--phx-color-primary, #f97316) 7%, transparent);
+}
+
+.student-pda-ranking-list article > strong {
+  color: var(--phx-color-primary, #f97316);
+  font-size: 17px;
+}
+
+.student-pda-ranking-athlete {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.student-pda-ranking-athlete > img,
+.student-pda-ranking-athlete > span {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.student-pda-ranking-athlete > span {
+  display: grid;
+  place-items: center;
+  color: var(--phx-color-primary, #f97316);
+  background: color-mix(in srgb, var(--phx-color-primary, #f97316) 12%, transparent);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.student-pda-ranking-athlete b,
+.student-pda-ranking-athlete small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-pda-ranking-athlete b { font-size: 12px; }
+.student-pda-ranking-athlete small { margin-top: 2px; color: var(--phx-color-text-muted); font-size: 9px; }
+.student-pda-ranking-points { text-align: right; }
+.student-pda-ranking-points b { display: block; color: var(--phx-color-text, #fff); font-size: 14px; }
+.student-pda-ranking-points small { color: var(--phx-color-primary, #f97316); font-size: 9px; }
+
+.student-pda-empty {
+  padding: 42px 20px;
+  color: var(--phx-color-text-muted);
+  text-align: center;
+}
+
+.student-pda-modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.student-pda-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(8px);
+}
+
+.student-pda-modal {
+  position: relative;
+  z-index: 2;
+  width: min(620px,100%);
+  max-height: min(88dvh,780px);
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--phx-color-primary, #f97316) 24%, transparent);
+  border-radius: 24px;
+  background: var(--phx-color-surface, #111111);
+  box-shadow: 0 30px 100px rgba(0,0,0,.65);
+}
+
+.student-pda-ranking-modal { width: min(760px,100%); }
+.student-pda-detail-modal { width: min(760px,100%); }
+
+.student-pda-modal > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  border-bottom: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent);
+  padding: 19px;
+}
+
+.student-pda-modal > header span {
+  color: var(--phx-color-primary, #f97316);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.student-pda-modal > header h2 { margin: 5px 0 0; font-size: 23px; }
+.student-pda-modal > header p { margin: 5px 0 0; color: var(--phx-color-text-muted); font-size: 11px; }
+.student-pda-modal > header > button { border: 0; color: var(--phx-color-text, #fff); background: transparent; font-size: 28px; cursor: pointer; }
+.student-pda-modal-body { padding: 19px; }
+
+.student-pda-field { display: block; margin-bottom: 15px; }
+.student-pda-field > span { display: block; margin-bottom: 7px; color: var(--phx-color-text-muted); font-size: 10px; font-weight: 800; }
+.student-pda-field input,
+.student-pda-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 70%, transparent);
+  border-radius: 13px;
+  padding: 12px 13px;
+  color: var(--phx-color-text, #fff);
+  background: color-mix(in srgb, var(--phx-color-background, #050505) 70%, transparent);
+  outline: none;
+}
+.student-pda-field input:focus,
+.student-pda-field textarea:focus { border-color: color-mix(in srgb, var(--phx-color-primary, #f97316) 55%, transparent); }
+
+.student-pda-segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.student-pda-segmented button { border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 70%, transparent); border-radius: 12px; padding: 11px; color: var(--phx-color-text-muted); background: color-mix(in srgb, var(--phx-color-surface-soft) 48%, transparent); cursor: pointer; }
+.student-pda-segmented button.is-active { border-color: color-mix(in srgb, var(--phx-color-primary, #f97316) 50%, transparent); color: var(--phx-color-primary, #f97316); background: color-mix(in srgb, var(--phx-color-primary, #f97316) 10%, transparent); }
+.student-pda-form-error { margin-top: 4px; color: #fca5a5; font-size: 11px; }
+
+.student-pda-modal > footer { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent); padding: 15px 19px; }
+
+.student-pda-detail-meta { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; }
+.student-pda-detail-meta article { border: 1px solid color-mix(in srgb, var(--phx-color-border, rgba(255,255,255,.14)) 50%, transparent); border-radius: 15px; padding: 12px; background: color-mix(in srgb, var(--phx-color-surface-soft) 42%, transparent); }
+.student-pda-detail-meta small { display: block; color: var(--phx-color-text-muted); font-size: 9px; text-transform: uppercase; }
+.student-pda-detail-meta strong { display: block; margin-top: 5px; color: var(--phx-color-primary, #f97316); font-size: 12px; }
+.student-pda-detail-description { margin-top: 15px; border: 1px solid color-mix(in srgb, var(--phx-color-text, #fff) 6%, transparent); border-radius: 17px; padding: 16px; background: color-mix(in srgb, var(--phx-color-surface-soft) 36%, transparent); }
+.student-pda-detail-description p { margin: 0 0 7px; color: var(--phx-color-text-muted); line-height: 1.55; }
+.student-pda-detail-description p:last-child { margin-bottom: 0; }
+
+.student-pda-success {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(34,197,94,.3);
+  border-radius: 16px;
+  padding: 12px 15px;
+  color: #dcfce7;
+  background: rgba(20,83,45,.94);
+  box-shadow: 0 18px 50px rgba(0,0,0,.38);
+  font-size: 11px;
+}
+
+@keyframes pdaPulse {
+  from { transform: scale(.96); opacity: .65; }
+  to { transform: scale(1.03); opacity: 1; }
+}
+
+@media (max-width: 1180px) {
+  .student-pda-hero { grid-template-columns: 1fr; }
+  .student-pda-main-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .student-pda-inner { padding: 14px 15px 110px; }
+  .student-pda-coming { grid-template-columns: 1fr; }
+  .student-pda-coming-copy { text-align: center; }
+  .student-pda-coming-copy p { margin-inline: auto; }
+  .student-pda-wod { grid-template-columns: 58px minmax(0,1fr); }
+  .student-pda-wod-actions { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); }
+}
+
+@media (max-width: 680px) {
+  .student-pda-inner { padding-inline: 12px; }
+  .student-pda-heading { margin-top: 20px; }
+  .student-pda-heading h1 { font-size: 31px; }
+  .student-pda-dev-notice { align-items: flex-start; }
+  .student-pda-hero { border-radius: 22px; padding: 16px; }
+  .student-pda-hero-stats { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .student-pda-card { border-radius: 22px; }
+  .student-pda-wod { grid-template-columns: 50px minmax(0,1fr); padding: 9px; border-radius: 18px; }
+  .student-pda-wod-number strong { font-size: 22px; }
+  .student-pda-wod-actions { grid-template-columns: 1fr; }
+  .student-pda-detail-meta { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .student-pda-modal-shell { align-items: end; padding: 0; }
+  .student-pda-modal { width: 100%; max-height: 92dvh; border-radius: 24px 24px 0 0; }
+  .student-pda-success { right: 12px; bottom: 86px; left: 12px; justify-content: center; }
+}
+
+/* ============================================================
+   PDA ATHLETE · MOBILE/TABLET SCROLL
+   The global .student-dashboard shell uses overflow:hidden.
+   Therefore PDA must own the vertical scroll on small screens.
+   ============================================================ */
+@media (max-width: 1180px) {
+  .student-dashboard.student-pda-page {
+    height: 100dvh;
+    min-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .student-pda-main {
+    height: 100dvh;
+    min-height: 0;
+    max-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .student-pda-inner {
+    min-height: max-content;
+    padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  }
+}
