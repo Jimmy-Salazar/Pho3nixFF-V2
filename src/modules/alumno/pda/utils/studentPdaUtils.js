@@ -1,37 +1,37 @@
 // ============================================================
 // PHO3NIX V2 · PDA Athlete utilities
+// Production-safe utilities. No global development unlock.
 // ============================================================
 
-// TEMPORARY DEVELOPMENT SWITCH.
-// While true, the athlete PDA can be developed outside December and
-// without requiring pda_ediciones.estado = "activa".
-// IMPORTANT: set to false when the PDA module is finished and remove
-// the *_dev_* policies using PHO3NIX_PDA_DEV_LOCK_RESTORE.sql.
-export const PDA_DEVELOPMENT_UNLOCK = true
+import {
+  getPdaSeasonYear,
+  getPdaTodayIso,
+  isPdaResultDay,
+  isPdaSeasonVisible as resolvePdaSeasonVisible,
+} from "./pdaVisibility.js"
+
+/*
+ * Compatibility exports for code written during PDA development.
+ * Production is permanently locked; preview is handled only through the
+ * explicit DEV-only VITE_PDA_FORCE_VISIBLE switch in pdaVisibility.js.
+ */
+export const PDA_DEVELOPMENT_UNLOCK = false
 
 export function isPdaDevelopmentUnlockEnabled() {
-  return PDA_DEVELOPMENT_UNLOCK
+  return false
 }
 
 export function getPdaYear(date = new Date()) {
-  return date.getFullYear()
+  return getPdaSeasonYear(date)
 }
 
 export function isPdaSeasonVisible(date = new Date()) {
-  if (PDA_DEVELOPMENT_UNLOCK) return true
-
-  const month = date.getMonth()
-  const day = date.getDate()
-
-  // Final production rule: November 15 through December 31.
-  if (month === 10) return day >= 15
-  return month === 11
+  return resolvePdaSeasonVisible(date)
 }
 
 export function isPdaEditionAvailable(edition) {
   if (!edition?.id) return false
-  if (PDA_DEVELOPMENT_UNLOCK) return true
-  return edition.publicada === true && String(edition.estado || "").toLowerCase() === "activa"
+  return edition.publicada === true
 }
 
 export function formatPdaDate(value, locale = "es") {
@@ -48,6 +48,7 @@ export function formatPdaDate(value, locale = "es") {
     weekday: "short",
     day: "2-digit",
     month: "short",
+    timeZone: "America/Guayaquil",
   })
     .format(date)
     .replace(".", "")
@@ -56,8 +57,13 @@ export function formatPdaDate(value, locale = "es") {
 export function formatPdaResult(result, wod, copy) {
   if (!result) return copy.noResult
 
-  if (result.estado_resultado === "dnf" || !result.completado) {
-    return "DNF"
+  if (
+    ["dnf", "dns", "dq", "anulado"].includes(
+      String(result.estado_resultado || "").toLowerCase()
+    ) ||
+    !result.completado
+  ) {
+    return String(result.estado_resultado || "DNF").toUpperCase()
   }
 
   if (wod?.tipo_resultado === "tiempo") {
@@ -110,7 +116,7 @@ export function parseTimeToSeconds(value) {
 }
 
 export function getPdaWodStatus(wod, result, now = new Date()) {
-  const today = formatLocalIso(now)
+  const today = getPdaTodayIso(now)
   const wodDate = String(wod?.fecha || "").slice(0, 10)
 
   if (result?.id) return "completed"
@@ -122,14 +128,16 @@ export function getPdaWodStatus(wod, result, now = new Date()) {
 
 export function canRegisterPdaResult(wod, result, now = new Date()) {
   if (!wod?.id) return false
-  if (result?.estado_resultado === "dq" || result?.estado_resultado === "anulado") return false
 
-  // Development unlock lets us exercise the same result form now,
-  // even though the official PDA dates are in December.
-  if (PDA_DEVELOPMENT_UNLOCK) return true
+  if (
+    ["dq", "anulado"].includes(
+      String(result?.estado_resultado || "").toLowerCase()
+    )
+  ) {
+    return false
+  }
 
-  if (!wod?.fecha) return false
-  return String(wod.fecha).slice(0, 10) === formatLocalIso(now)
+  return isPdaResultDay(wod.fecha, now)
 }
 
 export function getInitials(name) {
@@ -139,18 +147,14 @@ export function getInitials(name) {
     .filter(Boolean)
 
   if (!words.length) return "PH"
-  return words.slice(0, 2).map((word) => word[0]?.toUpperCase()).join("")
+  return words
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("")
 }
 
 export function getWodPublicationLabel(wod, copy) {
   if (wod?.publicado === true && wod?.activo === true) return copy.published
   if (wod?.publicado === true) return copy.programmed
   return copy.draft
-}
-
-function formatLocalIso(date = new Date()) {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
 }

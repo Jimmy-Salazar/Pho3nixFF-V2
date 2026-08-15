@@ -1,8 +1,5 @@
 import { supabase } from "../../../../config/supabase.js"
-import {
-  getPdaYear,
-  isPdaDevelopmentUnlockEnabled,
-} from "../utils/studentPdaUtils.js"
+import { getPdaYear } from "../utils/studentPdaUtils.js"
 
 export const EMPTY_STUDENT_PDA = {
   profile: null,
@@ -35,35 +32,35 @@ export async function loadStudentPdaData({ authUser, authProfile } = {}) {
 
   const wods = await loadWods(edition.id)
 
-  // IMPORTANT:
-  // PDA does not use athlete enrollment/registration.
-  // We intentionally do not read or write pda_inscripciones here.
-  // Results will be connected directly to the athlete in the next database refinement.
+  const [results, generalRanking] = await Promise.all([
+    loadAthleteResults(authUser.id, wods),
+    loadGeneralRanking(edition.id),
+  ])
+
+  const athleteRank =
+    generalRanking.find((row) => row?.usuario_id === authUser.id) || null
+
   return {
     ...EMPTY_STUDENT_PDA,
     profile,
     membership,
     edition,
     wods,
+    results,
+    generalRanking,
+    athleteRank,
   }
 }
 
 export async function fetchPdaWodRanking(wodId) {
   if (!wodId) return []
 
-  // Keep ranking non-blocking while the PDA result model is being migrated
-  // away from pda_inscripciones. Existing published legacy results can still
-  // be shown if the current RPC supports them.
   const { data, error } = await supabase.rpc("pda_ranking_wod", {
     p_wod_id: wodId,
     p_categoria_id: null,
   })
 
-  if (error) {
-    console.warn("PDA WOD ranking temporarily unavailable:", error)
-    return []
-  }
-
+  if (error) throw error
   return data || []
 }
 
@@ -101,39 +98,24 @@ async function loadMembership(userId) {
 }
 
 async function loadEdition() {
-  const currentYear = getPdaYear()
+  const seasonYear = getPdaYear()
 
-  let query = supabase
+  const { data, error } = await supabase
     .from("pda_ediciones")
     .select(
       "id,anio,nombre,descripcion,fecha_inicio,fecha_fin,estado,publicada,created_at,updated_at"
     )
-    .eq("anio", currentYear)
-
-  if (!isPdaDevelopmentUnlockEnabled()) {
-    query = query.eq("publicada", true).eq("estado", "activa")
-  }
-
-  const { data: current, error: currentError } = await query.maybeSingle()
-  if (currentError) throw currentError
-  if (current) return current
-
-  if (!isPdaDevelopmentUnlockEnabled()) return null
-
-  const { data: latest, error: latestError } = await supabase
-    .from("pda_ediciones")
-    .select(
-      "id,anio,nombre,descripcion,fecha_inicio,fecha_fin,estado,publicada,created_at,updated_at"
-    )
-    .order("anio", { ascending: false })
+    .eq("anio", seasonYear)
+    .eq("publicada", true)
+    .order("updated_at", { ascending: false })
     .limit(1)
 
-  if (latestError) throw latestError
-  return latest?.[0] || null
+  if (error) throw error
+  return data?.[0] || null
 }
 
 async function loadWods(editionId) {
-  let query = supabase
+  const { data, error } = await supabase
     .from("pda_wods")
     .select(`
       id,
@@ -151,14 +133,54 @@ async function loadWods(editionId) {
       fecha_publicacion
     `)
     .eq("pda_edicion_id", editionId)
-
-  if (!isPdaDevelopmentUnlockEnabled()) {
-    query = query.eq("publicado", true).eq("activo", true)
-  }
-
-  const { data, error } = await query
+    .eq("publicado", true)
+    .eq("activo", true)
     .order("fecha", { ascending: true, nullsFirst: false })
     .order("numero", { ascending: true })
+
+  if (error) throw error
+  return data || []
+}
+
+async function loadAthleteResults(userId, wods) {
+  const wodIds = (wods || [])
+    .map((wod) => wod?.id)
+    .filter(Boolean)
+
+  if (!userId || wodIds.length === 0) return []
+
+  const { data, error } = await supabase
+    .from("pda_resultados")
+    .select(`
+      id,
+      pda_wod_id,
+      usuario_id,
+      estado_resultado,
+      completado,
+      tiempo_segundos,
+      tiempo_texto,
+      repeticiones,
+      carga_libras,
+      tie_break_segundos,
+      posicion,
+      puntos,
+      created_at,
+      updated_at
+    `)
+    .eq("usuario_id", userId)
+    .in("pda_wod_id", wodIds)
+
+  if (error) throw error
+  return data || []
+}
+
+async function loadGeneralRanking(editionId) {
+  if (!editionId) return []
+
+  const { data, error } = await supabase.rpc("pda_ranking_general", {
+    p_edicion_id: editionId,
+    p_categoria_id: null,
+  })
 
   if (error) throw error
   return data || []

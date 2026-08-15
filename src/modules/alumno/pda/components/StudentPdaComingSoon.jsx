@@ -1,27 +1,44 @@
 import { useMemo, useState } from "react"
 
-import { getStudentPdaPoster } from "../i18n/studentPdaCopy.js"
+import {
+  getPdaPosterFallbackPath,
+  getPdaPosterPath,
+  getPdaSeasonYear,
+} from "../utils/pdaVisibility.js"
 
-export default function StudentPdaComingSoon({ copy, locale, year }) {
-  const localizedPoster = useMemo(() => getStudentPdaPoster(locale, year), [locale, year])
-  const [failed, setFailed] = useState(false)
-  const src = failed ? "/images/pda/pda-2026-es.png" : localizedPoster
+import "../../../../styles/studentPdaComingSoon.css"
+
+export default function StudentPdaComingSoon({ locale = "es" }) {
+  const year = useMemo(() => getPdaSeasonYear(), [])
+  const fallback = getPdaPosterFallbackPath()
+  const [posterSrc, setPosterSrc] = useState(getPdaPosterPath(year))
+
+  const isEnglish = String(locale || "").toLowerCase().startsWith("en")
 
   return (
-    <section className="student-pda-coming">
-      <div className="student-pda-poster-frame">
+    <section className="student-pda-coming-soon">
+      <div className="student-pda-coming-soon__poster">
         <img
-          key={localizedPoster}
-          src={src}
-          alt={copy.posterAlt}
-          onError={() => setFailed(true)}
+          src={posterSrc}
+          alt={
+            isEnglish
+              ? `PHO3NIX PDA ${year} announcement`
+              : `Afiche PHO3NIX PDA ${year}`
+          }
+          onError={() => {
+            if (posterSrc !== fallback) setPosterSrc(fallback)
+          }}
         />
       </div>
 
-      <div className="student-pda-coming-copy">
-        <span>{copy.comingSoon}</span>
-        <h2>PDA {year}</h2>
-        <p>{copy.comingSoonText}</p>
+      <div className="student-pda-coming-soon__copy">
+        <span>PDA {year}</span>
+        <h2>{isEnglish ? "Coming soon" : "Próximamente"}</h2>
+        <p>
+          {isEnglish
+            ? "The official PDA edition has not been published yet."
+            : "La edición oficial del PDA todavía no ha sido publicada."}
+        </p>
       </div>
     </section>
   )

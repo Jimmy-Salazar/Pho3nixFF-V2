@@ -11,6 +11,7 @@ import StudentDashboardHeader from "../dashboard/components/StudentDashboardHead
 import { getStudentDashboardCopy } from "../dashboard/i18n/studentDashboardCopy.js"
 import { getMembershipInfo, getMembershipLabel } from "../dashboard/utils/studentDashboardUtils.js"
 
+import StudentPdaComingSoon from "../pda/components/StudentPdaComingSoon.jsx"
 import StudentPdaGeneralRanking from "../pda/components/StudentPdaGeneralRanking.jsx"
 import StudentPdaHero from "../pda/components/StudentPdaHero.jsx"
 import StudentPdaWodDetailModal from "../pda/components/StudentPdaWodDetailModal.jsx"
@@ -133,28 +134,30 @@ export default function StudentPdaPage() {
               <strong>{copy.loading}</strong>
             </div>
           ) : (
-            <>
-              {data.edition ? <StudentPdaHero copy={copy} data={data} /> : null}
+            data.edition ? (
+              <>
+                <StudentPdaHero copy={copy} data={data} />
 
-              <section className="student-pda-main-grid">
-                <StudentPdaWods
-                  copy={copy}
-                  locale={locale}
-                  wods={data.wods}
-                  results={data.results}
-                  onDetail={setDetailWod}
-                  onRanking={openRanking}
-                />
+                <section className="student-pda-main-grid">
+                  <StudentPdaWods
+                    copy={copy}
+                    locale={locale}
+                    wods={data.wods}
+                    results={data.results}
+                    onDetail={setDetailWod}
+                    onRanking={openRanking}
+                  />
 
-                {data.edition ? (
                   <StudentPdaGeneralRanking
                     copy={copy}
                     rows={data.generalRanking}
                     currentUserId={currentUserId}
                   />
-                ) : null}
-              </section>
-            </>
+                </section>
+              </>
+            ) : (
+              <StudentPdaComingSoon locale={locale} />
+            )
           )}
         </div>
       </section>

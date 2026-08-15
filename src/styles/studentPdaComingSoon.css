@@ -1,0 +1,61 @@
+.student-pda-coming-soon {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+  align-items: center;
+  margin-top: 18px;
+}
+
+.student-pda-coming-soon__poster {
+  width: min(100%, 1080px);
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
+}
+
+.student-pda-coming-soon__poster img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.student-pda-coming-soon__copy {
+  width: min(100%, 760px);
+  margin-inline: auto;
+  text-align: center;
+}
+
+.student-pda-coming-soon__copy span {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.student-pda-coming-soon__copy h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+}
+
+.student-pda-coming-soon__copy p {
+  margin: 8px 0 0;
+  opacity: 0.72;
+}
+
+@media (max-width: 720px) {
+  .student-pda-coming-soon {
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .student-pda-coming-soon__poster {
+    border-radius: 18px;
+  }
+}
