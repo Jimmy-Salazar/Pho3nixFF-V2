@@ -1,0 +1,67 @@
+/* PHO3NIX V2 — decoraciones visuales por theme.
+   No cambia textos, layout, rutas ni funcionalidad. */
+
+html[data-theme-key="valentines_day"] body {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 79, 135, 0.16), transparent 28%),
+    radial-gradient(circle at 82% 14%, rgba(216, 27, 96, 0.18), transparent 24%),
+    radial-gradient(circle at 50% 100%, rgba(255, 107, 107, 0.12), transparent 26%),
+    linear-gradient(180deg, var(--phx-color-background), #090a14 56%, #07070e) !important;
+}
+
+.phx-theme-decoration-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  contain: layout paint;
+}
+
+.phx-heart {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  opacity: .68;
+  filter: drop-shadow(0 0 10px rgba(255, 79, 135, .34));
+  animation: phxHeartFloat 8s ease-in-out infinite;
+}
+
+.phx-heart--1 { width: 86px; right: 4vw; top: 10vh; opacity: .62; animation-delay: -.8s; }
+.phx-heart--2 { width: 48px; left: 4vw; top: 28vh; opacity: .52; animation-delay: -3.2s; }
+.phx-heart--3 { width: 66px; right: 7vw; bottom: 14vh; opacity: .46; animation-delay: -1.6s; }
+.phx-heart--4 { width: 18px; left: 18vw; top: 12vh; opacity: .82; animation-delay: -5.1s; }
+.phx-heart--5 { width: 15px; right: 25vw; top: 35vh; opacity: .74; animation-delay: -2.4s; }
+.phx-heart--6 { width: 38px; left: 11vw; bottom: 11vh; opacity: .40; animation-delay: -4.3s; }
+.phx-heart--7 { width: 12px; left: 38vw; top: 18vh; opacity: .70; animation-delay: -6.0s; }
+.phx-heart--8 { width: 13px; right: 13vw; top: 56vh; opacity: .72; animation-delay: -2.9s; }
+.phx-heart--9 { width: 10px; left: 64vw; bottom: 17vh; opacity: .64; animation-delay: -5.6s; }
+
+@keyframes phxHeartFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg); }
+  50% { transform: translate3d(0, -10px, 0) rotate(3deg); }
+}
+
+html[data-theme-key="valentines_day"] :is(input, select, textarea):focus {
+  outline: none;
+  border-color: rgba(255, 79, 135, 0.48) !important;
+  box-shadow: 0 0 0 3px rgba(255, 79, 135, 0.18) !important;
+}
+
+@media (max-width: 768px) {
+  .phx-heart--1 { width: 58px; right: 3vw; top: 9vh; }
+  .phx-heart--2 { width: 32px; left: 3vw; top: 24vh; }
+  .phx-heart--3 { width: 46px; right: 4vw; bottom: 16vh; }
+  .phx-heart--4 { width: 16px; left: 14vw; top: 12vh; }
+  .phx-heart--5 { width: 13px; right: 18vw; top: 39vh; }
+  .phx-heart--6 { width: 28px; left: 8vw; bottom: 14vh; }
+  .phx-heart--7 { width: 10px; left: 48vw; top: 20vh; }
+  .phx-heart--8 { width: 11px; right: 9vw; top: 59vh; }
+  .phx-heart--9 { width: 9px; left: 60vw; bottom: 20vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phx-heart { animation: none; }
+}

@@ -1,6 +1,6 @@
 import { formatDateLabel } from "../utils/adminDashboardUtils.js"
 
-export default function AdminUpcomingEvents({ copy, locale, items, loading, navigate }) {
+export default function AdminUpcomingEvents({ copy, locale, items, loading }) {
   return (
     <section className="admin-panel admin-events-panel">
       <div className="admin-panel-heading admin-panel-heading-compact">
@@ -16,7 +16,14 @@ export default function AdminUpcomingEvents({ copy, locale, items, loading, navi
           <div className="admin-skeleton-list" aria-hidden="true"><span /><span /><span /></div>
         ) : items.length ? (
           items.map((item) => (
-            <button key={item.id} type="button" onClick={() => navigate(item.path)}>
+            <button
+              key={item.id}
+              type="button"
+              disabled
+              tabIndex={-1}
+              aria-disabled="true"
+              style={{ cursor: "default", pointerEvents: "none" }}
+            >
               <span className={`admin-event-icon is-${item.type}`} aria-hidden="true">{item.icon}</span>
               <div>
                 <strong>{item.title}</strong>

@@ -1,0 +1,181 @@
+/* =========================================================
+   PHO3NIX V2 - HALLOWEEN
+   31 DE OCTUBRE
+   Scope: html[data-theme-key="halloween"]
+   ========================================================= */
+
+html[data-theme-key="halloween"] {
+  color-scheme: dark;
+}
+
+html[data-theme-key="halloween"] body {
+  background:
+    radial-gradient(circle at 16% 10%, rgba(108, 60, 230, 0.18), transparent 30%),
+    radial-gradient(circle at 88% 16%, rgba(255, 138, 0, 0.10), transparent 26%),
+    radial-gradient(circle at 72% 88%, rgba(108, 60, 230, 0.10), transparent 28%),
+    var(--phx-color-background);
+}
+
+/* Decorative layer */
+.phx-halloween-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.phx-halloween-decoration {
+  position: absolute;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.phx-halloween-decoration--web {
+  top: -18px;
+  right: -18px;
+  width: min(27vw, 340px);
+  opacity: 0.42;
+  mix-blend-mode: screen;
+}
+
+.phx-halloween-decoration--bats {
+  top: 78px;
+  left: 7vw;
+  width: min(33vw, 430px);
+  opacity: 0.22;
+  mix-blend-mode: screen;
+}
+
+.phx-halloween-decoration--pumpkin {
+  right: 2.5vw;
+  bottom: 2vh;
+  width: min(12vw, 150px);
+  opacity: 0.22;
+  filter: drop-shadow(0 0 18px rgba(255, 122, 0, 0.25));
+}
+
+/* ---------------------------------------------------------
+   Compatibility with existing Tailwind orange accents.
+   Orange text remains Halloween orange.
+   Buttons/background accents use Halloween purple.
+   --------------------------------------------------------- */
+
+html[data-theme-key="halloween"] [class~="text-orange-300"],
+html[data-theme-key="halloween"] [class~="text-orange-400"],
+html[data-theme-key="halloween"] [class~="text-orange-500"],
+html[data-theme-key="halloween"] [class~="text-orange-600"] {
+  color: #FF8A00 !important;
+}
+
+html[data-theme-key="halloween"] [class~="bg-orange-400"],
+html[data-theme-key="halloween"] [class~="bg-orange-500"],
+html[data-theme-key="halloween"] [class~="bg-orange-600"] {
+  background-color: var(--phx-color-primary) !important;
+}
+
+html[data-theme-key="halloween"] [class~="bg-orange-500/5"] {
+  background-color: color-mix(in srgb, var(--phx-color-primary) 5%, transparent) !important;
+}
+
+html[data-theme-key="halloween"] [class~="bg-orange-500/10"] {
+  background-color: color-mix(in srgb, var(--phx-color-primary) 10%, transparent) !important;
+}
+
+html[data-theme-key="halloween"] [class~="bg-orange-500/15"] {
+  background-color: color-mix(in srgb, var(--phx-color-primary) 15%, transparent) !important;
+}
+
+html[data-theme-key="halloween"] [class~="bg-orange-500/20"] {
+  background-color: color-mix(in srgb, var(--phx-color-primary) 20%, transparent) !important;
+}
+
+html[data-theme-key="halloween"] [class*="border-orange-"] {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 34%, transparent) !important;
+}
+
+html[data-theme-key="halloween"] [class*="from-orange-"],
+html[data-theme-key="halloween"] [class*="via-orange-"],
+html[data-theme-key="halloween"] [class*="to-orange-"] {
+  --tw-gradient-from: var(--phx-color-primary) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--phx-color-primary) 0%, transparent) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+/* ---------------------------------------------------------
+   MOBILE: explicit portrait assets.
+   applyThemeVariables sets desktop/wide assets on <html>;
+   these override them for screens <= 768px.
+   --------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  html[data-theme-key="halloween"] {
+    --phx-home-hero-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url:
+      url("/themes/halloween/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url:
+      url("/themes/halloween/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url:
+      url("/themes/halloween/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url:
+      url("/themes/halloween/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+
+    --phx-login-image-url:
+      url("/themes/halloween/images/home-mobile-02.webp") !important;
+    --phx-home-image-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-home-background-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url:
+      url("/themes/halloween/images/home-mobile-01.webp") !important;
+  }
+
+  .phx-halloween-decoration--web {
+    top: -10px;
+    right: -28px;
+    width: 210px;
+    opacity: 0.28;
+  }
+
+  .phx-halloween-decoration--bats {
+    top: 74px;
+    left: -28px;
+    width: 245px;
+    opacity: 0.15;
+  }
+
+  .phx-halloween-decoration--pumpkin {
+    right: -8px;
+    bottom: 72px;
+    width: 92px;
+    opacity: 0.15;
+  }
+}
+
+@media (max-width: 480px) {
+  .phx-halloween-decoration--web {
+    width: 175px;
+    opacity: 0.24;
+  }
+
+  .phx-halloween-decoration--bats {
+    width: 205px;
+    opacity: 0.12;
+  }
+
+  .phx-halloween-decoration--pumpkin {
+    width: 76px;
+    opacity: 0.12;
+  }
+}

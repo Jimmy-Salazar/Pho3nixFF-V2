@@ -1,0 +1,45 @@
+{
+  "refactor": "PHO3NIX V2 Shared Theme Engine",
+  "completedAt": "2026-08-15T03:45:23.913Z",
+  "backup": ".pho3nix-backups\\theme-engine-20260814-224523",
+  "sharedPath": "src/shared/theme",
+  "defaultThemeKey": "phoenix",
+  "timeZone": "America/Guayaquil",
+  "themeKeys": [
+    "phoenix",
+    "new_year",
+    "valentines_day",
+    "carnival",
+    "international_womens_day",
+    "good_friday",
+    "labor_day",
+    "mothers_day",
+    "battle_of_pichincha",
+    "childrens_day",
+    "fathers_day",
+    "guayaquil_foundation",
+    "first_cry_of_independence",
+    "flag_day",
+    "guayaquil_independence",
+    "halloween",
+    "all_souls_day",
+    "cuenca_independence",
+    "quito_foundation",
+    "christmas",
+    "year_end"
+  ],
+  "webOnly": [
+    "ThemeProvider.jsx",
+    "themeRuntimeService.js",
+    "remoteThemeService.js",
+    "themeCalendar.js DEV preview adapter"
+  ],
+  "reusableByFutureMobileApp": [
+    "themeConstants.js",
+    "themeRegistry.js",
+    "easterCalculator.js",
+    "themeScheduleResolver.js",
+    "themeCalendar.js",
+    "themeRuntimeResolver.js"
+  ]
+}

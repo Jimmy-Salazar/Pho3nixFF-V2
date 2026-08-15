@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="180" viewBox="0 0 720 180">
+  <path d="M0 10h720" stroke="#00B2D9" stroke-width="4" opacity=".7"/>
+  <g fill="#00B2D9" opacity=".38">
+    <path d="M25 20h130v125l-20-15-20 15-20-15-20 15-25-15-25 15z"/>
+    <path d="M180 20h130v125l-20-15-20 15-20-15-20 15-25-15-25 15z"/>
+    <path d="M335 20h130v125l-20-15-20 15-20-15-20 15-25-15-25 15z"/>
+    <path d="M490 20h130v125l-20-15-20 15-20-15-20 15-25-15-25 15z"/>
+  </g>
+  <g fill="#071017" opacity=".8">
+    <circle cx="90" cy="72" r="24"/><circle cx="245" cy="72" r="24"/><circle cx="400" cy="72" r="24"/><circle cx="555" cy="72" r="24"/>
+  </g>
+</svg>

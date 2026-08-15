@@ -1,0 +1,54 @@
+/* PHO3NIX V2 — CHRISTMAS — 21-28 DEC */
+html[data-theme-key="christmas"] { color-scheme: dark; }
+
+html[data-theme-key="christmas"] body {
+  background:
+    radial-gradient(circle at 14% 10%, rgba(198, 40, 40, .16), transparent 28%),
+    radial-gradient(circle at 85% 16%, rgba(46, 125, 50, .12), transparent 24%),
+    radial-gradient(circle at 50% 0%, rgba(255, 152, 0, .10), transparent 24%),
+    var(--phx-color-background);
+}
+
+.phx-christmas-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.phx-christmas-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-christmas-decoration--lights { top: 62px; left: 50%; transform: translateX(-50%); width: min(54vw, 760px); opacity: .24; }
+.phx-christmas-decoration--holly { right: 2vw; top: 16vh; width: min(10vw, 120px); opacity: .16; }
+.phx-christmas-decoration--gift { left: 2vw; bottom: 2vh; width: min(9vw, 110px); opacity: .15; }
+
+html[data-theme-key="christmas"] [class*="text-orange-"] { color: var(--phx-color-primary) !important; }
+html[data-theme-key="christmas"] [class~="bg-orange-400"],
+html[data-theme-key="christmas"] [class~="bg-orange-500"],
+html[data-theme-key="christmas"] [class~="bg-orange-600"] {
+  background-color: var(--phx-color-primary) !important;
+}
+html[data-theme-key="christmas"] [class*="border-orange-"] {
+  border-color: color-mix(in srgb, var(--phx-color-accent, #FF9800) 44%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  html[data-theme-key="christmas"] {
+    --phx-home-hero-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/christmas/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/christmas/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/christmas/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/christmas/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/christmas/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/christmas/images/home-mobile-01.webp") !important;
+  }
+  .phx-christmas-decoration--lights { width: 360px; top: 54px; opacity: .18; }
+  .phx-christmas-decoration--holly { width: 86px; top: 118px; right: -12px; opacity: .12; }
+  .phx-christmas-decoration--gift { width: 82px; left: -8px; bottom: 72px; opacity: .12; }
+}

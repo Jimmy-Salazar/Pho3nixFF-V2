@@ -1,0 +1,55 @@
+/* PHO3NIX V2 — DÍA DE LOS DIFUNTOS — 02 NOV */
+html[data-theme-key="all_souls_day"] { color-scheme: dark; }
+
+html[data-theme-key="all_souls_day"] body {
+  background:
+    radial-gradient(circle at 15% 8%, rgba(0,178,217,.14), transparent 30%),
+    radial-gradient(circle at 85% 18%, rgba(255,152,0,.08), transparent 24%),
+    var(--phx-color-background);
+}
+
+.phx-all-souls-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.phx-all-souls-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-all-souls-decoration--paper { top: 58px; left: 2vw; width: min(40vw, 540px); opacity: .18; }
+.phx-all-souls-decoration--cross { right: 3vw; top: 17vh; width: min(9vw, 110px); opacity: .16; }
+.phx-all-souls-decoration--flower { right: 3vw; bottom: 4vh; width: min(8vw, 100px); opacity: .15; }
+
+html[data-theme-key="all_souls_day"] [class*="text-orange-"] {
+  color: var(--phx-color-primary) !important;
+}
+html[data-theme-key="all_souls_day"] [class~="bg-orange-400"],
+html[data-theme-key="all_souls_day"] [class~="bg-orange-500"],
+html[data-theme-key="all_souls_day"] [class~="bg-orange-600"] {
+  background-color: var(--phx-color-primary) !important;
+}
+html[data-theme-key="all_souls_day"] [class*="border-orange-"] {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 34%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  html[data-theme-key="all_souls_day"] {
+    --phx-home-hero-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/all-souls-day/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/all-souls-day/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/all-souls-day/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/all-souls-day/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/all-souls-day/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/all-souls-day/images/home-mobile-01.webp") !important;
+  }
+  .phx-all-souls-decoration--paper { top: 55px; left: -45px; width: 290px; opacity: .12; }
+  .phx-all-souls-decoration--cross { right: -8px; width: 78px; opacity: .10; }
+  .phx-all-souls-decoration--flower { width: 70px; opacity: .10; bottom: 70px; }
+}

@@ -23,17 +23,78 @@ export function applyThemeVariables(theme) {
   setCssVar(root, "--phx-radius-card", radius.card)
   setCssVar(root, "--phx-radius-button", radius.button)
 
+  // Global brand.
   setImageVar(root, "--phx-logo-url", assets.logoUrl)
   setImageVar(root, "--phx-partner-logo-url", assets.partnerLogoUrl)
-  setImageVar(root, "--phx-login-image-url", assets.loginImageUrl)
-  setImageVar(root, "--phx-home-image-url", assets.homeImageUrl)
-  setImageVar(root, "--phx-dashboard-image-url", assets.dashboardImageUrl)
 
-  setImageVar(root, "--phx-home-background-url", assets.homeBackgroundUrl)
-  setImageVar(root, "--phx-home-background-mobile-url", assets.homeBackgroundMobileUrl)
+  // Resolve section-specific theme assets.
+  const homeHero = firstDefined(
+    assets.homeHeroUrl,
+    assets.homeBackgroundUrl,
+    assets.homeImageUrl
+  )
+  const homeHeroMobile = firstDefined(
+    assets.homeHeroMobileUrl,
+    assets.homeBackgroundMobileUrl,
+    homeHero
+  )
+  const loginHero = firstDefined(
+    assets.loginHeroUrl,
+    assets.loginImageUrl,
+    homeHero
+  )
+  const dashboardHero = firstDefined(
+    assets.dashboardHeroUrl,
+    assets.dashboardImageUrl,
+    homeHero
+  )
+  const dashboardWod = firstDefined(
+    assets.dashboardWodUrl,
+    assets.wodsHeroUrl,
+    dashboardHero
+  )
+  const wodsHero = firstDefined(
+    assets.wodsHeroUrl,
+    dashboardHero
+  )
+  const prHero = firstDefined(
+    assets.prHeroUrl,
+    dashboardHero
+  )
+  const nutritionHero = firstDefined(
+    assets.nutritionHeroUrl,
+    dashboardHero
+  )
+  const challengeHero = firstDefined(
+    assets.challengeHeroUrl,
+    dashboardHero
+  )
+
+  // New V2 variables: every relevant screen gets its own image channel.
+  setImageVar(root, "--phx-home-hero-url", homeHero)
+  setImageVar(root, "--phx-home-hero-mobile-url", homeHeroMobile)
+  setImageVar(root, "--phx-login-hero-url", loginHero)
+  setImageVar(root, "--phx-dashboard-hero-url", dashboardHero)
+  setImageVar(root, "--phx-dashboard-wod-url", dashboardWod)
+  setImageVar(root, "--phx-wods-hero-url", wodsHero)
+  setImageVar(root, "--phx-pr-hero-url", prHero)
+  setImageVar(root, "--phx-nutrition-hero-url", nutritionHero)
+  setImageVar(root, "--phx-challenge-hero-url", challengeHero)
+
+  // Legacy variables: preserve current V2 compatibility.
+  setImageVar(root, "--phx-login-image-url", loginHero)
+  setImageVar(root, "--phx-home-image-url", homeHero)
+  setImageVar(root, "--phx-dashboard-image-url", dashboardHero)
+  setImageVar(root, "--phx-home-background-url", homeHero)
+  setImageVar(root, "--phx-home-background-mobile-url", homeHeroMobile)
+
   setImageVar(root, "--phx-home-monument-url", assets.homeMonumentUrl)
   setImageVar(root, "--phx-home-brand-word-url", assets.homeBrandWordUrl)
-  setImageVar(root, "--phx-home-partner-logo-url", assets.homePartnerLogoUrl || assets.partnerLogoUrl)
+  setImageVar(
+    root,
+    "--phx-home-partner-logo-url",
+    firstDefined(assets.homePartnerLogoUrl, assets.partnerLogoUrl)
+  )
 
   root.dataset.themeKey = safeTheme.themeKey || defaultTheme.themeKey
 }
@@ -41,34 +102,59 @@ export function applyThemeVariables(theme) {
 function mergeWithDefaultTheme(theme) {
   return {
     ...defaultTheme,
-    ...compactObject(theme || {}),
+    ...compactVisualObject(theme || {}),
     colors: {
       ...defaultTheme.colors,
-      ...compactObject(theme?.colors || {}),
+      ...compactVisualObject(theme?.colors || {}),
     },
     radius: {
       ...defaultTheme.radius,
-      ...compactObject(theme?.radius || {}),
+      ...compactVisualObject(theme?.radius || {}),
     },
-    assets: {
-      ...defaultTheme.assets,
-      ...compactObject(theme?.assets || {}),
-    },
+    // For assets, null is meaningful: it explicitly means "none".
+    assets: mergeAssets(defaultTheme.assets, theme?.assets),
   }
 }
 
-function compactObject(object) {
+function compactVisualObject(object) {
   return Object.fromEntries(
-    Object.entries(object).filter(([, value]) => value !== null && value !== undefined && value !== "")
+    Object.entries(object).filter(
+      ([, value]) => value !== null && value !== undefined && value !== ""
+    )
   )
 }
 
+function mergeAssets(baseAssets = {}, nextAssets = {}) {
+  const result = { ...baseAssets }
+
+  for (const [key, value] of Object.entries(nextAssets || {})) {
+    if (value !== undefined) {
+      result[key] = value
+    }
+  }
+
+  return result
+}
+
+function firstDefined(...values) {
+  for (const value of values) {
+    if (value !== undefined && value !== null && value !== "") {
+      return value
+    }
+  }
+  return null
+}
+
 function setCssVar(root, name, value) {
-  if (!value) return
+  if (value === null || value === undefined || value === "") return
   root.style.setProperty(name, value)
 }
 
 function setImageVar(root, name, value) {
-  const safeValue = value || ""
-  root.style.setProperty(name, safeValue ? `url("${safeValue}")` : "none")
+  if (value === null || value === undefined || value === "") {
+    root.style.setProperty(name, "none")
+    return
+  }
+
+  root.style.setProperty(name, `url("${String(value).replaceAll('"', '\\"')}")`)
 }

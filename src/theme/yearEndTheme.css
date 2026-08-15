@@ -1,0 +1,55 @@
+/* PHO3NIX V2 — YEAR END — 29-31 DEC */
+html[data-theme-key="year_end"] { color-scheme: dark; }
+
+html[data-theme-key="year_end"] body {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(244, 197, 66, .16), transparent 28%),
+    radial-gradient(circle at 86% 16%, rgba(255, 255, 255, .08), transparent 20%),
+    radial-gradient(circle at 52% 0%, rgba(255, 140, 0, .10), transparent 24%),
+    var(--phx-color-background);
+}
+
+.phx-year-end-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.phx-year-end-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-year-end-decoration--fireworks { right: 2vw; top: 14vh; width: min(12vw, 150px); opacity: .16; }
+.phx-year-end-decoration--confetti { left: 50%; top: 64px; transform: translateX(-50%); width: min(44vw, 560px); opacity: .18; }
+.phx-year-end-decoration--clock { left: 2vw; bottom: 3vh; width: min(9vw, 110px); opacity: .14; }
+
+html[data-theme-key="year_end"] [class*="text-orange-"] { color: var(--phx-color-primary) !important; }
+html[data-theme-key="year_end"] [class~="bg-orange-400"],
+html[data-theme-key="year_end"] [class~="bg-orange-500"],
+html[data-theme-key="year_end"] [class~="bg-orange-600"] {
+  background-color: var(--phx-color-primary) !important;
+  color: #0A0A0A !important;
+}
+html[data-theme-key="year_end"] [class*="border-orange-"] {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 44%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  html[data-theme-key="year_end"] {
+    --phx-home-hero-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/year-end/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/year-end/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/year-end/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/year-end/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/year-end/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/year-end/images/home-mobile-01.webp") !important;
+  }
+  .phx-year-end-decoration--fireworks { width: 92px; right: -10px; top: 110px; opacity: .12; }
+  .phx-year-end-decoration--confetti { width: 320px; top: 54px; opacity: .12; }
+  .phx-year-end-decoration--clock { width: 80px; left: -6px; bottom: 74px; opacity: .10; }
+}

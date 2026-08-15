@@ -1,0 +1,239 @@
+/* =========================================================
+   PHO3NIX V2 - INDEPENDENCIA DE GUAYAQUIL
+   9 DE OCTUBRE
+
+   Scoped entirely to data-theme-key="guayaquil_independence".
+   ========================================================= */
+
+html[data-theme-key="guayaquil_independence"] {
+  color-scheme: dark;
+}
+
+html[data-theme-key="guayaquil_independence"] body {
+  background:
+    radial-gradient(
+      circle at 18% 8%,
+      rgba(57, 188, 235, 0.15),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(248, 252, 255, 0.08),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 76% 88%,
+      rgba(242, 193, 78, 0.07),
+      transparent 24%
+    ),
+    var(--phx-color-background);
+}
+
+/* ---------------------------------------------------------
+   Decorative layer
+   --------------------------------------------------------- */
+
+.phx-guayaquil-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.phx-guayaquil-decoration {
+  position: absolute;
+  user-select: none;
+  -webkit-user-drag: none;
+  mix-blend-mode: screen;
+}
+
+.phx-guayaquil-decoration--stripes {
+  top: 72px;
+  right: -88px;
+  width: min(38vw, 560px);
+  opacity: 0.34;
+}
+
+.phx-guayaquil-decoration--stars {
+  top: 96px;
+  left: 3vw;
+  width: min(20vw, 280px);
+  opacity: 0.20;
+}
+
+.phx-guayaquil-decoration--corner {
+  right: -18px;
+  bottom: -18px;
+  width: min(25vw, 330px);
+  opacity: 0.30;
+}
+
+/* ---------------------------------------------------------
+   Hardcoded Phoenix orange compatibility.
+   This is important for current responsive/mobile modules.
+   --------------------------------------------------------- */
+
+html[data-theme-key="guayaquil_independence"] [class~="text-orange-300"],
+html[data-theme-key="guayaquil_independence"] [class~="text-orange-400"],
+html[data-theme-key="guayaquil_independence"] [class~="text-orange-500"] {
+  color: var(--phx-color-primary) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="bg-orange-500"] {
+  background-color: var(--phx-color-primary) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="bg-orange-500/5"] {
+  background-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 5%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="bg-orange-500/10"] {
+  background-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 10%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="bg-orange-500/15"] {
+  background-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 15%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="bg-orange-500/20"] {
+  background-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 20%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="border-orange-400/20"],
+html[data-theme-key="guayaquil_independence"] [class~="border-orange-500/20"] {
+  border-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 20%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="border-orange-500/25"] {
+  border-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 25%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="border-orange-500/30"] {
+  border-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 30%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="border-orange-500/35"] {
+  border-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 35%,
+    transparent
+  ) !important;
+}
+
+html[data-theme-key="guayaquil_independence"] [class~="border-orange-500/40"] {
+  border-color: color-mix(
+    in srgb,
+    var(--phx-color-primary) 40%,
+    transparent
+  ) !important;
+}
+
+/* ---------------------------------------------------------
+   Mobile image channels.
+   applyThemeVariables writes the wide assets inline on <html>.
+   These !important variables deliberately replace them with
+   portrait artwork only on small screens.
+   --------------------------------------------------------- */
+
+@media (max-width: 768px) {
+  html[data-theme-key="guayaquil_independence"] {
+    --phx-home-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url:
+      url("/themes/guayaquil-independence/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+
+    --phx-login-image-url:
+      url("/themes/guayaquil-independence/images/home-mobile-02.webp") !important;
+    --phx-home-image-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-home-background-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url:
+      url("/themes/guayaquil-independence/images/home-mobile-01.webp") !important;
+  }
+
+  .phx-guayaquil-decoration--stripes {
+    top: 62px;
+    right: -76px;
+    width: 300px;
+    opacity: 0.24;
+  }
+
+  .phx-guayaquil-decoration--stars {
+    top: 84px;
+    left: -18px;
+    width: 170px;
+    opacity: 0.15;
+  }
+
+  .phx-guayaquil-decoration--corner {
+    right: -28px;
+    bottom: -20px;
+    width: 190px;
+    opacity: 0.22;
+  }
+}
+
+@media (max-width: 480px) {
+  .phx-guayaquil-decoration--stripes {
+    right: -94px;
+    width: 260px;
+    opacity: 0.19;
+  }
+
+  .phx-guayaquil-decoration--stars {
+    left: -34px;
+    width: 145px;
+    opacity: 0.12;
+  }
+
+  .phx-guayaquil-decoration--corner {
+    width: 160px;
+    opacity: 0.18;
+  }
+}

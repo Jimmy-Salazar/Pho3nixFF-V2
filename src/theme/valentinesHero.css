@@ -1,0 +1,52 @@
+/*
+  PHO3NIX V2 · San Valentín · Hero assets
+  NO cambia textos ni layout.
+  Solo evita que los fallbacks heredados de Julianas/Guayaquil se dibujen
+  cuando el theme activo es valentines_day.
+*/
+
+html[data-theme-key="valentines_day"] .box-home-bg-image {
+  background:
+    linear-gradient(90deg,
+      rgba(8, 11, 22, 0.98) 0%,
+      rgba(8, 11, 22, 0.86) 30%,
+      rgba(8, 11, 22, 0.28) 66%,
+      rgba(8, 11, 22, 0.62) 100%),
+    linear-gradient(180deg,
+      rgba(8, 11, 22, 0.10),
+      rgba(8, 11, 22, 0.88)),
+    var(--phx-home-background-url),
+    #080B16 !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+html[data-theme-key="valentines_day"] .box-home-monument,
+html[data-theme-key="valentines_day"] .box-home-brand-word {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  html[data-theme-key="valentines_day"] .box-home-bg-image {
+    background:
+      linear-gradient(180deg,
+        rgba(8, 11, 22, 0.62) 0%,
+        rgba(8, 11, 22, 0.24) 42%,
+        rgba(8, 11, 22, 0.88) 100%),
+      var(--phx-home-background-mobile-url),
+      #080B16 !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+}
+
+/* Las tarjetas que reutilizan el hero también reciben el asset del theme. */
+html[data-theme-key="valentines_day"] .student-wod-card {
+  background:
+    linear-gradient(90deg,
+      color-mix(in srgb, var(--phx-color-background) 94%, transparent),
+      color-mix(in srgb, var(--phx-color-surface) 74%, transparent)),
+    var(--phx-home-background-url) !important;
+  background-size: cover !important;
+  background-position: center !important;
+}

@@ -1,0 +1,210 @@
+/* ============================================================
+   PHO3NIX V2 - CENTRAL THEME ASSET BRIDGE
+   ------------------------------------------------------------
+   Rule:
+   Theme changes must change BOTH colors and visual assets.
+   This file removes old Guayaquil/Julianas hardcoded fallbacks
+   from the active visual result and binds current V2 screens
+   to the centralized theme variables.
+   ============================================================ */
+
+/* ---------- PUBLIC HOME ---------- */
+.box-home-bg-image {
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--phx-color-background) 98%, transparent) 0%,
+      color-mix(in srgb, var(--phx-color-background) 82%, transparent) 32%,
+      color-mix(in srgb, var(--phx-color-background) 42%, transparent) 62%,
+      color-mix(in srgb, var(--phx-color-background) 86%, transparent) 100%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--phx-color-background) 12%, transparent),
+      color-mix(in srgb, var(--phx-color-background) 95%, transparent)
+    ),
+    var(--phx-home-hero-url) !important;
+  background-color: var(--phx-color-background) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+.box-home-monument {
+  background-image: var(--phx-home-monument-url) !important;
+}
+
+.box-home-brand-word {
+  background-image: var(--phx-home-brand-word-url) !important;
+}
+
+.box-home-partner-logo {
+  background-image:
+    var(--phx-home-partner-logo-url),
+    var(--phx-partner-logo-url) !important;
+}
+
+/* ---------- LOGIN / AUTH ---------- */
+.phoenix-login-bg-image,
+.phoenix-login-brand-image,
+.login-bg-image,
+.login-background-image,
+.auth-background-image {
+  background-image: var(--phx-login-hero-url) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Generic V2 auth page receives the active theme image without
+   changing its layout or interaction layer. */
+.phx-auth-page {
+  position: relative;
+  isolation: isolate;
+}
+
+.phx-auth-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--phx-color-background) 94%, transparent),
+      color-mix(in srgb, var(--phx-color-background) 68%, transparent),
+      color-mix(in srgb, var(--phx-color-background) 92%, transparent)
+    ),
+    var(--phx-login-hero-url);
+  background-size: cover;
+  background-position: center;
+  opacity: .55;
+}
+
+/* ---------- ATHLETE DASHBOARD HERO ---------- */
+.student-dashboard-hero > div:first-child {
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--phx-color-background) 96%, transparent) 0%,
+      color-mix(in srgb, var(--phx-color-surface) 80%, transparent) 52%,
+      color-mix(in srgb, var(--phx-color-background) 48%, transparent) 100%
+    ),
+    var(--phx-dashboard-hero-url) !important;
+  background-color: var(--phx-color-surface) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* ---------- DASHBOARD WOD CARD ---------- */
+.student-wod-card {
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--phx-color-background) 94%, transparent),
+      color-mix(in srgb, var(--phx-color-surface) 72%, transparent)
+    ),
+    var(--phx-dashboard-wod-url) !important;
+  background-color: var(--phx-color-surface) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* ---------- ATHLETE WODS ----------
+   StudentWodsHero is the first child of .student-wods-top-grid
+   in the current modular V2 page. */
+.student-wods-top-grid > :first-child,
+.student-wods-hero,
+.student-wods-hero-card {
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--phx-color-background) 96%, transparent),
+      color-mix(in srgb, var(--phx-color-surface) 72%, transparent),
+      color-mix(in srgb, var(--phx-color-background) 48%, transparent)
+    ),
+    var(--phx-wods-hero-url) !important;
+  background-color: var(--phx-color-surface) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* ---------- PERSONAL RECORDS ----------
+   Current PR page has no dedicated V1-style hero card in V2.
+   Use the theme image subtly in the content atmosphere without
+   changing the existing component tree. */
+.student-prs-content::before {
+  background-image:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--phx-color-background) 88%, transparent),
+      color-mix(in srgb, var(--phx-color-background) 97%, transparent)
+    ),
+    var(--phx-pr-hero-url) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  opacity: .34;
+}
+
+/* ---------- OPTIONAL/FUTURE NUTRITION HERO ---------- */
+.student-nutrition-hero,
+.phoenix-nutrition-hero,
+.nutrition-hero {
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--phx-color-background) 94%, transparent),
+      color-mix(in srgb, var(--phx-color-surface) 70%, transparent)
+    ),
+    var(--phx-nutrition-hero-url) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* ---------- OPTIONAL CHALLENGE HERO ---------- */
+.student-challenge-card,
+.challenge-hero,
+.phoenix-challenge-hero {
+  --phx-active-challenge-image: var(--phx-challenge-hero-url);
+}
+
+/* ---------- LEGACY GENERIC SHELLS ---------- */
+.phx-dashboard-shell {
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--phx-color-background) 78%, transparent),
+      color-mix(in srgb, var(--phx-color-background) 92%, transparent)
+    ),
+    var(--phx-dashboard-hero-url) !important;
+  background-color: var(--phx-color-background) !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+/* ---------- MOBILE HOME HERO ---------- */
+@media (max-width: 768px) {
+  .box-home-bg-image {
+    background-image:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--phx-color-background) 86%, transparent),
+        color-mix(in srgb, var(--phx-color-background) 62%, transparent),
+        color-mix(in srgb, var(--phx-color-background) 96%, transparent)
+      ),
+      var(--phx-home-hero-mobile-url) !important;
+    background-position: center !important;
+  }
+
+  .student-dashboard-hero > div:first-child,
+  .student-wods-top-grid > :first-child,
+  .student-wods-hero,
+  .student-wods-hero-card {
+    background-position: center !important;
+  }
+}

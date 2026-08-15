@@ -5,6 +5,7 @@ import RoleRedirect from "../../modules/auth/components/RoleRedirect.jsx"
 import HomePage from "../../modules/public/pages/HomePage.jsx"
 import LoginPage from "../../modules/auth/pages/LoginPage.jsx"
 import AdminDashboardPage from "../../modules/admin/pages/AdminDashboardPage.jsx"
+import AdminThemesPage from "../../modules/admin/pages/AdminThemesPage.jsx"
 import AdminAthletesPage from "../../modules/admin/pages/AdminAthletesPage.jsx"
 import AdminWodsPage from "../../modules/admin/pages/AdminWodsPage.jsx"
 import AdminPrsPage from "../../modules/admin/pages/AdminPrsPage.jsx"
@@ -17,7 +18,6 @@ import StudentProfilePage from "../../modules/alumno/pages/StudentProfilePage.js
 import StudentProgressPage from "../../modules/alumno/pages/StudentProgressPage.jsx"
 import StudentPdaPage from "../../modules/alumno/pages/StudentPdaPage.jsx"
 import NotFoundPage from "../../modules/core/pages/NotFoundPage.jsx"
-
 function AthleteRoute({ children }) {
   return <ProtectedRoute allowedRoles={["alumno"]}>{children}</ProtectedRoute>
 }
@@ -30,7 +30,14 @@ export default function AppRoutes() {
       <Route path="/app" element={<RoleRedirect />} />
 
       <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin", "coach"]}><Navigate to="/admin/dashboard" replace /></ProtectedRoute>} />
-      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin", "coach"]}><AdminDashboardPage /></ProtectedRoute>} />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["admin", "coach"]}>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/admin/atleta" element={<ProtectedRoute allowedRoles={["admin", "coach"]}><AdminAthletesPage /></ProtectedRoute>} />
       <Route path="/admin/wods" element={<ProtectedRoute allowedRoles={["admin", "coach"]}><AdminWodsPage /></ProtectedRoute>} />
       <Route path="/admin/pr" element={<ProtectedRoute allowedRoles={["admin", "coach"]}><AdminPrsPage /></ProtectedRoute>} />
@@ -77,6 +84,16 @@ export default function AppRoutes() {
       <Route path="/perfil" element={<Navigate to="/atleta/perfil" replace />} />
       <Route path="/profile" element={<Navigate to="/atleta/perfil" replace />} />
       <Route path="/pda" element={<Navigate to="/atleta/pda" replace />} />
+
+
+      <Route
+        path="/admin/themes"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminThemesPage />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

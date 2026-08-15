@@ -1,0 +1,55 @@
+/* PHO3NIX V2 — INDEPENDENCIA DE CUENCA — 03 NOV */
+html[data-theme-key="cuenca_independence"] { color-scheme: dark; }
+
+html[data-theme-key="cuenca_independence"] body {
+  background:
+    radial-gradient(circle at 16% 8%, rgba(200,16,46,.17), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(212,175,55,.08), transparent 26%),
+    var(--phx-color-background);
+}
+
+.phx-cuenca-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.phx-cuenca-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-cuenca-decoration--flag { top: 70px; right: -25px; width: min(25vw, 330px); opacity: .15; }
+.phx-cuenca-decoration--cathedral { left: 1.5vw; bottom: 1vh; width: min(22vw, 290px); opacity: .11; }
+.phx-cuenca-decoration--flourish { left: 35%; top: 86px; width: min(30vw, 390px); opacity: .13; }
+
+html[data-theme-key="cuenca_independence"] [class*="text-orange-"] {
+  color: var(--phx-color-primary) !important;
+}
+html[data-theme-key="cuenca_independence"] [class~="bg-orange-400"],
+html[data-theme-key="cuenca_independence"] [class~="bg-orange-500"],
+html[data-theme-key="cuenca_independence"] [class~="bg-orange-600"] {
+  background-color: var(--phx-color-primary) !important;
+}
+html[data-theme-key="cuenca_independence"] [class*="border-orange-"] {
+  border-color: color-mix(in srgb, var(--phx-color-primary) 36%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  html[data-theme-key="cuenca_independence"] {
+    --phx-home-hero-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/cuenca-independence/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/cuenca-independence/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/cuenca-independence/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/cuenca-independence/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/cuenca-independence/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/cuenca-independence/images/home-mobile-01.webp") !important;
+  }
+  .phx-cuenca-decoration--flag { top: 62px; right: -60px; width: 230px; opacity: .11; }
+  .phx-cuenca-decoration--cathedral { left: -35px; width: 210px; opacity: .08; }
+  .phx-cuenca-decoration--flourish { left: 15%; top: 72px; width: 280px; opacity: .08; }
+}

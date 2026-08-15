@@ -31,3 +31,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# PHO3NIX local backups
+.pho3nix-backups/
+*.bak-upcoming-events

@@ -278,7 +278,13 @@ function buildUpcomingEvents({ todayWod, birthdayRows, expiringRows, locale }) {
     })
   })
 
-  return events.slice(0, 6)
+  return events
+    .sort(
+      (a, b) =>
+        new Date(a.date).getTime() -
+        new Date(b.date).getTime()
+    )
+    .slice(0, 6)
 }
 
 export async function loadAdminDashboardData({ locale = "es" } = {}) {

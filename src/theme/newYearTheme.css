@@ -1,0 +1,39 @@
+html[data-theme-key="new_year"] { color-scheme: dark; }
+html[data-theme-key="new_year"] body {
+  background:
+    radial-gradient(circle at 16% 10%, color-mix(in srgb, var(--phx-color-primary) 16%, transparent), transparent 28%),
+    radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--phx-color-secondary) 12%, transparent), transparent 24%),
+    radial-gradient(circle at 52% 0%, color-mix(in srgb, var(--phx-color-accent) 10%, transparent), transparent 22%),
+    var(--phx-color-background);
+}
+.phx-new-year-decorations { pointer-events: none; position: fixed; inset: 0; z-index: 1; overflow: hidden; }
+.phx-new-year-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-new-year-decoration--firework-burst { right: 2vw; top: 14vh; width: min(10vw, 120px); opacity: .15; }
+.phx-new-year-decoration--countdown-ring { left: 2vw; bottom: 3vh; width: min(10vw, 120px); opacity: .13; }
+.phx-new-year-decoration--gold-streamer { left: 50%; top: 66px; transform: translateX(-50%); width: min(42vw, 560px); opacity: .14; }
+html[data-theme-key="new_year"] [class*="text-orange-"] { color: var(--phx-color-primary) !important; }
+html[data-theme-key="new_year"] [class~="bg-orange-400"],
+html[data-theme-key="new_year"] [class~="bg-orange-500"],
+html[data-theme-key="new_year"] [class~="bg-orange-600"] { background-color: var(--phx-color-primary) !important; color: #fff !important; }
+html[data-theme-key="new_year"] [class*="border-orange-"] { border-color: color-mix(in srgb, var(--phx-color-primary) 40%, transparent) !important; }
+@media (max-width: 768px) {
+  html[data-theme-key="new_year"] {
+    --phx-home-hero-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/new-year/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/new-year/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/new-year/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/new-year/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/new-year/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/new-year/images/home-mobile-01.webp") !important;
+  }
+  .phx-new-year-decoration--firework-burst { right: -14px; top: 105px; width: 82px; opacity: .10; }
+  .phx-new-year-decoration--countdown-ring { left: -10px; bottom: 72px; width: 82px; opacity: .09; }
+  .phx-new-year-decoration--gold-streamer { top: 54px; width: 320px; opacity: .10; }
+}

@@ -1,0 +1,51 @@
+
+html[data-theme-key="first_cry_of_independence"] { color-scheme: dark; }
+html[data-theme-key="first_cry_of_independence"] body {
+  background:
+    radial-gradient(circle at 16% 10%, color-mix(in srgb, var(--phx-color-primary) 14%, transparent), transparent 28%),
+    radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--phx-color-secondary) 14%, transparent), transparent 24%),
+    radial-gradient(circle at 52% 0%, color-mix(in srgb, var(--phx-color-accent) 12%, transparent), transparent 22%),
+    var(--phx-color-background);
+}
+
+.phx-first-cry-of-independence-decorations {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+.phx-first-cry-of-independence-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-first-cry-of-independence-decoration--flag-ribbon { top: 64px; left: 50%; transform: translateX(-50%); width: min(42vw, 620px); opacity: .18; }
+.phx-first-cry-of-independence-decoration--historic-star { right: 2vw; top: 16vh; width: min(8vw, 88px); opacity: .14; }
+.phx-first-cry-of-independence-decoration--ecuador-badge { left: 2vw; bottom: 3vh; width: min(8vw, 96px); opacity: .14; }
+
+html[data-theme-key="first_cry_of_independence"] [class*="text-orange-"] { color: var(--phx-color-primary) !important; }
+html[data-theme-key="first_cry_of_independence"] [class~="bg-orange-400"],
+html[data-theme-key="first_cry_of_independence"] [class~="bg-orange-500"],
+html[data-theme-key="first_cry_of_independence"] [class~="bg-orange-600"] {
+  background-color: var(--phx-color-primary) !important;
+  color: #fff !important;
+}
+html[data-theme-key="first_cry_of_independence"] [class*="border-orange-"] {
+  border-color: color-mix(in srgb, var(--phx-color-accent, #C62828) 44%, transparent) !important;
+}
+
+@media (max-width: 768px) {
+  html[data-theme-key="first_cry_of_independence"] {
+    --phx-home-hero-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/first-cry-independence/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/first-cry-independence/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/first-cry-independence/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/first-cry-independence/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/first-cry-independence/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/first-cry-independence/images/home-mobile-01.webp") !important;
+  }
+}

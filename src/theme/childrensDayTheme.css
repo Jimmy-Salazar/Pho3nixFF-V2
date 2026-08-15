@@ -1,0 +1,39 @@
+html[data-theme-key="childrens_day"] { color-scheme: dark; }
+html[data-theme-key="childrens_day"] body {
+  background:
+    radial-gradient(circle at 16% 10%, color-mix(in srgb, var(--phx-color-primary) 16%, transparent), transparent 28%),
+    radial-gradient(circle at 86% 16%, color-mix(in srgb, var(--phx-color-secondary) 12%, transparent), transparent 24%),
+    radial-gradient(circle at 52% 0%, color-mix(in srgb, var(--phx-color-accent) 10%, transparent), transparent 22%),
+    var(--phx-color-background);
+}
+.phx-childrens-day-decorations { pointer-events: none; position: fixed; inset: 0; z-index: 1; overflow: hidden; }
+.phx-childrens-day-decoration { position: absolute; user-select: none; -webkit-user-drag: none; }
+.phx-childrens-day-decoration--balloons { right: 2vw; top: 14vh; width: min(10vw, 120px); opacity: .15; }
+.phx-childrens-day-decoration--confetti-fun { left: 2vw; bottom: 3vh; width: min(10vw, 120px); opacity: .13; }
+.phx-childrens-day-decoration--kid-star { left: 50%; top: 66px; transform: translateX(-50%); width: min(42vw, 560px); opacity: .14; }
+html[data-theme-key="childrens_day"] [class*="text-orange-"] { color: var(--phx-color-primary) !important; }
+html[data-theme-key="childrens_day"] [class~="bg-orange-400"],
+html[data-theme-key="childrens_day"] [class~="bg-orange-500"],
+html[data-theme-key="childrens_day"] [class~="bg-orange-600"] { background-color: var(--phx-color-primary) !important; color: #fff !important; }
+html[data-theme-key="childrens_day"] [class*="border-orange-"] { border-color: color-mix(in srgb, var(--phx-color-primary) 40%, transparent) !important; }
+@media (max-width: 768px) {
+  html[data-theme-key="childrens_day"] {
+    --phx-home-hero-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-home-hero-mobile-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-login-hero-url: url("/themes/childrens-day/images/home-mobile-02.webp") !important;
+    --phx-dashboard-hero-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-dashboard-wod-url: url("/themes/childrens-day/images/home-mobile-02.webp") !important;
+    --phx-wods-hero-url: url("/themes/childrens-day/images/home-mobile-02.webp") !important;
+    --phx-pr-hero-url: url("/themes/childrens-day/images/home-mobile-02.webp") !important;
+    --phx-nutrition-hero-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-challenge-hero-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-login-image-url: url("/themes/childrens-day/images/home-mobile-02.webp") !important;
+    --phx-home-image-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-dashboard-image-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-home-background-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+    --phx-home-background-mobile-url: url("/themes/childrens-day/images/home-mobile-01.webp") !important;
+  }
+  .phx-childrens-day-decoration--balloons { right: -14px; top: 105px; width: 82px; opacity: .10; }
+  .phx-childrens-day-decoration--confetti-fun { left: -10px; bottom: 72px; width: 82px; opacity: .09; }
+  .phx-childrens-day-decoration--kid-star { top: 54px; width: 320px; opacity: .10; }
+}

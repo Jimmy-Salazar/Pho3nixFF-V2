@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 
 import PublicShell from "../../../shared/layouts/PublicShell.jsx"
 import HomeInfoPopup from "../components/HomeInfoPopup.jsx"
+import CommunityGalleryPopup from "../components/CommunityGalleryPopup.jsx"
 import { useI18n } from "../../../i18n/I18nProvider.jsx"
 
 const actionCards = [
@@ -67,7 +68,7 @@ export default function HomePage() {
                 <span>→</span>
               </Link>
 
-              <button type="button" className="box-home-secondary-button" onClick={() => setActivePopup("about")}>
+              <button type="button" className="box-home-secondary-button" onClick={() => setActivePopup("community")}>
                 {t("home.secondaryAction")}
                 <span>▶</span>
               </button>
@@ -132,7 +133,13 @@ export default function HomePage() {
           </a>
         </div>
 
-        {activePopup ? (
+        {activePopup === "community" ? (
+          <CommunityGalleryPopup
+            locale={locale}
+            title={t("home.secondaryAction")}
+            onClose={() => setActivePopup(null)}
+          />
+        ) : activePopup ? (
           <HomeInfoPopup
             type={activePopup}
             locale={locale}

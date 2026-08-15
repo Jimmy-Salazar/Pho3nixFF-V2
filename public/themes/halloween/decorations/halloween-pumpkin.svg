@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="190" viewBox="0 0 220 190">
+  <defs>
+    <filter id="g"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <path d="M108 34c-7-15 0-28 17-33 3 14-2 25-15 34" fill="#72532A"/>
+  <ellipse cx="110" cy="111" rx="82" ry="65" fill="#FF7A00" opacity=".38" filter="url(#g)"/>
+  <path d="M42 105c6-47 42-68 68-68 37 0 70 25 70 68 0 45-31 70-70 70-38 0-73-25-68-70z" fill="#E76F00" fill-opacity=".68" stroke="#FF9A1F" stroke-opacity=".55" stroke-width="3"/>
+  <path d="M61 99l26-17 18 22-44-5zm98 0l-26-17-18 22 44-5zM82 134c20 13 40 13 59 0-8 22-50 25-59 0z" fill="#120817"/>
+</svg>
