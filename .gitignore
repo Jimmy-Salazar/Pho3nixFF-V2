@@ -34,3 +34,7 @@ dist-ssr
 # PHO3NIX local backups
 .pho3nix-backups/
 *.bak-upcoming-events
+
+# PHO3NIX local backups
+.pho3nix-backups/
+*.bak-upcoming-events
