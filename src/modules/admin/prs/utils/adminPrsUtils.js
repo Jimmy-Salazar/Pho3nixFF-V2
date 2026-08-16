@@ -82,9 +82,10 @@ export function getExerciseName(record) {
 
 export function getRecordTimestamp(record) {
   const date = parseLocalDate(record?.fecha)
-  const dateTime = date?.getTime() || 0
+  if (date) return date.getTime()
+
   const created = record?.created_at ? new Date(record.created_at).getTime() : 0
-  return Math.max(dateTime, Number.isFinite(created) ? created : 0)
+  return Number.isFinite(created) ? created : 0
 }
 
 export function buildLatestByAthlete(records = []) {

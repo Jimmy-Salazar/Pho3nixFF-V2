@@ -8,6 +8,7 @@ import {
   formatWeight,
   getAthleteFromRecord,
   getAthleteName,
+  getExerciseName,
   PLATE_OPTIONS,
 } from "../utils/adminPrsUtils.js"
 
@@ -134,6 +135,128 @@ export function RegisterPrModal({
   )
 }
 
+export function EditPrModal({ copy, record, exercises, saving, onClose, onSave }) {
+  const [exerciseId, setExerciseId] = useState(record?.ejercicio_id || "")
+  const [weightLb, setWeightLb] = useState(record?.peso_libras ?? "")
+  const [date, setDate] = useState(String(record?.fecha || "").slice(0, 10))
+  const [error, setError] = useState("")
+
+  function handleSubmit(event) {
+    event.preventDefault()
+    setError("")
+
+    if (!exerciseId || !date) {
+      setError(copy.requiredFields)
+      return
+    }
+
+    const numericWeight = Number(weightLb)
+    if (!Number.isFinite(numericWeight) || numericWeight <= 0) {
+      setError(copy.invalidWeight)
+      return
+    }
+
+    onSave({ exerciseId, weightLb: numericWeight, date })
+  }
+
+  return (
+    <ModalShell onClose={saving ? undefined : onClose}>
+      <form onSubmit={handleSubmit} className="admin-prs-modal-card admin-prs-small-modal">
+        <ModalHeader
+          title={copy.editPrTitle}
+          subtitle={copy.editPrSubtitle}
+          onClose={onClose}
+          disabled={saving}
+          icon="✎"
+        />
+
+        <div className="admin-prs-small-modal-body">
+          <Field label={copy.athlete}>
+            <input value={getAthleteName(record)} disabled />
+          </Field>
+
+          <Field label={copy.exercise}>
+            <select value={exerciseId} onChange={(event) => setExerciseId(event.target.value)} autoFocus>
+              <option value="">{copy.selectExerciseOption}</option>
+              {exercises.map((exercise) => (
+                <option key={exercise.id} value={exercise.id}>{exercise.nombre}</option>
+              ))}
+            </select>
+          </Field>
+
+          <div className="admin-prs-field-grid">
+            <Field label={copy.weight}>
+              <input
+                type="number"
+                min="0.5"
+                step="0.5"
+                value={weightLb}
+                onChange={(event) => setWeightLb(event.target.value)}
+              />
+            </Field>
+
+            <Field label={copy.date}>
+              <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+            </Field>
+          </div>
+
+          {error ? <div className="admin-prs-modal-error" role="alert">{error}</div> : null}
+        </div>
+
+        <ModalActions copy={copy} saving={saving} onClose={onClose} submitLabel={copy.save} />
+      </form>
+    </ModalShell>
+  )
+}
+
+export function DeletePrModal({ copy, locale, record, saving, onClose, onDelete }) {
+  const confirmationWord = locale === "en" ? "DELETE" : "ELIMINAR"
+  const [confirmation, setConfirmation] = useState("")
+  const canDelete = confirmation.trim().toUpperCase() === confirmationWord
+  const athleteName = getAthleteName(record)
+  const exerciseName = getExerciseName(record)
+
+  return (
+    <ModalShell onClose={saving ? undefined : onClose}>
+      <section className="admin-prs-modal-card admin-prs-small-modal admin-prs-delete-modal">
+        <ModalHeader
+          title={copy.deletePrTitle}
+          subtitle={athleteName + " · " + exerciseName}
+          onClose={onClose}
+          disabled={saving}
+          icon="⚠"
+        />
+
+        <div className="admin-prs-small-modal-body">
+          <p className="admin-prs-delete-message">
+            {interpolatePrCopy(copy.deletePrWarning, {
+              weight: formatWeight(record?.peso_libras, locale),
+              date: formatDate(record?.fecha, locale),
+            })}
+          </p>
+
+          <Field label={confirmationWord}>
+            <input
+              value={confirmation}
+              onChange={(event) => setConfirmation(event.target.value)}
+              autoFocus
+              autoComplete="off"
+              placeholder={confirmationWord}
+            />
+          </Field>
+        </div>
+
+        <div className="admin-prs-modal-actions">
+          <button type="button" className="admin-prs-secondary-button" onClick={onClose} disabled={saving}>{copy.cancel}</button>
+          <button type="button" className="admin-prs-danger-button" onClick={onDelete} disabled={saving || !canDelete}>
+            {saving ? copy.deleting : copy.confirmDelete}
+          </button>
+        </div>
+      </section>
+    </ModalShell>
+  )
+}
+
 export function ExerciseModal({ copy, exercise, saving, onClose, onSave }) {
   const [name, setName] = useState(exercise?.nombre || "")
   const [error, setError] = useState("")
@@ -211,11 +334,11 @@ export function DeleteExerciseModal({ copy, locale, exercise, saving, onClose, o
   )
 }
 
-export function PrHistoryModal({ copy, locale, record, rows, onClose }) {
+export function PrHistoryModal({ copy, locale, record, rows, onClose, onEdit, onDelete }) {
   const athlete = getAthleteFromRecord(record)
   const name = getAthleteName(record)
   const points = buildChartPoints(rows)
-  const recent = [...rows].reverse().slice(0, 8)
+  const recent = [...rows].reverse()
 
   return (
     <ModalShell onClose={onClose}>
@@ -241,7 +364,7 @@ export function PrHistoryModal({ copy, locale, record, rows, onClose }) {
           </section>
 
           <section className="admin-prs-history-list-card">
-            <header><small>{copy.recentRecords}</small><strong>{recent.length}</strong></header>
+            <header><small>{copy.records}</small><strong>{recent.length}</strong></header>
             {recent.length === 0 ? (
               <div className="admin-prs-empty">{copy.noHistory}</div>
             ) : (
@@ -249,7 +372,11 @@ export function PrHistoryModal({ copy, locale, record, rows, onClose }) {
                 {recent.map((item) => (
                   <article key={item.id}>
                     <span><strong>{formatWeight(item.peso_libras, locale)}</strong><small>{formatDate(item.fecha, locale)}</small></span>
-                    <em>PR</em>
+                    <div className="admin-prs-row-actions">
+                      <em>PR</em>
+                      <button type="button" onClick={() => onEdit(item)} aria-label={copy.edit + " PR"}>✎</button>
+                      <button type="button" className="is-danger" onClick={() => onDelete(item)} aria-label={copy.delete + " PR"}>🗑</button>
+                    </div>
                   </article>
                 ))}
               </div>

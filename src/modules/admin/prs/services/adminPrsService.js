@@ -81,6 +81,31 @@ export async function createPrRecord({ athleteId, exerciseId, weightLb, date, re
   return data
 }
 
+export async function updatePrRecord({ prId, exerciseId, weightLb, date }) {
+  const { data, error } = await supabase
+    .from("rm")
+    .update({
+      ejercicio_id: exerciseId,
+      peso_libras: weightLb,
+      fecha: date,
+    })
+    .eq("id", prId)
+    .select("id,usuario,ejercicio_id,peso_libras,fecha,created_at,registrado_por")
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function deletePrRecord(prId) {
+  const { error } = await supabase
+    .from("rm")
+    .delete()
+    .eq("id", prId)
+
+  if (error) throw error
+}
+
 export async function createExercise(name) {
   const { data, error } = await supabase
     .from("ejercicios")
@@ -105,19 +130,12 @@ export async function updateExercise(exerciseId, name) {
 }
 
 export async function deleteExerciseComplete(exerciseId) {
-  const { error: recordsError } = await supabase
-    .from("rm")
-    .delete()
-    .eq("ejercicio_id", exerciseId)
-
-  if (recordsError) throw recordsError
-
-  const { error: exerciseError } = await supabase
+  const { error } = await supabase
     .from("ejercicios")
     .delete()
     .eq("id", exerciseId)
 
-  if (exerciseError) throw exerciseError
+  if (error) throw error
 }
 
 async function fetchRecordsWithFallback() {

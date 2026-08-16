@@ -13,6 +13,8 @@ import AdminPrsHeader from "../prs/components/AdminPrsHeader.jsx"
 import AdminPrsStats from "../prs/components/AdminPrsStats.jsx"
 import {
   DeleteExerciseModal,
+  DeletePrModal,
+  EditPrModal,
   ExerciseModal,
   OperationFeedbackPopup,
   PrHistoryModal,
@@ -23,9 +25,11 @@ import {
   createExercise,
   createPrRecord,
   deleteExerciseComplete,
+  deletePrRecord,
   fetchAdminPrData,
   fetchCurrentAdminProfile,
   updateExercise,
+  updatePrRecord,
 } from "../prs/services/adminPrsService.js"
 import {
   buildExerciseRows,
@@ -58,6 +62,10 @@ export default function AdminPrsPage() {
 
   const [registerPrOpen, setRegisterPrOpen] = useState(false)
   const [savingPr, setSavingPr] = useState(false)
+  const [editPrTarget, setEditPrTarget] = useState(null)
+  const [savingPrEdit, setSavingPrEdit] = useState(false)
+  const [deletePrTarget, setDeletePrTarget] = useState(null)
+  const [deletingPr, setDeletingPr] = useState(false)
   const [exerciseEditor, setExerciseEditor] = useState(undefined)
   const [savingExercise, setSavingExercise] = useState(false)
   const [deleteExerciseTarget, setDeleteExerciseTarget] = useState(null)
@@ -171,6 +179,71 @@ export default function AdminPrsPage() {
       })
     } finally {
       setSavingPr(false)
+    }
+  }
+
+  async function handleUpdatePr({ exerciseId, weightLb, date }) {
+    if (!editPrTarget?.id) return
+
+    const athleteId = getAthleteId(editPrTarget)
+    const duplicated = data.records.some(
+      (record) =>
+        String(record?.id) !== String(editPrTarget.id) &&
+        String(getAthleteId(record)) === String(athleteId) &&
+        String(record?.ejercicio_id) === String(exerciseId) &&
+        String(record?.fecha || "").slice(0, 10) === String(date || "").slice(0, 10)
+    )
+
+    if (duplicated) {
+      setFeedback({ tone: "error", message: copy.duplicatePrDate })
+      return
+    }
+
+    try {
+      setSavingPrEdit(true)
+      await updatePrRecord({
+        prId: editPrTarget.id,
+        exerciseId,
+        weightLb,
+        date,
+      })
+
+      setEditPrTarget(null)
+      await loadData()
+      setSelectedExerciseId(exerciseId)
+      setFeedback({ tone: "success", message: copy.prUpdatedSuccess })
+    } catch (operationError) {
+      console.error("ADMIN PRS UPDATE ERROR:", operationError)
+
+      const duplicateFromDatabase =
+        operationError?.code === "23505" ||
+        String(operationError?.message || "").includes("rm_usuario_ejercicio_fecha_unique")
+
+      setFeedback({
+        tone: "error",
+        message: duplicateFromDatabase
+          ? copy.duplicatePrDate
+          : operationError?.message || copy.operationError,
+      })
+    } finally {
+      setSavingPrEdit(false)
+    }
+  }
+
+  async function handleDeletePr() {
+    if (!deletePrTarget?.id) return
+
+    try {
+      setDeletingPr(true)
+      await deletePrRecord(deletePrTarget.id)
+      setDeletePrTarget(null)
+      await loadData()
+      setFeedback({ tone: "success", message: copy.prDeletedSuccess })
+    } catch (operationError) {
+      console.error("ADMIN PRS DELETE ERROR:", operationError)
+      setFeedback({ tone: "error", message: operationError?.message || copy.operationError })
+    } finally {
+      setDeletingPr(false)
     }
   }
 
@@ -325,6 +398,36 @@ export default function AdminPrsPage() {
           record={historyTarget}
           rows={historyRows}
           onClose={() => setHistoryTarget(null)}
+          onEdit={(item) => {
+            setHistoryTarget(null)
+            setEditPrTarget(item)
+          }}
+          onDelete={(item) => {
+            setHistoryTarget(null)
+            setDeletePrTarget(item)
+          }}
+        />
+      ) : null}
+
+      {editPrTarget ? (
+        <EditPrModal
+          copy={copy}
+          record={editPrTarget}
+          exercises={data.exercises}
+          saving={savingPrEdit}
+          onClose={() => !savingPrEdit && setEditPrTarget(null)}
+          onSave={handleUpdatePr}
+        />
+      ) : null}
+
+      {deletePrTarget ? (
+        <DeletePrModal
+          copy={copy}
+          locale={locale}
+          record={deletePrTarget}
+          saving={deletingPr}
+          onClose={() => !deletingPr && setDeletePrTarget(null)}
+          onDelete={handleDeletePr}
         />
       ) : null}
 
