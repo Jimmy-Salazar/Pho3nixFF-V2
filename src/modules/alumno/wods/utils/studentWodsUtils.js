@@ -1,3 +1,36 @@
+export const WOD_TIME_ZONE = "America/Guayaquil"
+
+export function getWodDateTimeParts(date = new Date()) {
+  const current = date instanceof Date ? date : new Date(date)
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: WOD_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  })
+  const values = Object.fromEntries(
+    formatter.formatToParts(current).map((part) => [part.type, part.value])
+  )
+
+  return {
+    year: Number(values.year),
+    month: Number(values.month),
+    day: Number(values.day),
+    hour: Number(values.hour),
+    minute: Number(values.minute),
+    second: Number(values.second),
+    iso: `${values.year}-${values.month}-${values.day}`,
+  }
+}
+
+export function getWodTodayISO(date = new Date()) {
+  return getWodDateTimeParts(date).iso
+}
+
 export function formatDateISO(date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -20,7 +53,7 @@ export function addDaysISO(value, amount) {
 }
 
 export function getCurrentWeekRange(date = new Date()) {
-  const current = date instanceof Date ? date : new Date(date)
+  const current = parseISODate(getWodTodayISO(date))
   const day = current.getDay()
   const diffToMonday = day === 0 ? -6 : 1 - day
 
@@ -39,51 +72,54 @@ export function getCurrentWeekRange(date = new Date()) {
 }
 
 export function getVisibleWodDateISO(now = new Date()) {
-  const current = now instanceof Date ? now : new Date(now)
-  const cutoff = new Date(current)
-  cutoff.setHours(19, 30, 0, 0)
+  const current = getWodDateTimeParts(now)
+  const nextWodIsVisible =
+    current.hour > 19 || (current.hour === 19 && current.minute >= 30)
 
-  if (current >= cutoff) {
-    const tomorrow = new Date(current)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    return formatDateISO(tomorrow)
-  }
-
-  return formatDateISO(current)
+  return nextWodIsVisible ? addDaysISO(current.iso, 1) : current.iso
 }
 
 export function isWodVisible(wod, now = new Date()) {
-  if (!wod?.fecha) return false
+  if (!wod?.fecha || wod.publicado !== true) return false
 
-  if (wod.publicado === true && wod.fecha_publicacion) {
-    return new Date(wod.fecha_publicacion) <= now
+  if (wod.fecha_publicacion && new Date(wod.fecha_publicacion) > now) {
+    return false
   }
 
-  const wodDate = parseISODate(wod.fecha)
-  if (!wodDate) return false
+  const current = getWodDateTimeParts(now)
+  const visibleDateIso = addDaysISO(String(wod.fecha).slice(0, 10), -1)
 
-  const visibleAt = new Date(wodDate)
-  visibleAt.setDate(visibleAt.getDate() - 1)
-  visibleAt.setHours(19, 30, 0, 0)
+  if (current.iso > visibleDateIso) return true
+  if (current.iso < visibleDateIso) return false
 
-  return now >= visibleAt
+  return current.hour > 19 || (current.hour === 19 && current.minute >= 30)
 }
 
 /**
- * Regla PHO3NIX para registrar resultados de WOD:
- * - El registro abre a las 04:00 del día programado.
- * - Antes de esa hora permanece bloqueado.
- * - Los WODs pasados pendientes continúan disponibles hasta registrarse.
- * - No existe cierre semanal ni cierre dominical.
+ * Regla PHO3NIX para registrar o modificar resultados:
+ * - El WOD se puede ver desde las 19:30 del día anterior.
+ * - El registro abre a las 04:00 del día del WOD.
+ * - Durante el mismo mes calendario se puede registrar o modificar.
+ * - Al iniciar el mes siguiente, el WOD queda histórico y solo lectura.
+ * - Toda la ventana se calcula en America/Guayaquil.
  */
 export function getRegisterWindow(wodDateValue) {
-  const wodDate = parseISODate(wodDateValue)
-  if (!wodDate) return null
+  const dateIso = String(wodDateValue || "").slice(0, 10)
+  const [year, month, day] = dateIso.split("-").map(Number)
+  if (!year || !month || !day) return null
 
-  const startAt = new Date(wodDate)
-  startAt.setHours(4, 0, 0, 0)
+  const nextMonthYear = month === 12 ? year + 1 : year
+  const nextMonth = month === 12 ? 1 : month + 1
+  const nextMonthIso = `${nextMonthYear}-${String(nextMonth).padStart(2, "0")}-01`
 
-  return { startAt, endAt: null }
+  // America/Guayaquil uses UTC-05:00 year-round.
+  const startAt = new Date(`${dateIso}T04:00:00-05:00`)
+  const nextMonthStart = new Date(`${nextMonthIso}T00:00:00-05:00`)
+  const endAt = new Date(nextMonthStart.getTime() - 1)
+
+  if (Number.isNaN(startAt.getTime()) || Number.isNaN(endAt.getTime())) return null
+
+  return { startAt, endAt }
 }
 
 export function getRegisterAvailability(wod, now = new Date()) {
@@ -101,7 +137,16 @@ export function getRegisterAvailability(wod, now = new Date()) {
       canRegister: false,
       status: "before_start",
       startAt: window.startAt,
-      endAt: null,
+      endAt: window.endAt,
+    }
+  }
+
+  if (now > window.endAt) {
+    return {
+      canRegister: false,
+      status: "closed_month",
+      startAt: window.startAt,
+      endAt: window.endAt,
     }
   }
 
@@ -109,7 +154,7 @@ export function getRegisterAvailability(wod, now = new Date()) {
     canRegister: true,
     status: "open",
     startAt: window.startAt,
-    endAt: null,
+    endAt: window.endAt,
   }
 }
 
@@ -121,7 +166,9 @@ export function getRegisterButtonLabel({ copy, wod, loading, hasRegistered, avai
   if (loading) return copy.loading
   if (!wod?.id) return copy.noWod
   if (hasRegistered) return copy.resultSaved
-  if (availability?.status === "before_start") return copy.availableAtFour
+  if (availability?.status === "before_start") {
+    return copy.availableAtFour || copy.availableTomorrow || copy.unavailable
+  }
   if (!availability?.canRegister) return copy.unavailable
   return copy.registerResult
 }
@@ -199,23 +246,35 @@ export function shouldUseTimeResult(wod) {
 
 export function parseTimeToSeconds(value) {
   const text = String(value || "").trim()
-  if (!text) return null
+  if (!text || !text.includes(":")) return null
 
-  const parts = text.split(":").map(Number)
-  if (parts.some((part) => Number.isNaN(part))) return null
+  const parts = text.split(":")
+  if (parts.some((part) => !/^\d+$/.test(part))) return null
 
-  if (parts.length === 2) {
-    const [minutes, seconds] = parts
-    return Number(minutes || 0) * 60 + Number(seconds || 0)
+  const numbers = parts.map(Number)
+
+  if (numbers.length === 2) {
+    const [minutes, seconds] = numbers
+    if (parts[1].length !== 2 || seconds < 0 || seconds > 59) return null
+    return minutes * 60 + seconds
   }
 
-  if (parts.length === 3) {
-    const [hours, minutes, seconds] = parts
-    return Number(hours || 0) * 3600 + Number(minutes || 0) * 60 + Number(seconds || 0)
+  if (numbers.length === 3) {
+    const [hours, minutes, seconds] = numbers
+    if (
+      parts[1].length !== 2 ||
+      parts[2].length !== 2 ||
+      minutes < 0 ||
+      minutes > 59 ||
+      seconds < 0 ||
+      seconds > 59
+    ) {
+      return null
+    }
+    return hours * 3600 + minutes * 60 + seconds
   }
 
-  const asNumber = Number(text)
-  return Number.isFinite(asNumber) ? asNumber : null
+  return null
 }
 
 export function formatSeconds(seconds) {

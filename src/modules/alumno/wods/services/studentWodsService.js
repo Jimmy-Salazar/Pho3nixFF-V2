@@ -4,7 +4,6 @@ import {
   buildWeeklyCalories,
   addDaysISO,
   estimateWodCalories,
-  formatDateISO,
   getCurrentWeekRange,
   getRegisterAvailability,
   getVisibleWodDateISO,
@@ -337,18 +336,27 @@ async function fetchExistingResult({ wodId, userId }) {
   return data || null
 }
 
+function assertStudentResultWindow(wod) {
+  if (!wod?.id) {
+    throw new Error("No se pudo identificar el WOD seleccionado.")
+  }
+
+  const availability = getRegisterAvailability(wod, new Date())
+  if (!availability.canRegister) {
+    throw new Error("Este WOD no está disponible para registrar o modificar resultados.")
+  }
+
+  return availability
+}
+
 export async function saveStudentWodResult({ wod, result, estimatedCalories }) {
   const { data: authData, error: authError } = await supabase.auth.getUser()
   if (authError) throw authError
 
   const authUser = authData?.user
   if (!authUser?.id) throw new Error("No active session.")
-  if (!wod?.id) throw new Error("No se pudo identificar el WOD seleccionado para registrar resultado.")
 
-  const availability = getRegisterAvailability(wod, new Date())
-  if (!availability.canRegister) {
-    throw new Error("Este WOD todavía no está disponible para registrar resultado.")
-  }
+  assertStudentResultWindow(wod)
 
   const existing = await fetchExistingResult({ wodId: wod.id, userId: authUser.id })
   if (existing?.id) {
@@ -358,7 +366,7 @@ export async function saveStudentWodResult({ wod, result, estimatedCalories }) {
   const payload = {
     wod_id: wod.id,
     usuario_id: authUser.id,
-    fecha: wod.fecha || formatDateISO(new Date()),
+    fecha: wod.fecha,
     modalidad: result.modalidad || "RX",
     tiempo_segundos: result.tiempo_segundos || null,
     tiempo_texto: result.tiempo_texto || null,
@@ -373,6 +381,9 @@ export async function saveStudentWodResult({ wod, result, estimatedCalories }) {
     .select()
     .single()
 
+  if (error?.code === "23505") {
+    throw new Error("Ya registraste resultado para este WOD. Usa editar resultado.")
+  }
   if (error) throw error
   return data
 }
@@ -384,6 +395,8 @@ export async function updateStudentWodResult({ resultId, wod, result, estimatedC
   const authUser = authData?.user
   if (!authUser?.id) throw new Error("No active session.")
   if (!resultId) throw new Error("No result id.")
+
+  assertStudentResultWindow(wod)
 
   const payload = {
     modalidad: result.modalidad || "RX",

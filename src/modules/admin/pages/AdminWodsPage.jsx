@@ -26,6 +26,7 @@ import {
   fetchCurrentAdminProfile,
   schedulePendingWod,
   updatePendingWod,
+  isPastWodDate,
 } from "../wods/services/adminWodsService.js"
 import {
   buildCurrentWeekWods,
@@ -34,7 +35,6 @@ import {
   canEditWod,
   filterWods,
   getPreferredWodMonthKey,
-  isPastDate,
 } from "../wods/utils/adminWodsUtils.js"
 
 import "../../../styles/adminDashboard.css"
@@ -174,7 +174,7 @@ export default function AdminWodsPage() {
   async function handleSchedule(date) {
     if (!scheduleTarget?.id) return
 
-    if (isPastDate(date)) {
+    if (isPastWodDate(date)) {
       setScheduleError(copy.pastDate)
       return
     }

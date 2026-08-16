@@ -18,7 +18,11 @@ import {
   saveStudentWodResult,
   updateStudentWodResult,
 } from "../wods/services/studentWodsService.js"
-import { getInitials, getTodayUserResult } from "../wods/utils/studentWodsUtils.js"
+import {
+  getInitials,
+  getRegisterAvailability,
+  getTodayUserResult,
+} from "../wods/utils/studentWodsUtils.js"
 
 import StudentWodsHero from "../wods/components/StudentWodsHero.jsx"
 import StudentWodsCaloriesCard from "../wods/components/StudentWodsCaloriesCard.jsx"
@@ -137,8 +141,21 @@ export default function StudentWodsPage() {
     }
   }
 
+  function canOpenResultForm(wod) {
+    const availability = getRegisterAvailability(wod, new Date())
+    if (availability.canRegister) {
+      setError("")
+      return true
+    }
+
+    setError(copy.unavailable)
+    return false
+  }
+
   function openCreateForWod(wodOrRow) {
     const wod = wodOrRow?.wod || wodOrRow || data.todayWod
+    if (!canOpenResultForm(wod)) return
+
     setSelectedWod(wod)
     setEditResult(null)
     setFormMode("create")
@@ -146,6 +163,8 @@ export default function StudentWodsPage() {
 
   function openEditForResult(resultOrRow) {
     const wod = resultOrRow?.wod || data.todayWod
+    if (!canOpenResultForm(wod)) return
+
     setSelectedWod(wod)
     setEditResult(resultOrRow)
     setFormMode("edit")

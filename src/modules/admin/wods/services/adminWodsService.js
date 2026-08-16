@@ -1,9 +1,41 @@
 import { supabase } from "../../../../config/supabase.js"
-import {
-  buildPreviousDay1930,
-  canEditWod,
-  isPastDate,
-} from "../utils/adminWodsUtils.js"
+import { canEditWod } from "../utils/adminWodsUtils.js"
+
+const WOD_TIME_ZONE = "America/Guayaquil"
+
+export function getAdminWodTodayISO(date = new Date()) {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: WOD_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+  const values = Object.fromEntries(
+    formatter.formatToParts(date).map((part) => [part.type, part.value])
+  )
+
+  return `${values.year}-${values.month}-${values.day}`
+}
+
+export function isPastWodDate(wodDate, now = new Date()) {
+  const dateIso = String(wodDate || "").slice(0, 10)
+  return Boolean(dateIso) && dateIso < getAdminWodTodayISO(now)
+}
+
+function buildPreviousDay1930Guayaquil(wodDate) {
+  const dateIso = String(wodDate || "").slice(0, 10)
+  const [year, month, day] = dateIso.split("-").map(Number)
+  if (!year || !month || !day) {
+    throw new Error("INVALID_WOD_DATE")
+  }
+
+  const previousDay = new Date(Date.UTC(year, month - 1, day))
+  previousDay.setUTCDate(previousDay.getUTCDate() - 1)
+  const previousIso = previousDay.toISOString().slice(0, 10)
+
+  // America/Guayaquil uses UTC-05:00 year-round.
+  return `${previousIso}T19:30:00-05:00`
+}
 
 const WOD_SELECT = [
   "id",
@@ -96,7 +128,7 @@ export async function updatePendingWod(wodId, payload) {
 }
 
 export async function schedulePendingWod(wodId, wodDate) {
-  if (isPastDate(wodDate)) throw new Error("PAST_WOD_DATE")
+  if (isPastWodDate(wodDate)) throw new Error("PAST_WOD_DATE")
 
   const current = await fetchWodById(wodId)
   if (!canEditWod(current)) {
@@ -120,7 +152,7 @@ export async function schedulePendingWod(wodId, wodDate) {
       fecha: wodDate,
       publicado: true,
       activo: true,
-      fecha_publicacion: buildPreviousDay1930(wodDate),
+      fecha_publicacion: buildPreviousDay1930Guayaquil(wodDate),
     })
     .eq("id", wodId)
     .select(WOD_SELECT)
