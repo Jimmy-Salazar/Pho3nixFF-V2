@@ -16,10 +16,12 @@ import {
   ExerciseModal,
   OperationFeedbackPopup,
   PrHistoryModal,
+  RegisterPrModal,
 } from "../prs/components/AdminPrModals.jsx"
 import { getAdminPrsCopy } from "../prs/i18n/adminPrsCopy.js"
 import {
   createExercise,
+  createPrRecord,
   deleteExerciseComplete,
   fetchAdminPrData,
   fetchCurrentAdminProfile,
@@ -54,6 +56,8 @@ export default function AdminPrsPage() {
   const [selectedExerciseId, setSelectedExerciseId] = useState("")
   const [genderFilter, setGenderFilter] = useState("all")
 
+  const [registerPrOpen, setRegisterPrOpen] = useState(false)
+  const [savingPr, setSavingPr] = useState(false)
   const [exerciseEditor, setExerciseEditor] = useState(undefined)
   const [savingExercise, setSavingExercise] = useState(false)
   const [deleteExerciseTarget, setDeleteExerciseTarget] = useState(null)
@@ -118,6 +122,55 @@ export default function AdminPrsPage() {
     } catch (logoutError) {
       console.error("ADMIN PRS LOGOUT ERROR:", logoutError)
       window.location.href = "/"
+    }
+  }
+
+  async function handleSavePr({ athleteId, exerciseId, weightLb, date }) {
+    const duplicated = data.records.some(
+      (record) =>
+        String(record?.usuario) === String(athleteId) &&
+        String(record?.ejercicio_id) === String(exerciseId) &&
+        String(record?.fecha || "").slice(0, 10) === String(date || "").slice(0, 10)
+    )
+
+    if (duplicated) {
+      setFeedback({ tone: "error", message: copy.duplicatePrDate })
+      return
+    }
+
+    if (!user?.id) {
+      setFeedback({ tone: "error", message: copy.operationError })
+      return
+    }
+
+    try {
+      setSavingPr(true)
+      await createPrRecord({
+        athleteId,
+        exerciseId,
+        weightLb,
+        date,
+        registeredBy: user.id,
+      })
+
+      setRegisterPrOpen(false)
+      await loadData()
+      setSelectedExerciseId(exerciseId)
+      setFeedback({ tone: "success", message: copy.createdSuccess })
+    } catch (operationError) {
+      console.error("ADMIN PRS CREATE ERROR:", operationError)
+      const duplicateFromDatabase =
+        operationError?.code === "23505" ||
+        String(operationError?.message || "").includes("rm_usuario_ejercicio_fecha_unique")
+
+      setFeedback({
+        tone: "error",
+        message: duplicateFromDatabase
+          ? copy.duplicatePrDate
+          : operationError?.message || copy.operationError,
+      })
+    } finally {
+      setSavingPr(false)
     }
   }
 
@@ -220,6 +273,7 @@ export default function AdminPrsPage() {
             onSearch={setSearch}
             onSelectExercise={setSelectedExerciseId}
             onGenderFilter={setGenderFilter}
+            onCreatePr={() => setRegisterPrOpen(true)}
             onCreateExercise={() => setExerciseEditor(null)}
             onEditExercise={setExerciseEditor}
             onDeleteExercise={setDeleteExerciseTarget}
@@ -229,6 +283,19 @@ export default function AdminPrsPage() {
       </div>
 
       <AdminMobileNav copy={dashboardCopy} navigate={navigate} />
+
+      {registerPrOpen ? (
+        <RegisterPrModal
+          copy={copy}
+          locale={locale}
+          athletes={data.athletes}
+          exercises={data.exercises}
+          selectedExerciseId={selectedExerciseId}
+          saving={savingPr}
+          onClose={() => !savingPr && setRegisterPrOpen(false)}
+          onSave={handleSavePr}
+        />
+      ) : null}
 
       {exerciseEditor !== undefined ? (
         <ExerciseModal

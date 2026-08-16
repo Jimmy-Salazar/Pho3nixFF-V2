@@ -17,6 +17,7 @@ export default function AdminPrsDirectory({
   onSearch,
   onSelectExercise,
   onGenderFilter,
+  onCreatePr,
   onCreateExercise,
   onEditExercise,
   onDeleteExercise,
@@ -36,6 +37,11 @@ export default function AdminPrsDirectory({
             placeholder={copy.searchPlaceholder}
           />
         </label>
+
+        <button type="button" className="admin-prs-toolbar-button" onClick={onCreatePr}>
+          <span aria-hidden="true">🏆</span>
+          {copy.newPr}
+        </button>
 
         <button type="button" className="admin-prs-toolbar-button" onClick={onCreateExercise}>
           <span aria-hidden="true">＋</span>
