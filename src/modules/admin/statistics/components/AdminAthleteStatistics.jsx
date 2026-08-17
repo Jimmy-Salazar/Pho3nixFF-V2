@@ -17,12 +17,12 @@ export default function AdminAthleteStatistics({ copy, locale = "es", stats }) {
         </div>
       </div>
 
-      <AthleteGeneral copy={copy} stats={stats} />
+      <AthleteGeneral copy={copy} locale={locale} stats={stats} />
     </section>
   )
 }
 
-function AthleteGeneral({ copy, stats }) {
+function AthleteGeneral({ copy, locale = "es", stats }) {
   const summary = stats?.summary || {}
   const membershipRows = [
     { key: "active", label: copy.membershipActive, value: summary.active || 0 },
