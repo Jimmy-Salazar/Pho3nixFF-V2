@@ -7,6 +7,7 @@
   --statistics-success: #39d98a;
   --statistics-warning: #ffb347;
   --statistics-danger: #ff5d68;
+  --statistics-upcoming: #4f9df8;
   --statistics-goal-1: var(--admin-primary);
   --statistics-goal-2: #f3b33d;
   --statistics-goal-3: #4f9df8;
@@ -230,6 +231,7 @@
 .is-orange { background: var(--admin-primary); }
 .is-green { background: var(--statistics-success); }
 .is-red { background: var(--statistics-danger); }
+.is-blue { background: var(--statistics-upcoming); }
 .is-muted { background: rgba(255, 255, 255, .22); }
 
 .admin-statistics-line-chart {
@@ -785,6 +787,7 @@
 .admin-statistics-status-pill.is-active { border-color: color-mix(in srgb, var(--statistics-success) 35%, transparent); color: var(--statistics-success); background: color-mix(in srgb, var(--statistics-success) 8%, transparent); }
 .admin-statistics-status-pill.is-expiring { border-color: color-mix(in srgb, var(--statistics-warning) 38%, transparent); color: var(--statistics-warning); background: color-mix(in srgb, var(--statistics-warning) 8%, transparent); }
 .admin-statistics-status-pill.is-expired { border-color: color-mix(in srgb, var(--statistics-danger) 35%, transparent); color: var(--statistics-danger); background: color-mix(in srgb, var(--statistics-danger) 8%, transparent); }
+.admin-statistics-status-pill.is-upcoming { border-color: color-mix(in srgb, var(--statistics-upcoming) 38%, transparent); color: var(--statistics-upcoming); background: color-mix(in srgb, var(--statistics-upcoming) 8%, transparent); }
 
 .admin-statistics-athlete-picker {
   display: grid;
@@ -836,6 +839,7 @@
 .admin-statistics-membership-state.is-active strong { color: var(--statistics-success); }
 .admin-statistics-membership-state.is-expiring strong { color: var(--statistics-warning); }
 .admin-statistics-membership-state.is-expired strong { color: var(--statistics-danger); }
+.admin-statistics-membership-state.is-upcoming strong { color: var(--statistics-upcoming); }
 
 .admin-statistics-detail-loading,
 .admin-statistics-detail-error {

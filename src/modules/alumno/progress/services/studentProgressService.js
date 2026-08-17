@@ -6,8 +6,9 @@ import {
   calculateAge,
   calculateDaysRemaining,
   calculatePho3nixScore,
-  dateDaysAgo,
   getMostFrequentModality,
+  rollingWindowStartISO,
+  selectRelevantMembership,
   todayISO,
   validateNutritionProfile,
 } from "../utils/studentProgressUtils.js"
@@ -16,11 +17,20 @@ const TABLES = {
   users: "usuarios",
   memberships: "mensualidades",
   nutritionProfile: "nutricion_perfil",
+  nutritionMeasurements: "nutricion_mediciones",
   nutritionAnalysis: "nutricion_analisis",
+  attendance: "asistencia",
   wodResults: "wod_resultados",
+  wodParticipants: "wod_resultado_participantes",
   prs: "rm",
   exercises: "ejercicios",
 }
+
+const WOD_RESULT_SELECT = "id,wod_id,usuario_id,resultado,calorias_estimadas,fecha,modalidad,tiempo_segundos,tiempo_texto,repeticiones,created_at"
+const ATHLETE_SELECT = "id,nombre,email,foto_url,sexo,fecha_nacimiento"
+const NUTRITION_PROFILE_SELECT = "usuario_id,peso_kg,estatura_cm,cintura_cm,horas_sueno,nivel_energia,lesiones,observaciones,meta,updated_at"
+const ANALYSIS_HISTORY_SELECT = "id,fecha_analisis,peso_kg,estatura_cm,imc,meta,score_pho3nix,score_formula_version,modalidad_frecuente,created_at"
+const LATEST_ANALYSIS_SELECT = "id,usuario_id,fecha_analisis,proximo_analisis,meta,resumen,diagnostico,nutricion,entrenamiento,pre_wod,post_wod,hidratacion,descanso,alerta,respuesta_json,created_at"
 
 function throwIfError(error) {
   if (error) throw new Error(error.message || "Supabase error")
@@ -29,7 +39,7 @@ function throwIfError(error) {
 async function fetchAthlete(userId, authProfile) {
   const { data, error } = await supabase
     .from(TABLES.users)
-    .select("*")
+    .select(ATHLETE_SELECT)
     .eq("id", userId)
     .maybeSingle()
 
@@ -46,7 +56,7 @@ async function fetchAthlete(userId, authProfile) {
 async function fetchNutritionProfile(userId) {
   const { data, error } = await supabase
     .from(TABLES.nutritionProfile)
-    .select("*")
+    .select(NUTRITION_PROFILE_SELECT)
     .eq("usuario_id", userId)
     .maybeSingle()
 
@@ -54,54 +64,167 @@ async function fetchNutritionProfile(userId) {
   return data || null
 }
 
+export async function fetchStudentMeasurementHistory(userId) {
+  const { data, error } = await supabase
+    .from(TABLES.nutritionMeasurements)
+    .select("id,usuario_id,fecha_medicion,peso_kg,estatura_cm,cintura_cm,horas_sueno,nivel_energia,lesiones,observaciones,meta,created_at,updated_at")
+    .eq("usuario_id", userId)
+    .order("fecha_medicion", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(24)
+
+  throwIfError(error)
+  return data || []
+}
+
 async function fetchMembership(userId) {
   const { data, error } = await supabase
     .from(TABLES.memberships)
     .select("id,usuario_id,fecha_inicio,fecha_fin,estado,created_at")
     .eq("usuario_id", userId)
+    .order("fecha_inicio", { ascending: false })
     .order("fecha_fin", { ascending: false })
     .order("created_at", { ascending: false })
-    .limit(1)
+    .limit(20)
 
   throwIfError(error)
-  return data?.[0] || null
+  return selectRelevantMembership(data || [])
 }
 
+function uniqueWodParticipationRows(rows = []) {
+  const resultIds = new Set()
+  const wodIds = new Set()
+  const unique = []
+
+  for (const row of rows) {
+    const resultId = String(row?.id || "")
+    const wodId = String(row?.wod_id || "")
+    if (!resultId || !wodId || resultIds.has(resultId) || wodIds.has(wodId)) continue
+
+    resultIds.add(resultId)
+    wodIds.add(wodId)
+    unique.push(row)
+  }
+
+  return unique
+}
+
+
 export async function fetchWodSummary30Days(userId) {
-  const fromDate = dateDaysAgo(30)
-  const { data, error } = await supabase
-    .from(TABLES.wodResults)
-    .select("id,wod_id,usuario_id,resultado,calorias_estimadas,fecha,modalidad,tiempo_segundos,tiempo_texto,repeticiones,notas,created_at")
-    .eq("usuario_id", userId)
-    .gte("fecha", fromDate)
-    .order("fecha", { ascending: false })
+  const fromDate = rollingWindowStartISO(30)
+  const toDate = todayISO()
 
-  throwIfError(error)
+  const [directResponse, linkedResponse] = await Promise.all([
+    supabase
+      .from(TABLES.wodResults)
+      .select(WOD_RESULT_SELECT)
+      .eq("usuario_id", userId)
+      .gte("fecha", fromDate)
+      .lte("fecha", toDate)
+      .order("fecha", { ascending: false })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false }),
+    supabase.rpc("athlete_progress_group_wod_rows", {
+      p_from_date: fromDate,
+      p_to_date: toDate,
+    }),
+  ])
 
-  const rows = data || []
-  const calories30Days = rows.reduce((sum, item) => sum + Number(item.calorias_estimadas || 0), 0)
-  const trainingDays30Days = new Set(rows.map((item) => item.fecha).filter(Boolean)).size
+  throwIfError(directResponse.error)
+  throwIfError(linkedResponse.error)
+
+  const linkedRows = (linkedResponse.data || [])
+    .map((item) => item?.row_data)
+    .filter(Boolean)
+
+  const rows = uniqueWodParticipationRows([
+    ...(directResponse.data || []),
+    ...linkedRows,
+  ].sort((a, b) => {
+    const dateCompare = String(b.fecha || "").localeCompare(String(a.fecha || ""))
+    if (dateCompare !== 0) return dateCompare
+    const createdCompare = String(b.created_at || "").localeCompare(String(a.created_at || ""))
+    if (createdCompare !== 0) return createdCompare
+    return String(b.id || "").localeCompare(String(a.id || ""))
+  }))
+
+  const calories30Days = rows.reduce(
+    (sum, item) => sum + Number(item.calorias_estimadas || 0),
+    0
+  )
+  const wodTrainingDates = [...new Set(rows.map((item) => item.fecha).filter(Boolean))]
 
   return {
     fromDate,
+    toDate,
     rows,
+    wodTrainingDates,
     wods30Days: rows.length,
     calories30Days,
-    trainingDays30Days,
-    averageCalories: rows.length ? Number((calories30Days / rows.length).toFixed(2)) : 0,
+    trainingDays30Days: wodTrainingDates.length,
+    averageCalories: rows.length
+      ? Number((calories30Days / rows.length).toFixed(2))
+      : 0,
     frequentModality: getMostFrequentModality(rows),
   }
 }
 
+async function fetchAttendanceSummary30Days(userId) {
+  const fromDate = rollingWindowStartISO(30)
+  const toDate = todayISO()
+
+  const { data, error } = await supabase
+    .from(TABLES.attendance)
+    .select("id,usuario_id,fecha,presente,created_at")
+    .eq("usuario_id", userId)
+    .eq("presente", true)
+    .gte("fecha", fromDate)
+    .lte("fecha", toDate)
+    .order("fecha", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+
+  throwIfError(error)
+
+  const rows = data || []
+  const dates = [...new Set(rows.map((item) => item.fecha).filter(Boolean))]
+
+  return {
+    fromDate,
+    toDate,
+    rows,
+    dates,
+    attendanceDays30Days: dates.length,
+  }
+}
+
+function mergeTrainingDays(wodSummary, attendanceSummary) {
+  const dates = new Set([
+    ...(wodSummary?.wodTrainingDates || []),
+    ...(attendanceSummary?.dates || []),
+  ])
+
+  return {
+    ...wodSummary,
+    attendanceDays30Days: attendanceSummary?.attendanceDays30Days || 0,
+    trainingDays30Days: dates.size,
+    trainingDates: [...dates].sort().reverse(),
+  }
+}
+
 export async function fetchPrSummary30Days(userId) {
-  const fromDate = dateDaysAgo(30)
+  const fromDate = rollingWindowStartISO(30)
+  const toDate = todayISO()
 
   const { data: rows, error } = await supabase
     .from(TABLES.prs)
     .select("id,usuario,ejercicio_id,peso_libras,fecha,created_at")
     .eq("usuario", userId)
     .gte("fecha", fromDate)
+    .lte("fecha", toDate)
     .order("fecha", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
 
   throwIfError(error)
 
@@ -116,7 +239,9 @@ export async function fetchPrSummary30Days(userId) {
       .in("id", exerciseIds)
 
     throwIfError(exerciseError)
-    exerciseMap = new Map((exercises || []).map((item) => [String(item.id), item.nombre]))
+    exerciseMap = new Map(
+      (exercises || []).map((item) => [String(item.id), item.nombre])
+    )
   }
 
   const hydratedRows = baseRows.map((item) => ({
@@ -126,43 +251,93 @@ export async function fetchPrSummary30Days(userId) {
 
   return {
     fromDate,
+    toDate,
     rows: hydratedRows,
     prs30Days: hydratedRows.length,
   }
 }
 
+
 async function fetchAnalysisHistory(userId) {
   const { data, error } = await supabase
     .from(TABLES.nutritionAnalysis)
-    .select("*")
+    .select(ANALYSIS_HISTORY_SELECT)
     .eq("usuario_id", userId)
     .order("fecha_analisis", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
     .limit(12)
 
   throwIfError(error)
   return data || []
 }
 
+async function fetchLatestAnalysis(userId) {
+  const { data, error } = await supabase
+    .from(TABLES.nutritionAnalysis)
+    .select(LATEST_ANALYSIS_SELECT)
+    .eq("usuario_id", userId)
+    .order("fecha_analisis", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  throwIfError(error)
+  return data || null
+}
+
 export async function fetchStudentProgressBundle({ userId, authProfile }) {
   if (!userId) throw new Error("NO_AUTH_USER")
 
-  const [athlete, nutritionProfile, membership, wodSummary, prSummary, history] = await Promise.all([
+  const [
+    athlete,
+    nutritionProfile,
+    measurementHistory,
+    membership,
+    baseWodSummary,
+    attendanceSummary,
+    prSummary,
+    history,
+    latestAnalysis,
+  ] = await Promise.all([
     fetchAthlete(userId, authProfile),
     fetchNutritionProfile(userId),
+    fetchStudentMeasurementHistory(userId),
     fetchMembership(userId),
     fetchWodSummary30Days(userId),
+    fetchAttendanceSummary30Days(userId),
     fetchPrSummary30Days(userId),
     fetchAnalysisHistory(userId),
+    fetchLatestAnalysis(userId),
   ])
 
-  const latestAnalysis = history[0] || null
+  const wodSummary = mergeTrainingDays(baseWodSummary, attendanceSummary)
   const nextAnalysis = latestAnalysis?.proximo_analisis
-    || (latestAnalysis?.fecha_analisis ? addDaysISO(latestAnalysis.fecha_analisis, 30) : null)
+    || (latestAnalysis?.fecha_analisis
+      ? addDaysISO(latestAnalysis.fecha_analisis, 30)
+      : null)
   const daysToAnalyze = nextAnalysis ? calculateDaysRemaining(nextAnalysis) : 0
+
+  const hasActivityData = (
+    wodSummary.wods30Days > 0
+    || wodSummary.calories30Days > 0
+    || wodSummary.trainingDays30Days > 0
+    || prSummary.prs30Days > 0
+  )
+  const liveScore = hasActivityData
+    ? calculatePho3nixScore({
+      wods30Days: wodSummary.wods30Days,
+      calories30Days: wodSummary.calories30Days,
+      trainingDays30Days: wodSummary.trainingDays30Days,
+      prs30Days: prSummary.prs30Days,
+    })
+    : null
 
   return {
     athlete,
     nutritionProfile,
+    measurementHistory,
     membership,
     wodSummary,
     prSummary,
@@ -171,7 +346,9 @@ export async function fetchStudentProgressBundle({ userId, authProfile }) {
     nextAnalysis,
     daysToAnalyze,
     canAnalyze: !latestAnalysis || daysToAnalyze === 0,
-    reference: buildBodyReference(nutritionProfile),
+    reference: buildBodyReference(nutritionProfile, athlete?.edad),
+    liveScore,
+    hasActivityData,
   }
 }
 
@@ -186,75 +363,17 @@ export async function saveStudentNutritionProfile(userId, payload) {
       peso_kg: clean.peso_kg,
       estatura_cm: clean.estatura_cm,
       meta: clean.meta,
+      cintura_cm: clean.cintura_cm,
+      horas_sueno: clean.horas_sueno,
+      nivel_energia: clean.nivel_energia,
+      lesiones: clean.lesiones,
+      observaciones: clean.observaciones,
     }, { onConflict: "usuario_id" })
-    .select()
+    .select(NUTRITION_PROFILE_SELECT)
     .single()
 
   throwIfError(error)
   return data
-}
-
-function cleanWodRows(rows = []) {
-  return rows.slice(0, 30).map((item) => ({
-    id: item.id,
-    wod_id: item.wod_id,
-    resultado: item.resultado,
-    calorias_estimadas: item.calorias_estimadas,
-    fecha: item.fecha,
-    modalidad: item.modalidad,
-    tiempo_segundos: item.tiempo_segundos,
-    tiempo_texto: item.tiempo_texto,
-    repeticiones: item.repeticiones,
-    notas: item.notas,
-  }))
-}
-
-function cleanPrRows(rows = []) {
-  return rows.slice(0, 20).map((item) => ({
-    id: item.id,
-    ejercicio_id: item.ejercicio_id,
-    ejercicio_nombre: item.ejercicio_nombre,
-    peso_libras: item.peso_libras,
-    fecha: item.fecha,
-  }))
-}
-
-function cleanHistory(rows = []) {
-  return rows.slice(0, 3).map((item) => ({
-    fecha_analisis: item.fecha_analisis,
-    peso_kg: item.peso_kg,
-    estatura_cm: item.estatura_cm,
-    imc: item.imc,
-    meta: item.meta,
-    wods_30_dias: item.wods_30_dias,
-    calorias_30_dias: item.calorias_30_dias,
-    dias_entrenados_30_dias: item.dias_entrenados_30_dias,
-    prs_30_dias: item.prs_30_dias,
-    score_pho3nix: item.score_pho3nix,
-    resumen: item.resumen,
-    diagnostico: item.diagnostico,
-  }))
-}
-
-function normalizeAiAnalysis(response, locale) {
-  const analysis = response?.analisis || response
-  if (!analysis || typeof analysis !== "object") throw new Error("INVALID_AI_RESPONSE")
-
-  return {
-    resumen: analysis.resumen || "",
-    diagnostico: analysis.diagnostico || "",
-    nutricion: analysis.nutricion || "",
-    entrenamiento: analysis.entrenamiento || "",
-    pre_wod: analysis.pre_wod || "",
-    post_wod: analysis.post_wod || "",
-    hidratacion: analysis.hidratacion || "",
-    descanso: analysis.descanso || "",
-    alerta: analysis.alerta || (
-      locale === "en"
-        ? "This analysis is for guidance and does not replace medical or professional nutrition advice."
-        : "Este análisis es orientativo y no reemplaza consulta médica o nutricional profesional."
-    ),
-  }
 }
 
 async function readFunctionError(error) {
@@ -269,7 +388,6 @@ async function readFunctionError(error) {
   }
   return message
 }
-
 
 const ANALYSIS_TEXT_FIELDS = [
   "resumen",
@@ -323,7 +441,12 @@ function isCompleteTranslation(value) {
   return Boolean(
     value
       && typeof value === "object"
-      && ANALYSIS_TEXT_FIELDS.every((field) => typeof value[field] === "string")
+      && ANALYSIS_TEXT_FIELDS.every((field) => {
+        const text = value[field]
+        return typeof text === "string"
+          && text.trim().length > 0
+          && text.length <= 3000
+      })
   )
 }
 
@@ -382,175 +505,44 @@ export async function localizeStudentNutritionAnalysis({ analysis, locale }) {
     throw new Error("INVALID_TRANSLATION_RESPONSE")
   }
 
+  const sourceLocale = data?.source_locale || getStoredSourceLocale(analysis)
+  const responseJson = analysis?.respuesta_json || {}
+
   return {
     ...analysis,
     ...translation,
-    respuesta_json: data?.respuesta_json || analysis.respuesta_json,
+    respuesta_json: {
+      ...responseJson,
+      source_locale: sourceLocale,
+      translations: {
+        ...(responseJson?.translations || {}),
+        [targetLocale]: translation,
+      },
+    },
     localized_locale: targetLocale,
   }
 }
 
-export async function createStudentNutritionAnalysis({ athlete, profile, locale = "es" }) {
-  if (!athlete?.id) throw new Error("NO_AUTH_USER")
-  const cleanProfile = validateNutritionProfile(profile)
+export async function createStudentNutritionAnalysis({ locale = "es" } = {}) {
+  const targetLocale = normalizeLocale(locale)
 
-  const [wodSummary, prSummary, history] = await Promise.all([
-    fetchWodSummary30Days(athlete.id),
-    fetchPrSummary30Days(athlete.id),
-    fetchAnalysisHistory(athlete.id),
-  ])
-
-  const latest = history[0] || null
-  if (latest) {
-    const next = latest.proximo_analisis || addDaysISO(latest.fecha_analisis, 30)
-    const remaining = calculateDaysRemaining(next)
-    if (remaining > 0) throw new Error(`ANALYSIS_LOCKED:${remaining}`)
-  }
-
-  const reference = buildBodyReference(cleanProfile)
-  const summary = {
-    wods30Days: wodSummary.wods30Days,
-    calories30Days: wodSummary.calories30Days,
-    trainingDays30Days: wodSummary.trainingDays30Days,
-    prs30Days: prSummary.prs30Days,
-  }
-  const score = calculatePho3nixScore(summary)
-
-  const goalLabels = {
-    es: {
-      perder_grasa: "Perder grasa",
-      recomposicion: "Mantener / recomposición corporal",
-      ganar_masa_muscular: "Ganar masa muscular",
-      mejorar_rendimiento: "Mejorar rendimiento deportivo",
-    },
-    en: {
-      perder_grasa: "Lose fat",
-      recomposicion: "Body recomposition",
-      ganar_masa_muscular: "Gain muscle",
-      mejorar_rendimiento: "Improve athletic performance",
-    },
-  }
-
-  const payload = {
-    usuario: {
-      id: athlete.id,
-      nombre: athlete.nombre,
-      edad: athlete.edad,
-      sexo: athlete.sexo || null,
-    },
-    perfil_nutricional: {
-      peso_kg: cleanProfile.peso_kg,
-      estatura_cm: cleanProfile.estatura_cm,
-      meta: cleanProfile.meta,
-      meta_label: goalLabels[locale]?.[cleanProfile.meta] || goalLabels.es[cleanProfile.meta],
-    },
-    referencia_corporal: {
-      imc: reference.bmi ? Number(reference.bmi.toFixed(2)) : null,
-      peso_referencia_min: reference.minWeight ? Number(reference.minWeight.toFixed(2)) : null,
-      peso_referencia_max: reference.maxWeight ? Number(reference.maxWeight.toFixed(2)) : null,
-      diferencia_rango: reference.rangeDifference !== null
-        ? Number(reference.rangeDifference.toFixed(2))
-        : null,
-      nota: locale === "en"
-        ? "The healthy range is a BMI-based reference. For strength and CrossFit athletes, assess it together with performance, muscle mass, attendance and evolution."
-        : "El rango saludable es una referencia basada en IMC. En atletas de fuerza o CrossFit debe analizarse junto con rendimiento, masa muscular, asistencia y evolución.",
-    },
-    rendimiento_30_dias: {
-      wods_30_dias: wodSummary.wods30Days,
-      calorias_30_dias: wodSummary.calories30Days,
-      dias_entrenados_30_dias: wodSummary.trainingDays30Days,
-      prs_30_dias: prSummary.prs30Days,
-      promedio_calorias: wodSummary.averageCalories,
-      mejor_modalidad: wodSummary.frequentModality,
-      resultados_wods: cleanWodRows(wodSummary.rows),
-      prs: cleanPrRows(prSummary.rows),
-    },
-    historial_analisis: cleanHistory(history),
-    reglas: {
-      analisis_cada_dias: 30,
-      enfoque: "sports nutrition and CrossFit-style functional training",
-      idioma: locale === "en" ? "English" : "Spanish",
-      tono: locale === "en"
-        ? "clear, motivating, professional and practical"
-        : "claro, motivador, profesional y práctico",
-      seguridad: [
-        "Do not diagnose diseases.",
-        "Do not replace medical or professional nutrition advice.",
-        "Do not recommend medication, fat burners, steroids, hormones or prohibited substances.",
-        "Do not recommend extreme diets.",
-        "Recommend professional evaluation when risk signs are present.",
-      ],
-      formato_respuesta: {
-        resumen: "string",
-        diagnostico: "string",
-        nutricion: "string",
-        entrenamiento: "string",
-        pre_wod: "string",
-        post_wod: "string",
-        hidratacion: "string",
-        descanso: "string",
-        alerta: "string",
-      },
-    },
-  }
-
-  const { data: response, error: functionError } = await supabase.functions.invoke(
+  const { data, error } = await supabase.functions.invoke(
     "analizar-nutricion-ia",
-    { body: payload }
+    {
+      body: {
+        locale: targetLocale,
+      },
+    }
   )
 
-  if (functionError) throw new Error(await readFunctionError(functionError))
-
-  const analysis = normalizeAiAnalysis(response, locale)
-  const analysisDate = todayISO()
-
-  const insertPayload = {
-    usuario_id: athlete.id,
-    fecha_analisis: analysisDate,
-    proximo_analisis: addDaysISO(analysisDate, 30),
-    edad: athlete.edad,
-    sexo: athlete.sexo || null,
-    peso_kg: cleanProfile.peso_kg,
-    estatura_cm: cleanProfile.estatura_cm,
-    imc: reference.bmi ? Number(reference.bmi.toFixed(2)) : null,
-    peso_referencia_min: reference.minWeight ? Number(reference.minWeight.toFixed(2)) : null,
-    peso_referencia_max: reference.maxWeight ? Number(reference.maxWeight.toFixed(2)) : null,
-    diferencia_rango: reference.rangeDifference !== null
-      ? Number(reference.rangeDifference.toFixed(2))
-      : null,
-    meta: cleanProfile.meta,
-    wods_30_dias: wodSummary.wods30Days,
-    calorias_30_dias: wodSummary.calories30Days,
-    dias_entrenados_30_dias: wodSummary.trainingDays30Days,
-    prs_30_dias: prSummary.prs30Days,
-    promedio_calorias: wodSummary.averageCalories,
-    mejor_modalidad: wodSummary.frequentModality,
-    score_pho3nix: score,
-    resumen: analysis.resumen,
-    diagnostico: analysis.diagnostico,
-    nutricion: analysis.nutricion,
-    entrenamiento: analysis.entrenamiento,
-    pre_wod: analysis.pre_wod,
-    post_wod: analysis.post_wod,
-    hidratacion: analysis.hidratacion,
-    descanso: analysis.descanso,
-    alerta: analysis.alerta,
-    respuesta_json: {
-      source_locale: locale === "en" ? "en" : "es",
-      translations: {
-        [locale === "en" ? "en" : "es"]: analysis,
-      },
-      payload_ia: payload,
-      respuesta_ia: analysis,
-    },
+  if (error) {
+    throw new Error(await readFunctionError(error))
   }
 
-  const { data, error } = await supabase
-    .from(TABLES.nutritionAnalysis)
-    .insert(insertPayload)
-    .select()
-    .single()
+  const analysis = data?.analysis || data?.analisis
+  if (!analysis?.id) {
+    throw new Error("INVALID_AI_RESPONSE")
+  }
 
-  throwIfError(error)
-  return data
+  return analysis
 }

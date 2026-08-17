@@ -1,9 +1,13 @@
-import { numberText } from "../utils/studentProgressUtils.js"
+import {
+  formatModality,
+  numberText,
+} from "../utils/studentProgressUtils.js"
 
-export default function StudentThirtyDaySummary({ copy, wodSummary, prSummary }) {
+export default function StudentThirtyDaySummary({ copy, wodSummary, prSummary, locale }) {
+  const hasWods = Number(wodSummary?.wods30Days || 0) > 0
   const metrics = [
     { icon: "🏋️", value: wodSummary?.wods30Days || 0, label: copy.completedWods },
-    { icon: "🔥", value: numberText(wodSummary?.calories30Days, 0), label: copy.calories },
+    { icon: "🔥", value: numberText(wodSummary?.calories30Days, 0, locale), label: copy.estimatedCalories },
     { icon: "📅", value: wodSummary?.trainingDays30Days || 0, label: copy.trainingDays },
     { icon: "🏆", value: prSummary?.prs30Days || 0, label: copy.prs },
   ]
@@ -25,8 +29,14 @@ export default function StudentThirtyDaySummary({ copy, wodSummary, prSummary })
       </div>
 
       <footer>
-        <span>{copy.averagePerWod}: <strong>{numberText(wodSummary?.averageCalories, 0)} kcal</strong></span>
-        <span>{copy.frequentModality}: <strong>{wodSummary?.frequentModality || copy.noData}</strong></span>
+        <span>
+          {copy.averageEstimatedPerWod}:{" "}
+          <strong>{hasWods ? `${numberText(wodSummary?.averageCalories, 0, locale)} kcal` : copy.noData}</strong>
+        </span>
+        <span>
+          {copy.frequentModality}:{" "}
+          <strong>{formatModality(wodSummary?.frequentModality, copy)}</strong>
+        </span>
       </footer>
     </article>
   )

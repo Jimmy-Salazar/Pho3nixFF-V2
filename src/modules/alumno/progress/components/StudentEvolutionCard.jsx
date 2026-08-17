@@ -1,6 +1,7 @@
 import {
   buildEvolutionChart,
-  formatMonth,
+  formatDate,
+  formatShortDate,
   normalizeEvolutionRows,
   numberText,
 } from "../utils/studentProgressUtils.js"
@@ -9,9 +10,68 @@ function pointsToString(points) {
   return points.map((point) => `${point.x},${point.y}`).join(" ")
 }
 
-export default function StudentEvolutionCard({ copy, history, locale }) {
-  const rows = normalizeEvolutionRows(history)
-  const chart = buildEvolutionChart(rows)
+function SeriesChart({
+  title,
+  unit,
+  rows,
+  points,
+  limitPoints,
+  ticks,
+  yScale,
+  left,
+  right,
+  showLimit,
+  limitLabel,
+  locale,
+  className,
+}) {
+  return (
+    <section className={`student-evolution-series ${className}`}>
+      <header className="student-evolution-series-header">
+        <strong>{title}</strong>
+        {showLimit ? <small>{limitLabel}</small> : null}
+      </header>
+
+      <div className="student-evolution-chart">
+        <svg viewBox="0 0 730 270" role="img" aria-label={title}>
+          {ticks.map((tick) => {
+            const y = yScale(tick)
+            return (
+              <g key={`${className}-${tick}`}>
+                <line x1={left} x2={right} y1={y} y2={y} />
+                <text x="8" y={y + 4}>{tick}</text>
+              </g>
+            )
+          })}
+
+          {showLimit ? <polyline className="is-limit" points={pointsToString(limitPoints)} /> : null}
+          <polyline className="is-series" points={pointsToString(points)} />
+
+          {points.map((point, index) => (
+            <g key={point.key}>
+              <circle className="is-series" cx={point.x} cy={point.y} r="5" />
+              <text className="student-evolution-value" x={point.x} y={point.y - 12} textAnchor="middle">
+                {point.label}{unit}
+              </text>
+              <text className="student-evolution-month" x={point.x} y="254" textAnchor="middle">
+                {formatShortDate(rows[index]?.fecha_analisis, locale)}
+              </text>
+            </g>
+          ))}
+        </svg>
+      </div>
+    </section>
+  )
+}
+
+export default function StudentEvolutionCard({
+  copy,
+  history,
+  locale,
+  showAdultReference = true,
+}) {
+  const rows = normalizeEvolutionRows(history, { showAdultReference })
+  const chart = buildEvolutionChart(rows, { showAdultReference, locale })
 
   return (
     <article className="student-progress-card student-evolution-card">
@@ -23,51 +83,46 @@ export default function StudentEvolutionCard({ copy, history, locale }) {
         <div className="student-progress-empty">{copy.noEvolution}</div>
       ) : (
         <>
-          <div className="student-evolution-legend">
-            <span className="is-weight">{copy.weightKg}</span>
-            <span className="is-bmi">{copy.bmi}</span>
-            <span className="is-limit">{copy.weightLimit}</span>
-          </div>
+          <div className="student-evolution-series-grid">
+            <SeriesChart
+              title={copy.weightTrend}
+              unit=" kg"
+              rows={rows}
+              points={chart.weightPoints}
+              limitPoints={chart.weightLimitPoints}
+              ticks={chart.weightTicks}
+              yScale={chart.yWeight}
+              left={chart.left}
+              right={chart.right}
+              showLimit={showAdultReference}
+              limitLabel={copy.weightLimit}
+              locale={locale}
+              className="is-weight"
+            />
 
-          <div className="student-evolution-chart">
-            <svg viewBox="0 0 730 270" role="img" aria-label={copy.evolutionSubtitle}>
-              {chart.weightTicks.map((tick) => {
-                const y = chart.yWeight(tick)
-                return (
-                  <g key={`w-${tick}`}>
-                    <line x1={chart.left} x2={chart.right} y1={y} y2={y} />
-                    <text x="8" y={y + 4}>{tick}</text>
-                  </g>
-                )
-              })}
-
-              <polyline className="is-weight-limit" points={pointsToString(chart.weightLimitPoints)} />
-              <polyline className="is-bmi-limit" points={pointsToString(chart.bmiLimitPoints)} />
-              <polyline className="is-weight" points={pointsToString(chart.weightPoints)} />
-              <polyline className="is-bmi" points={pointsToString(chart.bmiPoints)} />
-
-              {chart.weightPoints.map((point, index) => (
-                <g key={point.key}>
-                  <circle className="is-weight" cx={point.x} cy={point.y} r="6" />
-                  <text className="student-evolution-value" x={point.x} y={point.y - 12} textAnchor="middle">{point.label}</text>
-                  <text className="student-evolution-month" x={point.x} y="254" textAnchor="middle">
-                    {formatMonth(rows[index]?.fecha_analisis, locale, true)}
-                  </text>
-                </g>
-              ))}
-
-              {chart.bmiPoints.map((point) => (
-                <circle key={point.key} className="is-bmi" cx={point.x} cy={point.y} r="5" />
-              ))}
-            </svg>
+            <SeriesChart
+              title={copy.bmiTrend}
+              unit=""
+              rows={rows}
+              points={chart.bmiPoints}
+              limitPoints={chart.bmiLimitPoints}
+              ticks={chart.bmiTicks}
+              yScale={chart.yBmi}
+              left={chart.left}
+              right={chart.right}
+              showLimit={showAdultReference}
+              limitLabel={copy.bmiLimit}
+              locale={locale}
+              className="is-bmi"
+            />
           </div>
 
           <div className="student-evolution-table">
             {rows.map((item) => (
               <div key={item.id || item.fecha_analisis}>
-                <span>{formatMonth(item.fecha_analisis, locale)}</span>
-                <strong>{numberText(item.peso_kg)} kg</strong>
-                <b>{numberText(item.bmi)} IMC</b>
+                <span>{formatDate(item.fecha_analisis, locale)}</span>
+                <strong>{numberText(item.peso_kg, 1, locale)} kg</strong>
+                <b>{numberText(item.bmi, 1, locale)} {copy.bmi}</b>
               </div>
             ))}
           </div>

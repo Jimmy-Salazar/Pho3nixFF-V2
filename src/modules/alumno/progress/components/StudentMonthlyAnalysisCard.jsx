@@ -12,6 +12,7 @@ export default function StudentMonthlyAnalysisCard({
   onAnalyze,
 }) {
   const disabled = !canAnalyze || analyzing || saving
+  const dayLabel = Number(daysRemaining) === 1 ? copy.daySingular : copy.dayPlural
 
   return (
     <article className="student-progress-card student-analysis-card">
@@ -24,7 +25,7 @@ export default function StudentMonthlyAnalysisCard({
         <div><small>{copy.nextAnalysis}</small><strong>{nextAnalysis ? formatDate(nextAnalysis, locale) : copy.availableNow}</strong></div>
       </div>
 
-      {!canAnalyze ? <p className="student-analysis-lock">🔒 {copy.missingDays} <strong>{daysRemaining}</strong> {copy.days}</p> : null}
+      {!canAnalyze ? <p className="student-analysis-lock">🔒 {copy.missingDays} <strong>{daysRemaining}</strong> {dayLabel}</p> : null}
 
       <button type="button" disabled={disabled} onClick={onAnalyze}>
         {analyzing ? copy.analyzing : copy.analyzeWithAi}

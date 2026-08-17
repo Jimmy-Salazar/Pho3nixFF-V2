@@ -1,10 +1,46 @@
+import { getAdminStatisticsCopy } from "../i18n/adminStatisticsCopy.js"
+
 const DAY_MS = 86400000
+export const STATISTICS_TIME_ZONE = "America/Guayaquil"
+
+function fallbackLabel(locale = "es", key = "") {
+  const copy = getAdminStatisticsCopy(locale)
+  if (key === "athlete") return `${copy.athlete} PHO3NIX`
+  if (key === "exercise") return copy.exercise
+  return ""
+}
+
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/
+const TIME_ZONE_DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
+  timeZone: STATISTICS_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+})
+
+function buildCalendarDate(year, month, day) {
+  const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day), 12, 0, 0, 0))
+  return Number.isNaN(date.getTime()) ? null : date
+}
+
+function getTimeZoneDateParts(value) {
+  const date = value instanceof Date ? new Date(value.getTime()) : new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+
+  const parts = TIME_ZONE_DATE_FORMATTER.formatToParts(date)
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const year = Number(values.year)
+  const month = Number(values.month)
+  const day = Number(values.day)
+
+  return [year, month, day].every(Number.isFinite) ? { year, month, day } : null
+}
 
 export const EMPTY_ATHLETE_DETAIL = {
   athlete: null,
   range: { days: 30, startIso: "", endIso: "" },
   membership: null,
-  membershipStatus: { status: "missing", active: false, daysLeft: null },
+  membershipStatus: { status: "missing", active: false, daysLeft: null, daysUntilStart: null },
   summary: {
     totalWods: 0,
     periodWods: 0,
@@ -43,6 +79,7 @@ export const EMPTY_STATISTICS_DATA = {
     active: 0,
     expiring: 0,
     expired: 0,
+    upcoming: 0,
     missing: 0,
     total: 0,
   },
@@ -57,6 +94,7 @@ export const EMPTY_STATISTICS_DATA = {
       active: 0,
       expiring: 0,
       expired: 0,
+      upcoming: 0,
       missing: 0,
       newInPeriod: 0,
       activeInPeriod: 0,
@@ -119,42 +157,38 @@ export function normalizeRole(value) {
 
 export function parseLocalDate(value) {
   if (!value) return null
-  if (value instanceof Date) return new Date(value)
 
-  const text = String(value)
-  const parts = text.slice(0, 10).split("-").map(Number)
-  if (parts.length === 3 && parts.every(Number.isFinite)) {
-    return new Date(parts[0], parts[1] - 1, parts[2])
+  if (typeof value === "string") {
+    const exactDate = DATE_ONLY_RE.exec(value.trim())
+    if (exactDate) return buildCalendarDate(exactDate[1], exactDate[2], exactDate[3])
   }
 
-  const date = new Date(text)
-  return Number.isNaN(date.getTime()) ? null : date
+  const parts = getTimeZoneDateParts(value)
+  return parts ? buildCalendarDate(parts.year, parts.month, parts.day) : null
 }
 
 export function formatDateIso(value = new Date()) {
-  const date = value instanceof Date ? value : new Date(value)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
+  const date = parseLocalDate(value)
+  if (!date) return ""
+
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, "0")
+  const day = String(date.getUTCDate()).padStart(2, "0")
   return `${year}-${month}-${day}`
 }
 
 export function startOfDay(value = new Date()) {
-  const date = value instanceof Date ? new Date(value) : new Date(value)
-  date.setHours(0, 0, 0, 0)
-  return date
+  return parseLocalDate(value)
 }
 
 export function endOfDay(value = new Date()) {
-  const date = value instanceof Date ? new Date(value) : new Date(value)
-  date.setHours(23, 59, 59, 999)
-  return date
+  return parseLocalDate(value)
 }
 
 export function getStatisticsRange(days = 30, now = new Date()) {
   const safeDays = [7, 30, 90, 365].includes(Number(days)) ? Number(days) : 30
-  const end = endOfDay(now)
-  const start = startOfDay(new Date(end.getTime() - (safeDays - 1) * DAY_MS))
+  const end = startOfDay(now)
+  const start = new Date(end.getTime() - (safeDays - 1) * DAY_MS)
 
   return {
     days: safeDays,
@@ -167,56 +201,128 @@ export function getStatisticsRange(days = 30, now = new Date()) {
 
 export function getWeekRange(now = new Date()) {
   const date = startOfDay(now)
-  const day = date.getDay()
+  const day = date.getUTCDay()
   const mondayOffset = day === 0 ? -6 : 1 - day
   const start = new Date(date)
-  start.setDate(start.getDate() + mondayOffset)
+  start.setUTCDate(start.getUTCDate() + mondayOffset)
   const end = new Date(start)
-  end.setDate(start.getDate() + 5)
+  end.setUTCDate(start.getUTCDate() + 5)
 
   return {
     start,
-    end: endOfDay(end),
+    end,
     startIso: formatDateIso(start),
     endIso: formatDateIso(end),
   }
 }
 
 export function getMembershipStatus(membership, now = new Date()) {
-  if (!membership?.fecha_fin) return { status: "missing", active: false, daysLeft: null }
+  if (!membership) {
+    return { status: "missing", active: false, daysLeft: null, daysUntilStart: null }
+  }
 
+  const today = startOfDay(now)
+  const start = parseLocalDate(membership.fecha_inicio)
   const end = parseLocalDate(membership.fecha_fin)
-  if (!end) return { status: "missing", active: false, daysLeft: null }
-
   const explicit = String(membership.estado || "").trim().toLowerCase()
-  const inactive = ["inactivo", "inactiva", "vencido", "vencida", "cancelado", "cancelada"].includes(explicit)
-  const daysLeft = Math.round((startOfDay(end).getTime() - startOfDay(now).getTime()) / DAY_MS)
+  const inactive = [
+    "inactivo", "inactiva",
+    "vencido", "vencida",
+    "cancelado", "cancelada",
+    "anulado", "anulada",
+  ].includes(explicit)
 
-  if (inactive || daysLeft < 0) return { status: "expired", active: false, daysLeft }
-  if (daysLeft <= 7) return { status: "expiring", active: true, daysLeft }
-  return { status: "active", active: true, daysLeft }
+  const daysLeft = end ? Math.round((end.getTime() - today.getTime()) / DAY_MS) : null
+  const daysUntilStart = start ? Math.round((start.getTime() - today.getTime()) / DAY_MS) : null
+
+  if (inactive || (end && end < today)) {
+    return { status: "expired", active: false, daysLeft, daysUntilStart }
+  }
+
+  if (start && start > today) {
+    return { status: "upcoming", active: false, daysLeft, daysUntilStart }
+  }
+
+  if (end && daysLeft <= 7) {
+    return { status: "expiring", active: true, daysLeft, daysUntilStart }
+  }
+
+  return { status: "active", active: true, daysLeft, daysUntilStart }
 }
 
-export function latestMembershipsByUser(rows = []) {
-  const sorted = [...rows].sort((a, b) => {
-    const aDate = parseLocalDate(a.fecha_fin || a.created_at)?.getTime() || 0
-    const bDate = parseLocalDate(b.fecha_fin || b.created_at)?.getTime() || 0
-    return bDate - aDate
-  })
-  const map = new Map()
+function createdAtTime(row) {
+  const date = new Date(row?.created_at || 0)
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime()
+}
 
-  sorted.forEach((row) => {
-    if (row?.usuario_id && !map.has(String(row.usuario_id))) {
-      map.set(String(row.usuario_id), row)
-    }
+function membershipStartTime(row) {
+  return parseLocalDate(row?.fecha_inicio || row?.created_at)?.getTime() ?? Number.NEGATIVE_INFINITY
+}
+
+function compareMembershipsLatestFirst(a, b) {
+  const aEnd = parseLocalDate(a?.fecha_fin)?.getTime() ?? Number.NEGATIVE_INFINITY
+  const bEnd = parseLocalDate(b?.fecha_fin)?.getTime() ?? Number.NEGATIVE_INFINITY
+  if (aEnd !== bEnd) return bEnd - aEnd
+  return createdAtTime(b) - createdAtTime(a)
+}
+
+function selectRelevantMembership(rows = [], now = new Date()) {
+  const current = rows
+    .filter((row) => ["active", "expiring"].includes(getMembershipStatus(row, now).status))
+    .sort((a, b) => {
+      const startDifference = membershipStartTime(b) - membershipStartTime(a)
+      return startDifference || compareMembershipsLatestFirst(a, b)
+    })
+
+  if (current.length) return current[0]
+
+  const upcoming = rows
+    .filter((row) => getMembershipStatus(row, now).status === "upcoming")
+    .sort((a, b) => {
+      const startDifference = membershipStartTime(a) - membershipStartTime(b)
+      return startDifference || createdAtTime(a) - createdAtTime(b)
+    })
+
+  if (upcoming.length) return upcoming[0]
+
+  const expired = rows
+    .filter((row) => getMembershipStatus(row, now).status === "expired")
+    .sort(compareMembershipsLatestFirst)
+
+  return expired[0] || null
+}
+
+export function latestMembershipsByUser(rows = [], now = new Date()) {
+  const grouped = new Map()
+
+  rows.forEach((row) => {
+    const userId = String(row?.usuario_id || "")
+    if (!userId) return
+    if (!grouped.has(userId)) grouped.set(userId, [])
+    grouped.get(userId).push(row)
+  })
+
+  const map = new Map()
+  grouped.forEach((userRows, userId) => {
+    const membership = selectRelevantMembership(userRows, now)
+    if (membership) map.set(userId, membership)
   })
 
   return map
 }
 
+function getMemberStartDate(memberships = [], fallback = null) {
+  const starts = memberships
+    .map((row) => parseLocalDate(row?.fecha_inicio || row?.created_at))
+    .filter(Boolean)
+    .sort((a, b) => a.getTime() - b.getTime())
+
+  return starts[0] || parseLocalDate(fallback)
+}
+
 export function buildMembershipSummary(athletes = [], memberships = [], now = new Date()) {
-  const latest = latestMembershipsByUser(memberships)
-  const summary = { active: 0, expiring: 0, expired: 0, missing: 0, total: athletes.length }
+  const latest = latestMembershipsByUser(memberships, now)
+  const summary = { active: 0, expiring: 0, expired: 0, upcoming: 0, missing: 0, total: athletes.length }
   const activeIds = new Set()
   const expiringRows = []
 
@@ -251,11 +357,14 @@ function buildBuckets(range, locale) {
   const bucketCount = useDays ? range.days : Math.min(range.days <= 30 ? 5 : range.days <= 90 ? 6 : 12, 12)
   const totalMs = range.end.getTime() - range.start.getTime() + DAY_MS
   const bucketMs = totalMs / bucketCount
-  const formatter = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-EC", useDays
-    ? { weekday: "short" }
-    : range.days >= 365
-      ? { month: "short" }
-      : { day: "numeric", month: "short" })
+  const formatter = new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-EC", {
+    timeZone: "UTC",
+    ...(useDays
+      ? { weekday: "short" }
+      : range.days >= 365
+        ? { month: "short" }
+        : { day: "numeric", month: "short" }),
+  })
 
   for (let index = 0; index < bucketCount; index += 1) {
     const start = new Date(range.start.getTime() + index * bucketMs)
@@ -345,15 +454,15 @@ export function buildWodWeekSeries(wodResults = [], locale = "es", now = new Dat
   wodResults.forEach((row) => {
     const date = dateFromRow(row)
     if (!date || date < week.start || date > week.end) return
-    const dayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1
+    const dayIndex = date.getUTCDay() === 0 ? 6 : date.getUTCDay() - 1
     if (dayIndex >= 0 && dayIndex < 6) values[dayIndex] += 1
   })
 
   return names.map((label, index) => ({ label, value: values[index] }))
 }
 
-export function buildPrMovementSeries(prRecords = [], exercises = [], limit = 5) {
-  const exerciseMap = new Map(exercises.map((row) => [String(row.id), row.nombre || "Ejercicio"]))
+export function buildPrMovementSeries(prRecords = [], exercises = [], limit = 5, locale = "es") {
+  const exerciseMap = new Map(exercises.map((row) => [String(row.id), row.nombre || fallbackLabel(locale, "exercise")]))
   const counts = new Map()
 
   prRecords.forEach((row) => {
@@ -363,12 +472,12 @@ export function buildPrMovementSeries(prRecords = [], exercises = [], limit = 5)
   })
 
   return Array.from(counts.entries())
-    .map(([exerciseId, value]) => ({ exerciseId, label: exerciseMap.get(exerciseId) || "Ejercicio", value }))
+    .map(([exerciseId, value]) => ({ exerciseId, label: exerciseMap.get(exerciseId) || fallbackLabel(locale, "exercise"), value }))
     .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label))
     .slice(0, limit)
 }
 
-export function buildHighlightedAthletes({ users = [], wodResults = [], prRecords = [], attendance = [], limit = 5 }) {
+export function buildHighlightedAthletes({ users = [], wodResults = [], prRecords = [], attendance = [], limit = 5, locale = "es" }) {
   const usersMap = new Map(users.map((user) => [String(user.id), user]))
   const scores = new Map()
 
@@ -388,39 +497,120 @@ export function buildHighlightedAthletes({ users = [], wodResults = [], prRecord
   return Array.from(scores.values())
     .map((row) => {
       const user = usersMap.get(row.userId) || {}
-      return { ...row, nombre: user.nombre || user.email || "Atleta PHO3NIX", fotoUrl: user.foto_url || "" }
+      return { ...row, nombre: user.nombre || user.email || fallbackLabel(locale, "athlete"), fotoUrl: user.foto_url || "" }
     })
     .sort((a, b) => b.score - a.score || a.nombre.localeCompare(b.nombre))
     .slice(0, limit)
 }
 
-export function buildInactiveAthletes({ athletes = [], activeIds = new Set(), recentWodResults = [], recentPrRecords = [], recentAttendance = [] }) {
-  const activeActivityIds = new Set()
-  recentWodResults.forEach((row) => row?.usuario_id && activeActivityIds.add(String(row.usuario_id)))
-  recentPrRecords.forEach((row) => row?.usuario && activeActivityIds.add(String(row.usuario)))
-  recentAttendance.forEach((row) => row?.usuario_id && activeActivityIds.add(String(row.usuario_id)))
+export function buildInactiveAthletes({
+  athletes = [],
+  activeIds = new Set(),
+  recentWodResults = [],
+  recentPrRecords = [],
+  recentAttendance = [],
+  now = new Date(),
+  thresholdDays = 14,
+}) {
+  const latestActivity = new Map()
+
+  const register = (items, userField) => {
+    items.forEach((item) => {
+      const userId = String(item?.[userField] || "")
+      const date = dateFromRow(item)
+      if (!userId || !date) return
+      const current = latestActivity.get(userId)
+      if (!current || date > current) latestActivity.set(userId, date)
+    })
+  }
+
+  register(recentWodResults, "usuario_id")
+  register(recentPrRecords, "usuario")
+  register(recentAttendance, "usuario_id")
+
+  const today = startOfDay(now)
+  const safeThreshold = Math.max(0, Number(thresholdDays) || 0)
 
   return athletes.filter((athlete) => {
     const id = String(athlete.id)
-    return activeIds.has(id) && !activeActivityIds.has(id)
+    if (!activeIds.has(id)) return false
+
+    const last = latestActivity.get(id) || null
+    const daysWithoutActivity = last
+      ? Math.floor((today.getTime() - startOfDay(last).getTime()) / DAY_MS)
+      : 999
+
+    return daysWithoutActivity >= safeThreshold
   })
 }
 
-export function calculateWodParticipationRate({ activeAthleteCount = 0, publishedWodCount = 0, wodResults = [] }) {
+export function expandWodResultsWithParticipants(results = [], participantLinks = []) {
+  const linksByResult = new Map()
+
+  participantLinks.forEach((link) => {
+    const resultId = String(link?.wod_resultado_id || "")
+    const userId = String(link?.usuario_id || "")
+    if (!resultId || !userId) return
+    if (!linksByResult.has(resultId)) linksByResult.set(resultId, new Set())
+    linksByResult.get(resultId).add(userId)
+  })
+
+  const expanded = []
+
+  results.forEach((result) => {
+    const resultId = String(result?.id || "")
+    const participantIds = new Set()
+    const ownerId = String(result?.usuario_id || "")
+    if (ownerId) participantIds.add(ownerId)
+
+    ;(linksByResult.get(resultId) || []).forEach((userId) => participantIds.add(userId))
+
+    participantIds.forEach((userId) => {
+      expanded.push({
+        ...result,
+        source_result_id: result.id,
+        source_usuario_id: result.usuario_id,
+        usuario_id: userId,
+      })
+    })
+  })
+
+  return expanded
+}
+
+export function calculateWodParticipationRate({
+  activeAthleteCount = 0,
+  activeAthleteIds = null,
+  publishedWodCount = 0,
+  wodResults = [],
+}) {
   if (!activeAthleteCount || !publishedWodCount) return 0
+
+  const activeIds = activeAthleteIds instanceof Set
+    ? new Set([...activeAthleteIds].map((value) => String(value)))
+    : null
+  const eligibleResults = activeIds
+    ? wodResults.filter((row) => activeIds.has(String(row?.usuario_id || "")))
+    : wodResults
+
   const expected = activeAthleteCount * publishedWodCount
   const uniquePairs = new Set(
-    wodResults.filter((row) => row?.usuario_id && row?.wod_id).map((row) => `${row.usuario_id}:${row.wod_id}`)
+    eligibleResults
+      .filter((row) => row?.usuario_id && row?.wod_id)
+      .map((row) => `${row.usuario_id}:${row.wod_id}`)
   )
+
   return Math.min(100, Math.round((uniquePairs.size / expected) * 100))
 }
 
 function getAge(dateOfBirth, now = new Date()) {
   const date = parseLocalDate(dateOfBirth)
-  if (!date) return null
-  let age = now.getFullYear() - date.getFullYear()
-  const month = now.getMonth() - date.getMonth()
-  if (month < 0 || (month === 0 && now.getDate() < date.getDate())) age -= 1
+  const today = startOfDay(now)
+  if (!date || !today) return null
+
+  let age = today.getUTCFullYear() - date.getUTCFullYear()
+  const month = today.getUTCMonth() - date.getUTCMonth()
+  if (month < 0 || (month === 0 && today.getUTCDate() < date.getUTCDate())) age -= 1
   return age >= 0 && age < 120 ? age : null
 }
 
@@ -491,9 +681,10 @@ export function buildAthleteGrowthSeries({
       if (createdAt && createdAt > bucket.end) return false
 
       const membership = latestMembershipAtDate(memberships, athlete?.id, bucket.end)
-      if (!membership) return false
+      if (!membership || getMembershipStatus(membership, bucket.end).status !== "expired") return false
 
-      return getMembershipStatus(membership, bucket.end).status === "expired"
+      const end = parseLocalDate(membership?.fecha_fin)
+      return Boolean(end && end >= bucket.start && end <= bucket.end)
     }).length
 
     return {
@@ -595,7 +786,7 @@ export function buildAthleteStatistics({ athletes = [], memberships = [], nutrit
 
     return {
       id: athlete.id,
-      nombre: athlete.nombre || athlete.email || "Atleta PHO3NIX",
+      nombre: athlete.nombre || athlete.email || fallbackLabel(locale, "athlete"),
       email: athlete.email || "",
       fotoUrl: athlete.foto_url || "",
       sexo: normalizeGender(athlete.sexo),
@@ -617,10 +808,18 @@ export function buildAthleteStatistics({ athletes = [], memberships = [], nutrit
     const date = parseLocalDate(athlete.created_at)
     return date && date >= range.start && date <= range.end
   }).length
+  const membershipsByUser = new Map()
+  memberships.forEach((membership) => {
+    const userId = String(membership?.usuario_id || "")
+    if (!userId) return
+    if (!membershipsByUser.has(userId)) membershipsByUser.set(userId, [])
+    membershipsByUser.get(userId).push(membership)
+  })
+
   const memberDays = athletes
-    .map((athlete) => parseLocalDate(athlete.created_at))
+    .map((athlete) => getMemberStartDate(membershipsByUser.get(String(athlete.id)) || [], athlete.created_at))
     .filter(Boolean)
-    .map((date) => Math.max(0, Math.floor((startOfDay(now) - startOfDay(date)) / DAY_MS)))
+    .map((date) => Math.max(0, Math.floor((startOfDay(now).getTime() - date.getTime()) / DAY_MS)))
 
   const recentActivityMap = new Map()
   const registerRecent = (items, userField) => {
@@ -649,10 +848,11 @@ export function buildAthleteStatistics({ athletes = [], memberships = [], nutrit
   const genders = { male: 0, female: 0, unspecified: 0 }
   athletes.forEach((athlete) => { genders[normalizeGender(athlete.sexo)] += 1 })
 
-  const ages = { age18_24: 0, age25_34: 0, age35_44: 0, age45_54: 0, age55Plus: 0, unspecified: 0 }
+  const ages = { under18: 0, age18_24: 0, age25_34: 0, age35_44: 0, age45_54: 0, age55Plus: 0, unspecified: 0 }
   athletes.forEach((athlete) => {
     const age = getAge(athlete.fecha_nacimiento, now)
     if (age === null) ages.unspecified += 1
+    else if (age < 18) ages.under18 += 1
     else if (age <= 24) ages.age18_24 += 1
     else if (age <= 34) ages.age25_34 += 1
     else if (age <= 44) ages.age35_44 += 1
@@ -666,6 +866,7 @@ export function buildAthleteStatistics({ athletes = [], memberships = [], nutrit
       active: membershipData.summary.active,
       expiring: membershipData.summary.expiring,
       expired: membershipData.summary.expired,
+      upcoming: membershipData.summary.upcoming,
       missing: membershipData.summary.missing,
       newInPeriod,
       activeInPeriod: activityIds.size,
@@ -871,7 +1072,7 @@ function buildPrCollectiveSeries(rows = [], range, locale = "es") {
 }
 
 function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], exercises = [], athletes = [], comparisons = [], range, locale = "es" }) {
-  const exerciseMap = new Map(exercises.map((item) => [String(item.id), item.nombre || "Ejercicio"]))
+  const exerciseMap = new Map(exercises.map((item) => [String(item.id), item.nombre || fallbackLabel(locale, "exercise")]))
   const athleteMap = new Map(athletes.map((item) => [String(item.id), item]))
   const periodGroups = new Map()
   const historyGroups = new Map()
@@ -906,7 +1107,7 @@ function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], ex
       rankingGroups.get(userId).push(row)
     })
 
-    const ranking = Array.from(rankingGroups.entries()).map(([userId, athleteRows]) => {
+    const rankingRows = Array.from(rankingGroups.entries()).map(([userId, athleteRows]) => {
       const history = [...athleteRows]
         .sort((a, b) => (dateFromRow(a)?.getTime() || 0) - (dateFromRow(b)?.getTime() || 0))
         .map((row) => ({
@@ -923,7 +1124,7 @@ function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], ex
 
       return {
         userId,
-        nombre: athlete.nombre || athlete.email || "Atleta PHO3NIX",
+        nombre: athlete.nombre || athlete.email || fallbackLabel(locale, "athlete"),
         fotoUrl: athlete.foto_url || athlete.fotoUrl || "",
         sexo: normalizeGender(athlete.sexo),
         bestWeight: best?.weight || 0,
@@ -935,7 +1136,18 @@ function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], ex
         date: best?.date || latest?.date || null,
       }
     }).sort((a, b) => b.bestWeight - a.bestWeight || a.nombre.localeCompare(b.nombre))
-      .map((row, index) => ({ ...row, position: index + 1 }))
+
+    let lastBestWeight = null
+    let lastRankingPosition = 0
+    const ranking = rankingRows.map((row, index) => {
+      const position = index > 0 && Number(row.bestWeight) === Number(lastBestWeight)
+        ? lastRankingPosition
+        : index + 1
+
+      lastBestWeight = row.bestWeight
+      lastRankingPosition = position
+      return { ...row, position }
+    })
 
     const positivePercents = improvedEvents.map((row) => row.percent)
     const positiveDifferences = improvedEvents.map((row) => row.difference)
@@ -944,7 +1156,7 @@ function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], ex
 
     return {
       exerciseId,
-      exercise: exerciseMap.get(exerciseId) || "Ejercicio",
+      exercise: exerciseMap.get(exerciseId) || fallbackLabel(locale, "exercise"),
       periodRecords: rows.length,
       totalRecords: allRows.length,
       uniqueAthletes: uniqueAthletes.size,
@@ -966,7 +1178,7 @@ function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], ex
           return {
             id: row.id,
             userId: String(row.usuario || ""),
-            nombre: athlete.nombre || athlete.email || "Atleta PHO3NIX",
+            nombre: athlete.nombre || athlete.email || fallbackLabel(locale, "athlete"),
             fotoUrl: athlete.foto_url || athlete.fotoUrl || "",
             weight: Number(row.peso_libras || 0),
             date: row.fecha || row.created_at,
@@ -977,7 +1189,7 @@ function buildPrExerciseStatistics({ periodRecords = [], historyRecords = [], ex
 }
 
 export function buildPrStatistics({ prRecords = [], historyRecords = prRecords, exercises = [], athletes = [], range, locale = "es" }) {
-  const exerciseMap = new Map(exercises.map((item) => [String(item.id), item.nombre || "Ejercicio"]))
+  const exerciseMap = new Map(exercises.map((item) => [String(item.id), item.nombre || fallbackLabel(locale, "exercise")]))
   const athleteMap = new Map(athletes.map((item) => [String(item.id), item]))
   const uniqueAthletes = new Set(prRecords.map((row) => String(row.usuario || "")).filter(Boolean))
   const uniqueExercises = new Set(prRecords.map((row) => String(row.ejercicio_id || "")).filter(Boolean))
@@ -1005,7 +1217,7 @@ export function buildPrStatistics({ prRecords = [], historyRecords = prRecords, 
     const athleteImprovements = improvements.filter((event) => event.userId === row.userId)
     return {
       userId: row.userId,
-      nombre: athlete.nombre || athlete.email || "Atleta PHO3NIX",
+      nombre: athlete.nombre || athlete.email || fallbackLabel(locale, "athlete"),
       fotoUrl: athlete.foto_url || "",
       count: row.count,
       exercises: row.exercises.size,
@@ -1024,9 +1236,9 @@ export function buildPrStatistics({ prRecords = [], historyRecords = prRecords, 
       const athlete = athleteMap.get(row.userId) || {}
       return {
         ...row,
-        nombre: athlete.nombre || athlete.email || "Atleta PHO3NIX",
+        nombre: athlete.nombre || athlete.email || fallbackLabel(locale, "athlete"),
         fotoUrl: athlete.foto_url || "",
-        exercise: exerciseMap.get(row.exerciseId) || "Ejercicio",
+        exercise: exerciseMap.get(row.exerciseId) || fallbackLabel(locale, "exercise"),
       }
     })
 
@@ -1056,15 +1268,15 @@ export function buildPrStatistics({ prRecords = [], historyRecords = prRecords, 
       comparablePairs: comparablePairs.size,
     },
     trendSeries: buildPrTrendSeries({ periodRecords: prRecords, comparisons, firstMarks, range, locale }),
-    topMovements: buildPrMovementSeries(prRecords, exercises, 8),
+    topMovements: buildPrMovementSeries(prRecords, exercises, 8, locale),
     topAthletes,
     improvementLeaders,
     exerciseStats,
   }
 }
 
-function buildAthletePrExercises(prRecords = [], exercises = []) {
-  const exerciseMap = new Map(exercises.map((item) => [String(item.id), item.nombre || "Ejercicio"]))
+function buildAthletePrExercises(prRecords = [], exercises = [], locale = "es") {
+  const exerciseMap = new Map(exercises.map((item) => [String(item.id), item.nombre || fallbackLabel(locale, "exercise")]))
   const groups = new Map()
 
   prRecords.forEach((row) => {
@@ -1094,7 +1306,7 @@ function buildAthletePrExercises(prRecords = [], exercises = []) {
 
     return {
       exerciseId,
-      exercise: exerciseMap.get(exerciseId) || "Ejercicio",
+      exercise: exerciseMap.get(exerciseId) || fallbackLabel(locale, "exercise"),
       records: history.length,
       latest,
       previous,
@@ -1108,18 +1320,18 @@ function buildAthletePrExercises(prRecords = [], exercises = []) {
 export function buildAthleteDetail({ athlete, memberships = [], exercises = [], prRecords = [], wodResults = [], totalWodCount = 0, latestWod = null, attendance = [], latestAttendance = null, range, locale = "es", now = new Date(), diagnostics = [] }) {
   if (!athlete) return { ...EMPTY_ATHLETE_DETAIL, range: { days: range.days, startIso: range.startIso, endIso: range.endIso }, diagnostics }
 
-  const membershipHistory = [...memberships].sort((a, b) => (parseLocalDate(b.fecha_fin || b.created_at)?.getTime() || 0) - (parseLocalDate(a.fecha_fin || a.created_at)?.getTime() || 0))
-  const membership = membershipHistory[0] || null
+  const membershipHistory = [...memberships].sort(compareMembershipsLatestFirst)
+  const membership = selectRelevantMembership(membershipHistory, now)
   const membershipStatus = getMembershipStatus(membership, now)
   const prPeriod = prRecords.filter((row) => {
     const date = dateFromRow(row)
     return date && date >= range.start && date <= range.end
   })
-  const prExercises = buildAthletePrExercises(prRecords, exercises)
+  const prExercises = buildAthletePrExercises(prRecords, exercises, locale)
   const prHistory = [...prRecords].sort((a, b) => (dateFromRow(b)?.getTime() || 0) - (dateFromRow(a)?.getTime() || 0)).map((row) => ({
     id: row.id,
     exerciseId: String(row.ejercicio_id || ""),
-    exercise: exercises.find((item) => String(item.id) === String(row.ejercicio_id))?.nombre || "Ejercicio",
+    exercise: exercises.find((item) => String(item.id) === String(row.ejercicio_id))?.nombre || fallbackLabel(locale, "exercise"),
     weight: Number(row.peso_libras || 0),
     date: row.fecha || row.created_at,
   }))
@@ -1130,8 +1342,8 @@ export function buildAthleteDetail({ athlete, memberships = [], exercises = [], 
     ...attendance.map(dateKey),
   ].filter(Boolean))
   const lastActivityDate = newestDate(latestWod, prRecords.at(-1), latestAttendance)
-  const memberStart = parseLocalDate(athlete.created_at || membership?.fecha_inicio)
-  const memberDays = memberStart ? Math.max(0, Math.floor((startOfDay(now) - startOfDay(memberStart)) / DAY_MS)) : 0
+  const memberStart = getMemberStartDate(membershipHistory, athlete.created_at)
+  const memberDays = memberStart ? Math.max(0, Math.floor((startOfDay(now).getTime() - memberStart.getTime()) / DAY_MS)) : 0
   const weeks = Math.max(range.days / 7, 1)
   const improvementEvents = buildImprovementEvents(prRecords)
   const biggestImprovement = [...improvementEvents].sort((a, b) => b.percent - a.percent)[0] || null
@@ -1148,7 +1360,7 @@ export function buildAthleteDetail({ athlete, memberships = [], exercises = [], 
   return {
     athlete: {
       id: athlete.id,
-      nombre: athlete.nombre || athlete.email || "Atleta PHO3NIX",
+      nombre: athlete.nombre || athlete.email || fallbackLabel(locale, "athlete"),
       email: athlete.email || "",
       fotoUrl: athlete.foto_url || athlete.fotoUrl || "",
       sexo: normalizeGender(athlete.sexo),
@@ -1207,6 +1419,20 @@ function escapeCsv(value) {
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text
 }
 
+function csvWodCategoryLabel(copy, key) {
+  const labels = {
+    strength: copy.wodCategoryStrength,
+    weightlifting: copy.wodCategoryWeightlifting,
+    gymnastics: copy.wodCategoryGymnastics,
+    cardio: copy.wodCategoryCardio,
+    mixed: copy.wodCategoryMixed,
+    metcon: copy.wodCategoryMetcon,
+    other: copy.wodCategoryOther,
+  }
+
+  return labels[key] || labels.other || String(key || "")
+}
+
 export function buildStatisticsCsv(data, copy, locale = "es") {
   const rows = [
     [copy.csvSection, copy.csvMetric, copy.csvValue],
@@ -1227,19 +1453,20 @@ export function buildStatisticsCsv(data, copy, locale = "es") {
     [copy.memberships, copy.active, data.membershipSummary.active],
     [copy.memberships, copy.expiring, data.membershipSummary.expiring],
     [copy.memberships, copy.expired, data.membershipSummary.expired],
+    [copy.memberships, copy.upcoming, data.membershipSummary.upcoming],
     [copy.memberships, copy.missing, data.membershipSummary.missing],
     [],
     [copy.csvSection, copy.csvLabel, copy.csvCount],
     ...data.activitySeries.map((item) => [copy.activityTitle, item.label, item.value]),
     ...data.wodWeekSeries.map((item) => [copy.participationByDay, item.label, item.value]),
-    ...(data.wodStats?.categorySeries || []).map((item) => [copy.wodTypeDistribution, item.key, item.value]),
+    ...(data.wodStats?.categorySeries || []).map((item) => [copy.wodTypeDistribution, csvWodCategoryLabel(copy, item.key), item.value]),
     ...(data.wodStats?.groupPerformanceSeries || []).flatMap((category) =>
-      (category.series || []).map((item) => [copy.groupPerformanceIndex, `${category.key}: ${item.name}`, `${item.score}%`])
+      (category.series || []).map((item) => [copy.groupPerformanceIndex, `${csvWodCategoryLabel(copy, category.key)}: ${item.name}`, `${item.score}%`])
     ),
     ...data.prMovementSeries.map((item) => [copy.topPrMovements, item.label, item.value]),
     [],
     [copy.periodLabel, `${data.range.startIso} - ${data.range.endIso}`],
-    [copy.generatedAt, new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-EC", { dateStyle: "medium", timeStyle: "short" }).format(new Date())],
+    [copy.generatedAt, new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-EC", { dateStyle: "medium", timeStyle: "short", timeZone: STATISTICS_TIME_ZONE }).format(new Date())],
   ]
 
   return `\uFEFF${rows.map((row) => row.map(escapeCsv).join(",")).join("\n")}`
@@ -1401,27 +1628,18 @@ function sameRankingMark(wod, a, b) {
   return aMetric.completed === bMetric.completed && aMetric.value === bMetric.value
 }
 
-export function buildWodRanking({ wod, results = [], users = [] }) {
+export function buildWodRanking({ wod, results = [], users = [], locale = "es" }) {
   const usersMap = new Map(users.map((user) => [String(user.id), user]))
   const mode = String(wod?.modo_ranking || "sin_ranking").toLowerCase()
-  const sorted = results.filter(resultHasMark).slice().sort((a, b) => compareWodResults(wod, a, b))
+  const marked = results.filter(resultHasMark)
 
-  let lastPosition = 0
-  return sorted.map((result, index) => {
+  const toRankingRow = (result, position = null) => {
     const user = usersMap.get(String(result.usuario_id || "")) || {}
-    const position = mode === "sin_ranking"
-      ? null
-      : index > 0 && sameRankingMark(wod, result, sorted[index - 1])
-        ? lastPosition
-        : index + 1
-
-    if (position) lastPosition = position
-
     return {
       id: result.id,
       position,
       userId: result.usuario_id,
-      name: user.nombre || user.email || "Atleta PHO3NIX",
+      name: user.nombre || user.email || fallbackLabel(locale, "athlete"),
       photoUrl: user.foto_url || user.fotoUrl || "",
       gender: user.sexo || "",
       modality: result.modalidad || wod?.modalidad || "",
@@ -1429,7 +1647,32 @@ export function buildWodRanking({ wod, results = [], users = [] }) {
       calories: Number(result.calorias_estimadas || 0),
       date: result.fecha || result.created_at,
     }
+  }
+
+  if (mode === "sin_ranking") {
+    return marked.map((result) => toRankingRow(result, null))
+  }
+
+  const comparable = marked
+    .filter((result) => Boolean(resultMetric(wod, result)))
+    .slice()
+    .sort((a, b) => compareWodResults(wod, a, b))
+  const nonComparable = marked.filter((result) => !resultMetric(wod, result))
+
+  let lastPosition = 0
+  const ranked = comparable.map((result, index) => {
+    const position = index > 0 && sameRankingMark(wod, result, comparable[index - 1])
+      ? lastPosition
+      : index + 1
+
+    lastPosition = position
+    return toRankingRow(result, position)
   })
+
+  return [
+    ...ranked,
+    ...nonComparable.map((result) => toRankingRow(result, null)),
+  ]
 }
 
 
@@ -1663,13 +1906,21 @@ function buildWodGroupPerformanceSeries({ wods = [], results = [] }) {
 export function buildWodStatistics({
   wods = [],
   results = [],
+  participationResults = results,
   users = [],
   activeAthleteCount = 0,
+  activeAthleteIds = null,
+  locale = "es",
 }) {
   const visibleWods = wods.slice().sort((a, b) => {
     return (parseLocalDate(b.fecha)?.getTime() || 0) - (parseLocalDate(a.fecha)?.getTime() || 0)
   })
   const resultsByWod = new Map()
+  const participationByWod = new Map()
+  const activeIds = activeAthleteIds instanceof Set
+    ? new Set([...activeAthleteIds].map((value) => String(value)))
+    : null
+
   results.forEach((result) => {
     const key = String(result.wod_id || "")
     if (!key) return
@@ -1678,11 +1929,23 @@ export function buildWodStatistics({
     resultsByWod.set(key, rows)
   })
 
+  participationResults.forEach((result) => {
+    const key = String(result.wod_id || "")
+    if (!key) return
+    const rows = participationByWod.get(key) || []
+    rows.push(result)
+    participationByWod.set(key, rows)
+  })
+
   const detailedWods = visibleWods.map((wod) => {
     const wodResults = resultsByWod.get(String(wod.id)) || []
-    const participantIds = new Set(wodResults.filter(resultHasMark).map((row) => String(row.usuario_id || "")).filter(Boolean))
+    const wodParticipationResults = participationByWod.get(String(wod.id)) || []
+    const participantIds = new Set(wodParticipationResults.map((row) => String(row.usuario_id || "")).filter(Boolean))
+    const rateParticipantIds = activeIds
+      ? new Set([...participantIds].filter((userId) => activeIds.has(userId)))
+      : participantIds
     const participationRate = activeAthleteCount
-      ? Math.min(100, Math.round((participantIds.size / activeAthleteCount) * 100))
+      ? Math.min(100, Math.round((rateParticipantIds.size / activeAthleteCount) * 100))
       : 0
 
     return {
@@ -1695,7 +1958,7 @@ export function buildWodStatistics({
       category: classifyWodCategory(wod),
       participantCount: participantIds.size,
       participationRate,
-      ranking: buildWodRanking({ wod, results: wodResults, users }),
+      ranking: buildWodRanking({ wod, results: wodResults, users, locale }),
     }
   })
 
@@ -1712,7 +1975,7 @@ export function buildWodStatistics({
     }
   })
 
-  const uniqueAthletes = new Set(results.filter(resultHasMark).map((row) => String(row.usuario_id || "")).filter(Boolean)).size
+  const uniqueAthletes = new Set(participationResults.map((row) => String(row.usuario_id || "")).filter(Boolean)).size
   const participationValues = detailedWods.map((wod) => wod.participationRate)
   const averageParticipation = participationValues.length
     ? Math.round(participationValues.reduce((sum, value) => sum + value, 0) / participationValues.length)
@@ -1721,7 +1984,7 @@ export function buildWodStatistics({
   return {
     summary: {
       totalWods,
-      totalResults: results.filter(resultHasMark).length,
+      totalResults: results.length,
       uniqueAthletes,
       averageParticipation,
     },

@@ -6,7 +6,7 @@ import {
   StatisticsKpis,
 } from "./AdminStatisticsDetailShared.jsx"
 
-export default function AdminAthleteStatistics({ copy, stats }) {
+export default function AdminAthleteStatistics({ copy, locale = "es", stats }) {
   return (
     <section className="admin-statistics-special-section admin-athlete-statistics-section">
       <div className="admin-statistics-special-heading">
@@ -28,6 +28,7 @@ function AthleteGeneral({ copy, stats }) {
     { key: "active", label: copy.membershipActive, value: summary.active || 0 },
     { key: "expiring", label: copy.membershipExpiring, value: summary.expiring || 0 },
     { key: "expired", label: copy.membershipExpired, value: summary.expired || 0 },
+    { key: "upcoming", label: copy.membershipUpcoming, value: summary.upcoming || 0 },
     { key: "missing", label: copy.membershipMissing, value: summary.missing || 0 },
   ]
   const genderRows = (stats?.genderSeries || []).map((row) => ({
@@ -87,6 +88,7 @@ function AthleteGeneral({ copy, stats }) {
           rows={nutritionRows}
           emptyText={copy.noNutritionData}
           totalLabel={copy.athletes}
+          locale={locale}
         />
       </div>
     </>

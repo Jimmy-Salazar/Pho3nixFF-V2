@@ -1,4 +1,4 @@
-# Logs
+﻿# Logs
 logs
 *.log
 npm-debug.log*
@@ -8,9 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Dependencies / build
-node_modules
-dist
-dist-ssr
+node_modules/
+dist/
+dist-ssr/
 *.local
 
 # Environment variables
@@ -18,23 +18,37 @@ dist-ssr
 .env.*
 !.env.example
 
-# Vercel
-.vercel
+# Vercel local metadata
+.vercel/
 
-# Editor directories and files
+# Supabase local CLI metadata
+supabase/.temp/
+
+# Editor
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-# PHO3NIX local backups
-.pho3nix-backups/
-*.bak-upcoming-events
 
 # PHO3NIX local backups
 .pho3nix-backups/
 *.bak-upcoming-events
+
+# Local audit snapshots
+admin-statistics-*.txt
+athlete-progress-*.txt
+
+# Local patch/audit tooling
+tools/backups/
+tools/replacements/
+tools/apply-*.cjs
+tools/snapshot-*.cjs
+tools/audit-*.cjs
+
+# PHO3NIX local audit / patch tooling
+tools/

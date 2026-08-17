@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { buildLinePoints } from "../utils/adminStatisticsUtils.js"
+import { buildLinePoints, parseLocalDate } from "../utils/adminStatisticsUtils.js"
 
 export function StatisticsSubTabs({ copy, mode, onMode, includeExercise = false }) {
   return (
@@ -198,6 +198,7 @@ export function StatisticsPieChart({
   rows = [],
   emptyText,
   totalLabel,
+  locale = "es",
 }) {
   const visibleRows = rows.filter((row) => Number(row.value || 0) > 0)
   const total = visibleRows.reduce((sum, row) => sum + Number(row.value || 0), 0)
@@ -227,7 +228,7 @@ export function StatisticsPieChart({
                 <i className={`is-slice-${index + 1}`} />
                 <span>
                   <strong>{row.label}</strong>
-                  <small>{row.value} · {Number(row.percentage || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })}%</small>
+                  <small>{row.value} · {Number(row.percentage || 0).toLocaleString(locale === "en" ? "en-US" : "es-EC", { maximumFractionDigits: 1 })}%</small>
                 </span>
               </div>
             ))}
@@ -259,14 +260,18 @@ export function StatisticsDistribution({ title, subtitle, rows = [], emptyText }
   )
 }
 
-export function AthleteIdentity({ athlete, copy, membershipStatus, membership }) {
+export function AthleteIdentity({ athlete, copy, locale = "es", membershipStatus, membership }) {
   if (!athlete) return null
   const label = membershipLabel(copy, membershipStatus?.status)
   const help = membershipStatus?.status === "expiring"
     ? copy.expiresIn.replace("{count}", String(membershipStatus.daysLeft ?? 0))
-    : membership?.fecha_fin
-      ? copy.validUntil.replace("{date}", formatDate(membership.fecha_fin))
-      : copy.membershipMissing
+    : membershipStatus?.status === "upcoming" && membership?.fecha_inicio
+      ? copy.startsOn.replace("{date}", formatDate(membership.fecha_inicio, locale))
+      : membership?.fecha_fin
+        ? copy.validUntil.replace("{date}", formatDate(membership.fecha_fin, locale))
+        : membershipStatus?.active
+          ? copy.membershipOpenEnded
+          : copy.membershipMissing
 
   return (
     <section className="admin-statistics-athlete-identity">
@@ -300,9 +305,15 @@ export function StatisticsEmpty({ text }) {
 
 export function formatDate(value, locale = "es") {
   if (!value) return "—"
-  const date = new Date(String(value).length === 10 ? `${value}T00:00:00` : value)
-  if (Number.isNaN(date.getTime())) return String(value)
-  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-EC", { day: "2-digit", month: "short", year: "numeric" }).format(date)
+  const date = parseLocalDate(value)
+  if (!date) return String(value)
+
+  return new Intl.DateTimeFormat(locale === "en" ? "en-US" : "es-EC", {
+    timeZone: "UTC",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date)
 }
 
 export function formatWeight(value) {
@@ -313,6 +324,7 @@ export function membershipLabel(copy, status) {
   if (status === "active") return copy.membershipActive
   if (status === "expiring") return copy.membershipExpiring
   if (status === "expired") return copy.membershipExpired
+  if (status === "upcoming") return copy.membershipUpcoming
   return copy.membershipMissing
 }
 

@@ -1,3 +1,4 @@
+
 import { createClient } from "npm:@supabase/supabase-js@2"
 
 const corsHeaders = {
@@ -6,6 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 }
 
+const MAX_ANALYSIS_TEXT_LENGTH = 3000
 const ANALYSIS_FIELDS = [
   "resumen",
   "diagnostico",
@@ -45,7 +47,13 @@ function extractFields(row: Record<string, unknown>): AnalysisTranslation {
 function isCompleteTranslation(value: unknown): value is AnalysisTranslation {
   if (!value || typeof value !== "object") return false
   const objectValue = value as Record<string, unknown>
-  return ANALYSIS_FIELDS.every((field) => typeof objectValue[field] === "string")
+
+  return ANALYSIS_FIELDS.every((field) => {
+    const text = objectValue[field]
+    return typeof text === "string"
+      && text.trim().length > 0
+      && text.length <= MAX_ANALYSIS_TEXT_LENGTH
+  })
 }
 
 function detectSourceLocale(row: Record<string, any>): Locale {
@@ -88,17 +96,11 @@ async function translateWithGemini(
     || "gemini-3.5-flash-lite"
 
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY no está configurada.")
+    throw new Error("AI_CONFIGURATION_ERROR")
   }
 
   const sourceLanguage = sourceLocale === "en" ? "English" : "Spanish"
   const targetLanguage = targetLocale === "en" ? "English" : "Spanish"
-
-  console.log("Nutrition translation model", {
-    model,
-    sourceLocale,
-    targetLocale,
-  })
 
   const prompt = [
     `Translate the JSON values from ${sourceLanguage} to ${targetLanguage}.`,
@@ -135,26 +137,27 @@ async function translateWithGemini(
   const body = await response.json()
 
   if (!response.ok) {
-    const message = body?.error?.message || "Gemini translation request failed."
-    throw new Error(message)
+    console.error("Gemini nutrition translation failed", {
+      status: response.status,
+      model,
+      error: body?.error?.message || "unknown",
+    })
+    throw new Error("AI_PROVIDER_ERROR")
   }
 
   const rawText = body?.candidates?.[0]?.content?.parts?.[0]?.text
-
-  if (!rawText) {
-    throw new Error("Gemini no devolvió una traducción.")
-  }
+  if (!rawText) throw new Error("INVALID_TRANSLATION_RESPONSE")
 
   let parsed: unknown
 
   try {
-    parsed = JSON.parse(stripJsonFence(rawText))
+    parsed = JSON.parse(stripJsonFence(String(rawText)))
   } catch {
-    throw new Error("Gemini devolvió un JSON de traducción inválido.")
+    throw new Error("INVALID_TRANSLATION_RESPONSE")
   }
 
   if (!isCompleteTranslation(parsed)) {
-    throw new Error("La respuesta traducida está incompleta.")
+    throw new Error("INVALID_TRANSLATION_RESPONSE")
   }
 
   return parsed
@@ -166,26 +169,23 @@ Deno.serve(async (request) => {
   }
 
   if (request.method !== "POST") {
-    return jsonResponse({ error: "Método no permitido." }, 405)
+    return jsonResponse({ error: "METHOD_NOT_ALLOWED" }, 405)
   }
 
   try {
     const authorization = request.headers.get("Authorization")
 
     if (!authorization) {
-      return jsonResponse({ error: "Sesión no encontrada." }, 401)
+      return jsonResponse({ error: "NO_AUTH_USER" }, 401)
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")
     const publicKey =
       Deno.env.get("SUPABASE_ANON_KEY")
       || Deno.env.get("SUPABASE_PUBLISHABLE_KEY")
-    const secretKey =
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
-      || Deno.env.get("SUPABASE_SECRET_KEY")
 
-    if (!supabaseUrl || !publicKey || !secretKey) {
-      throw new Error("Faltan variables internas de Supabase.")
+    if (!supabaseUrl || !publicKey) {
+      throw new Error("SERVER_CONFIGURATION_ERROR")
     }
 
     const userClient = createClient(supabaseUrl, publicKey, {
@@ -206,31 +206,24 @@ Deno.serve(async (request) => {
     } = await userClient.auth.getUser()
 
     if (userError || !user) {
-      return jsonResponse({ error: "Sesión inválida." }, 401)
+      return jsonResponse({ error: "NO_AUTH_USER" }, 401)
     }
 
-    const payload = await request.json()
+    const payload = await request.json().catch(() => ({}))
     const analysisId = String(payload?.analysis_id || "").trim()
     const targetLocale = normalizeLocale(payload?.target_locale)
 
     if (!analysisId) {
-      return jsonResponse({ error: "analysis_id es obligatorio." }, 400)
+      return jsonResponse({ error: "INVALID_ANALYSIS_ID" }, 400)
     }
 
     if (!targetLocale) {
-      return jsonResponse({ error: "target_locale debe ser es o en." }, 400)
+      return jsonResponse({ error: "INVALID_TARGET_LOCALE" }, 400)
     }
 
-    const adminClient = createClient(supabaseUrl, secretKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      },
-    })
-
-    const { data: analysis, error: analysisError } = await adminClient
+    const { data: analysis, error: analysisError } = await userClient
       .from("nutricion_analisis")
-      .select("*")
+      .select("id,usuario_id,resumen,diagnostico,nutricion,entrenamiento,pre_wod,post_wod,hidratacion,descanso,alerta,respuesta_json")
       .eq("id", analysisId)
       .eq("usuario_id", user.id)
       .maybeSingle()
@@ -238,24 +231,27 @@ Deno.serve(async (request) => {
     if (analysisError) throw analysisError
 
     if (!analysis) {
-      return jsonResponse({ error: "Análisis no encontrado." }, 404)
+      return jsonResponse({ error: "ANALYSIS_NOT_FOUND" }, 404)
     }
 
     const responseJson = analysis.respuesta_json || {}
     const cached = responseJson?.translations?.[targetLocale]
+    const sourceLocale = detectSourceLocale(analysis)
 
     if (isCompleteTranslation(cached)) {
       return jsonResponse({
         translation: cached,
-        source_locale: detectSourceLocale(analysis),
+        source_locale: sourceLocale,
         target_locale: targetLocale,
         cached: true,
-        respuesta_json: responseJson,
       })
     }
 
-    const sourceLocale = detectSourceLocale(analysis)
     const original = extractFields(analysis)
+
+    if (!isCompleteTranslation(original)) {
+      return jsonResponse({ error: "INVALID_SOURCE_ANALYSIS" }, 422)
+    }
 
     if (sourceLocale === targetLocale) {
       return jsonResponse({
@@ -263,7 +259,6 @@ Deno.serve(async (request) => {
         source_locale: sourceLocale,
         target_locale: targetLocale,
         cached: true,
-        respuesta_json: responseJson,
       })
     }
 
@@ -273,46 +268,60 @@ Deno.serve(async (request) => {
       targetLocale,
     )
 
-    const nextResponseJson = {
-      ...responseJson,
-      source_locale: sourceLocale,
-      translations: {
-        ...(responseJson?.translations || {}),
-        [sourceLocale]: isCompleteTranslation(
-          responseJson?.translations?.[sourceLocale],
-        )
-          ? responseJson.translations[sourceLocale]
-          : original,
-        [targetLocale]: translation,
-      },
+    const secretKey =
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+      || Deno.env.get("SUPABASE_SECRET_KEY")
+
+    if (!secretKey) {
+      throw new Error("SERVER_CONFIGURATION_ERROR")
     }
 
-    const { error: updateError } = await adminClient
-      .from("nutricion_analisis")
-      .update({ respuesta_json: nextResponseJson })
-      .eq("id", analysis.id)
-      .eq("usuario_id", user.id)
+    const adminClient = createClient(supabaseUrl, secretKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    })
 
-    if (updateError) throw updateError
+    const { data: merged, error: mergeError } = await adminClient.rpc(
+      "merge_nutrition_analysis_translation",
+      {
+        p_analysis_id: analysis.id,
+        p_usuario_id: user.id,
+        p_source_locale: sourceLocale,
+        p_target_locale: targetLocale,
+        p_source: original,
+        p_translation: translation,
+      },
+    )
+
+    if (mergeError) throw mergeError
+    if (merged !== true) {
+      return jsonResponse({ error: "ANALYSIS_NOT_FOUND" }, 404)
+    }
 
     return jsonResponse({
       translation,
       source_locale: sourceLocale,
       target_locale: targetLocale,
       cached: false,
-      respuesta_json: nextResponseJson,
     })
   } catch (error) {
-    console.error("traducir-analisis-nutricion:", error)
+    const message = error instanceof Error ? error.message : String(error || "")
 
-    return jsonResponse(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "No se pudo traducir el análisis.",
-      },
-      500,
-    )
+    if (
+      message === "AI_PROVIDER_ERROR"
+      || message === "AI_CONFIGURATION_ERROR"
+      || message === "INVALID_TRANSLATION_RESPONSE"
+    ) {
+      return jsonResponse({ error: message }, 502)
+    }
+
+    if (message === "SERVER_CONFIGURATION_ERROR") {
+      return jsonResponse({ error: message }, 500)
+    }
+
+    console.error("traducir-analisis-nutricion:", error)
+    return jsonResponse({ error: "TRANSLATION_FAILED" }, 500)
   }
 })

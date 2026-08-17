@@ -16,9 +16,9 @@ export default function StudentAnalysisHistoryCard({ copy, history, locale, goal
             <div key={item.id}>
               <span>
                 <strong>{goalLabels[item.meta] || item.meta || copy.monthlyAnalysis}</strong>
-                <small>{formatDate(item.fecha_analisis, locale)} · {numberText(item.peso_kg)} kg</small>
+                <small>{formatDate(item.fecha_analisis, locale)} · {numberText(item.peso_kg, 1, locale)} kg</small>
               </span>
-              <b>{item.score_pho3nix || 0}/100</b>
+              <b>{item.score_pho3nix === null || item.score_pho3nix === undefined ? "--" : numberText(item.score_pho3nix, 0, locale)}/100</b>
             </div>
           ))}
         </div>

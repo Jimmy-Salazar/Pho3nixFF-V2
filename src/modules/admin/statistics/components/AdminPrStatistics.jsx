@@ -101,6 +101,7 @@ function PrGeneral({ copy, locale, stats }) {
           rows={distributionRows}
           emptyText={copy.noPrData}
           totalLabel={copy.records}
+          locale={locale}
         />
 
         <ExerciseProgressTable copy={copy} rows={stats?.exerciseStats || []} />
@@ -392,7 +393,21 @@ function PrCollectiveIndexChart({ copy, series, exercise }) {
 
 function ExerciseRankingTable({ copy, locale, rows }) {
   const [gender, setGender] = useState("all")
-  const filtered = rows.filter((row) => gender === "all" || row.sexo === gender)
+  const filtered = useMemo(() => {
+    const subset = rows.filter((row) => gender === "all" || row.sexo === gender)
+    let lastBestWeight = null
+    let lastPosition = 0
+
+    return subset.map((row, index) => {
+      const position = index > 0 && Number(row.bestWeight) === Number(lastBestWeight)
+        ? lastPosition
+        : index + 1
+
+      lastBestWeight = row.bestWeight
+      lastPosition = position
+      return { ...row, displayPosition: position }
+    })
+  }, [gender, rows])
 
   return (
     <article className="admin-statistics-detail-panel is-wide admin-statistics-data-panel admin-pr-ranking-panel">
@@ -411,7 +426,7 @@ function ExerciseRankingTable({ copy, locale, rows }) {
             <tbody>
               {filtered.map((row) => (
                 <tr key={row.userId}>
-                  <td><strong className="admin-statistics-position-inline">#{row.position}</strong></td>
+                  <td><strong className="admin-statistics-position-inline">#{row.displayPosition}</strong></td>
                   <td><div className="admin-statistics-table-athlete"><Avatar athlete={{ nombre: row.nombre, fotoUrl: row.fotoUrl }} /><span><strong>{row.nombre}</strong></span></div></td>
                   <td>{genderLabel(copy, row.sexo)}</td>
                   <td><strong className="is-orange-text">{formatWeight(row.bestWeight)}</strong></td>
@@ -499,7 +514,7 @@ function PrIndividual({ copy, locale, athletes, selectedAthleteId, onSelectAthle
       <AthletePicker copy={copy} athletes={athletes} value={selectedAthleteId} onChange={onSelectAthlete} />
       {loading ? <StatisticsLoading copy={copy} /> : error ? <StatisticsError copy={copy} message={error} onRetry={onRetry} /> : detail?.athlete ? (
         <>
-          <AthleteIdentity athlete={detail.athlete} copy={copy} membershipStatus={detail.membershipStatus} membership={detail.membership} />
+          <AthleteIdentity athlete={detail.athlete} copy={copy} locale={locale} membershipStatus={detail.membershipStatus} membership={detail.membership} />
           <StatisticsKpis items={[
             { icon: "PR", label: copy.totalPrs, value: detail.prSummary.total, help: `${detail.prSummary.period} ${copy.periodPrs}` },
             { icon: "⌁", label: copy.exercisesWithMarks, value: detail.prSummary.exercises, help: copy.exercise },

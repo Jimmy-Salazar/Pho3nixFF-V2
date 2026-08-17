@@ -1,0 +1,8 @@
+
+project_id = "phoenix-v2"
+
+[functions.analizar-nutricion-ia]
+verify_jwt = true
+
+[functions.traducir-analisis-nutricion]
+verify_jwt = true

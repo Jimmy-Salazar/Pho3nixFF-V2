@@ -74,6 +74,7 @@ export default function AdminWodStatistics({ copy, locale, stats }) {
           rows={categoryRows}
           emptyText={copy.noWodTypeData}
           totalLabel={copy.wods}
+          locale={locale}
         />
 
         <WodGroupPerformanceChart
@@ -255,25 +256,25 @@ function WodGroupPerformanceChart({ copy, locale, categories }) {
           <div className="admin-wod-group-performance-summary">
             <PerformanceSummaryCard
               label={copy.firstWodPerformance}
-              value={`${formatDecimal(category.firstScore)}%`}
+              value={`${formatDecimal(category.firstScore, locale)}%`}
               help={rows[0]?.name || "—"}
             />
             <PerformanceSummaryCard
               label={copy.latestWodPerformance}
-              value={`${formatDecimal(category.latestScore)}%`}
+              value={`${formatDecimal(category.latestScore, locale)}%`}
               help={rows.at(-1)?.name || "—"}
             />
             <PerformanceSummaryCard
               label={copy.evolutionPoints}
-              value={hasEvolution ? `${formatSigned(category.deltaPoints)} ${copy.percentagePointsShort}` : "—"}
+              value={hasEvolution ? `${formatSigned(category.deltaPoints, locale)} ${copy.percentagePointsShort}` : "—"}
               help={hasEvolution
-                ? `${trendLabel(copy, category.trend)} · ${copy.relativeVariation}: ${formatSigned(category.relativeChange)}%`
+                ? `${trendLabel(copy, category.trend)} · ${copy.relativeVariation}: ${formatSigned(category.relativeChange, locale)}%`
                 : copy.singleWodNoTrend}
               tone={hasEvolution ? category.trend : "stable"}
             />
             <PerformanceSummaryCard
               label={copy.averagePerformance}
-              value={`${formatDecimal(category.averageScore)}%`}
+              value={`${formatDecimal(category.averageScore, locale)}%`}
               help={`${category.wodCount} ${copy.wods.toLowerCase()}`}
             />
           </div>
@@ -313,7 +314,7 @@ function WodGroupPerformanceChart({ copy, locale, categories }) {
                     <title>{performanceTooltip(copy, locale, point)}</title>
                   </circle>
                   <text x={point.x} y={point.y - 13} textAnchor="middle" className="admin-wod-group-point-value">
-                    {formatDecimal(point.score)}%
+                    {formatDecimal(point.score, locale)}%
                   </text>
                   <text x={point.x} y={plot.top + plotHeight + 28} textAnchor="middle" className="admin-wod-group-point-name">
                     {truncateLabel(point.name, 17)}
@@ -333,7 +334,7 @@ function WodGroupPerformanceChart({ copy, locale, categories }) {
                   <span>{formatDate(row.date, locale)}</span>
                   <strong>{row.name}</strong>
                 </div>
-                <b>{formatDecimal(row.score)}%</b>
+                <b>{formatDecimal(row.score, locale)}%</b>
                 <small>{row.validResultCount} {copy.validResults.toLowerCase()} · {copy.averageMark}: {row.averageMark}</small>
                 {row.metricKind === "time" ? (
                   <small>{copy.completionRate}: {formatPercent(row.completionRate || 0)}</small>
@@ -365,7 +366,7 @@ function performanceTooltip(copy, locale, point) {
   const parts = [
     point.name,
     formatDate(point.date, locale),
-    `${copy.groupPerformanceIndex}: ${formatDecimal(point.score)}%`,
+    `${copy.groupPerformanceIndex}: ${formatDecimal(point.score, locale)}%`,
     `${copy.validResults}: ${point.validResultCount}`,
     `${copy.averageMark}: ${point.averageMark}`,
   ]
@@ -377,14 +378,14 @@ function performanceTooltip(copy, locale, point) {
   return parts.join(" · ")
 }
 
-function formatDecimal(value) {
-  return Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 1 })
+function formatDecimal(value, locale = "es") {
+  return Number(value || 0).toLocaleString(locale === "en" ? "en-US" : "es-EC", { maximumFractionDigits: 1 })
 }
 
-function formatSigned(value) {
+function formatSigned(value, locale = "es") {
   const number = Number(value || 0)
   const prefix = number > 0 ? "+" : ""
-  return `${prefix}${formatDecimal(number)}`
+  return `${prefix}${formatDecimal(number, locale)}`
 }
 
 function truncateLabel(value, maxLength) {

@@ -24,6 +24,7 @@ import StudentThirtyDaySummary from "../progress/components/StudentThirtyDaySumm
 import { getStudentProgressCopy } from "../progress/i18n/studentProgressCopy.js"
 import {
   createStudentNutritionAnalysis,
+  fetchStudentMeasurementHistory,
   fetchStudentProgressBundle,
   getStoredLocalizedNutritionAnalysis,
   localizeStudentNutritionAnalysis,
@@ -43,6 +44,11 @@ import "../../../styles/studentProgress.css"
 const INITIAL_FORM = {
   peso_kg: "",
   estatura_cm: "",
+  cintura_cm: "",
+  horas_sueno: "",
+  nivel_energia: "",
+  lesiones: "",
+  observaciones: "",
   meta: "perder_grasa",
 }
 
@@ -53,6 +59,7 @@ const EMPTY_DATA = {
   wodSummary: null,
   prSummary: null,
   history: [],
+  measurementHistory: [],
   latestAnalysis: null,
   nextAnalysis: null,
   daysToAnalyze: 0,
@@ -64,6 +71,7 @@ export default function StudentProgressPage() {
   const navigate = useNavigate()
   const { locale } = useI18n()
   const { user, profile: authProfile, logout } = useAuth()
+  const userId = user?.id || null
   const copy = useMemo(() => getStudentProgressCopy(locale), [locale])
 
   const [loading, setLoading] = useState(true)
@@ -83,7 +91,7 @@ export default function StudentProgressPage() {
   }, [])
 
   const loadData = useCallback(async ({ showLoading = true } = {}) => {
-    if (!user?.id) {
+    if (!userId) {
       setLoading(false)
       return null
     }
@@ -93,7 +101,7 @@ export default function StudentProgressPage() {
       setError("")
 
       const payload = await fetchStudentProgressBundle({
-        userId: user.id,
+        userId,
         authProfile,
       })
 
@@ -101,66 +109,78 @@ export default function StudentProgressPage() {
       setForm({
         peso_kg: payload.nutritionProfile?.peso_kg || "",
         estatura_cm: payload.nutritionProfile?.estatura_cm || "",
+        cintura_cm: payload.nutritionProfile?.cintura_cm || "",
+        horas_sueno: payload.nutritionProfile?.horas_sueno ?? "",
+        nivel_energia: payload.nutritionProfile?.nivel_energia ?? "",
+        lesiones: payload.nutritionProfile?.lesiones || "",
+        observaciones: payload.nutritionProfile?.observaciones || "",
         meta: payload.nutritionProfile?.meta || "perder_grasa",
       })
       return payload
     } catch (loadError) {
       console.error("Error loading athlete progress:", loadError)
-      setError(loadError.message || copy.loadError)
+      setError(loadError.message || "LOAD_ERROR")
       return null
     } finally {
       if (showLoading) setLoading(false)
     }
-  }, [authProfile, copy.loadError, user?.id])
+  }, [authProfile, userId])
 
   useEffect(() => {
-    loadData()
-  }, [loadData])
+    const timeoutId = window.setTimeout(() => {
+      void loadData()
+    }, 0)
 
+    return () => window.clearTimeout(timeoutId)
+  }, [loadData])
 
   useEffect(() => {
     let active = true
-    const analysis = data.latestAnalysis
 
-    if (!analysis) {
+    const timeoutId = window.setTimeout(async () => {
+      const analysis = data.latestAnalysis
+
+      if (!analysis) {
+        if (!active) return
+        setLocalizedAnalysis(null)
+        setTranslatingAnalysis(false)
+        setTranslationError("")
+        return
+      }
+
+      const storedAnalysis = getStoredLocalizedNutritionAnalysis(analysis, locale)
+
+      if (storedAnalysis) {
+        if (!active) return
+        setLocalizedAnalysis(storedAnalysis)
+        setTranslatingAnalysis(false)
+        setTranslationError("")
+        return
+      }
+
       setLocalizedAnalysis(null)
-      setTranslatingAnalysis(false)
+      setTranslatingAnalysis(true)
       setTranslationError("")
-      return undefined
-    }
 
-    const storedAnalysis = getStoredLocalizedNutritionAnalysis(analysis, locale)
-
-    if (storedAnalysis) {
-      setLocalizedAnalysis(storedAnalysis)
-      setTranslatingAnalysis(false)
-      setTranslationError("")
-      return undefined
-    }
-
-    setLocalizedAnalysis(null)
-    setTranslatingAnalysis(true)
-    setTranslationError("")
-
-    localizeStudentNutritionAnalysis({ analysis, locale })
-      .then((translatedAnalysis) => {
+      try {
+        const translatedAnalysis = await localizeStudentNutritionAnalysis({ analysis, locale })
         if (!active) return
         setLocalizedAnalysis(translatedAnalysis)
-      })
-      .catch((localizationError) => {
+      } catch (localizationError) {
         if (!active) return
         console.error("Error translating nutrition analysis:", localizationError)
         setLocalizedAnalysis(analysis)
         setTranslationError(
           localizationError?.message || copy.translationFailed
         )
-      })
-      .finally(() => {
+      } finally {
         if (active) setTranslatingAnalysis(false)
-      })
+      }
+    }, 0)
 
     return () => {
       active = false
+      window.clearTimeout(timeoutId)
     }
   }, [copy.translationFailed, data.latestAnalysis, locale])
 
@@ -168,7 +188,7 @@ export default function StudentProgressPage() {
     if (!actionPopup.open) return undefined
     const timeoutId = window.setTimeout(() => {
       setActionPopup({ open: false, message: "", description: "" })
-    }, 2400)
+    }, 4000)
     return () => window.clearTimeout(timeoutId)
   }, [actionPopup.open])
 
@@ -176,15 +196,18 @@ export default function StudentProgressPage() {
     ? data.latestAnalysis.meta
     : form.meta
   const goalLocked = !data.canAnalyze && Boolean(data.latestAnalysis?.meta)
-  const reference = useMemo(() => buildBodyReference(form), [form])
+  const reference = useMemo(
+    () => buildBodyReference(form, data.athlete?.edad),
+    [data.athlete?.edad, form]
+  )
   const hasReference = Number(form.peso_kg) > 0 && Number(form.estatura_cm) > 0
   const membership = useMemo(
-    () => getMembershipStatus(data.membership, copy),
-    [copy, data.membership]
+    () => getMembershipStatus(data.membership, copy, locale),
+    [copy, data.membership, locale]
   )
   const profileName = data.athlete?.nombre || authProfile?.nombre || user?.email || copy.athlete
   const initials = getInitials(profileName)
-  const score = data.latestAnalysis?.score_pho3nix ?? "--"
+  const score = data.liveScore ?? "--"
   const goalLabels = useMemo(
     () => Object.fromEntries(getGoalOptions(copy).map((item) => [item.id, item.title])),
     [copy]
@@ -194,10 +217,21 @@ export default function StudentProgressPage() {
     const message = errorValue?.message || ""
     if (message === "INVALID_WEIGHT") return copy.invalidWeight
     if (message === "INVALID_HEIGHT") return copy.invalidHeight
+    if (message === "INVALID_WAIST") return copy.invalidWaist
+    if (message === "INVALID_SLEEP") return copy.invalidSleep
+    if (message === "INVALID_ENERGY") return copy.invalidEnergy
     if (message === "INVALID_GOAL") return copy.invalidGoal
+    if (message === "PROFILE_INCOMPLETE") return copy.profileIncomplete
+    if (message === "ANALYSIS_IN_PROGRESS") return copy.analysisInProgress
+    if (message === "INVALID_AI_RESPONSE") return copy.invalidAiResponse
+    if (["AI_PROVIDER_ERROR", "AI_CONFIGURATION_ERROR", "ANALYSIS_FAILED"].includes(message)) return fallback
     if (message.startsWith("ANALYSIS_LOCKED:")) {
-      const days = message.split(":")[1]
-      return `${copy.missingDays} ${days} ${copy.days}`
+      const days = Number(message.split(":")[1] || 0)
+      return `${copy.missingDays} ${days} ${days === 1 ? copy.daySingular : copy.dayPlural}`
+    }
+    if (message.startsWith("ANALYSIS_RATE_LIMITED:")) {
+      const minutes = Number(message.split(":")[1] || 1)
+      return `${copy.analysisRateLimited} ${minutes} ${minutes === 1 ? copy.minuteSingular : copy.minutePlural}.`
     }
     return message || fallback
   }
@@ -212,13 +246,21 @@ export default function StudentProgressPage() {
         ...draft,
         meta: activeGoal,
       })
-      const saved = await saveStudentNutritionProfile(user?.id, payload)
+      const saved = await saveStudentNutritionProfile(userId, payload)
+
+      let measurementHistory = data.measurementHistory
+      try {
+        measurementHistory = await fetchStudentMeasurementHistory(userId)
+      } catch (refreshError) {
+        console.error("Error refreshing athlete measurement history:", refreshError)
+      }
 
       setForm(saved)
       setData((current) => ({
         ...current,
         nutritionProfile: saved,
-        reference: buildBodyReference(saved),
+        measurementHistory,
+        reference: buildBodyReference(saved, current.athlete?.edad),
       }))
       setMeasurementsOpen(false)
       showPopup(copy.dataSaved)
@@ -239,13 +281,9 @@ export default function StudentProgressPage() {
         ...form,
         meta: activeGoal,
       })
-      const savedProfile = await saveStudentNutritionProfile(user?.id, clean)
+      await saveStudentNutritionProfile(userId, clean)
 
-      await createStudentNutritionAnalysis({
-        athlete: data.athlete,
-        profile: savedProfile,
-        locale,
-      })
+      await createStudentNutritionAnalysis({ locale })
 
       await loadData({ showLoading: false })
       showPopup(copy.analysisSaved)
@@ -278,7 +316,7 @@ export default function StudentProgressPage() {
 
           <StudentProgressHero copy={copy} score={score} />
 
-          {error ? <div className="student-progress-error">{error}</div> : null}
+          {error ? <div className="student-progress-error" role="alert">{error === "LOAD_ERROR" ? copy.loadError : error}</div> : null}
 
           <section className="student-progress-columns">
             <div className="student-progress-column">
@@ -294,6 +332,7 @@ export default function StudentProgressPage() {
                 copy={copy}
                 reference={reference}
                 hasReference={hasReference}
+                locale={locale}
               />
 
               <StudentGoalSelector
@@ -322,6 +361,7 @@ export default function StudentProgressPage() {
                 copy={copy}
                 wodSummary={data.wodSummary}
                 prSummary={data.prSummary}
+                locale={locale}
               />
 
               <StudentAiRecommendationCard
@@ -335,8 +375,9 @@ export default function StudentProgressPage() {
               <div className="student-progress-bottom-grid">
                 <StudentEvolutionCard
                   copy={copy}
-                  history={data.history}
+                  history={data.measurementHistory?.length ? data.measurementHistory : data.history}
                   locale={locale}
+                  showAdultReference={reference?.isAdultReference === true}
                 />
 
                 <StudentAnalysisHistoryCard

@@ -65,7 +65,7 @@ export default function AdminStatisticsPage() {
       setData(payload)
     } catch (loadError) {
       console.error("ADMIN STATISTICS LOAD ERROR:", loadError)
-      setError(loadError?.message || copy.loadError)
+      setError(loadError?.code === "ADMIN_ONLY" ? copy.accessDenied : copy.loadError)
     } finally {
       setLoading(false)
     }
@@ -85,7 +85,7 @@ export default function AdminStatisticsPage() {
       setAthleteDetail(payload)
     } catch (loadError) {
       console.error("ADMIN ATHLETE STATISTICS DETAIL ERROR:", loadError)
-      setDetailError(loadError?.message || copy.detailLoadError)
+      setDetailError(loadError?.code === "ADMIN_ONLY" ? copy.accessDenied : copy.detailLoadError)
     } finally {
       setDetailLoading(false)
     }
@@ -148,7 +148,7 @@ export default function AdminStatisticsPage() {
       setFeedback(copy.exportSuccess)
     } catch (exportError) {
       console.error("ADMIN STATISTICS EXPORT ERROR:", exportError)
-      setError(exportError?.message || copy.loadError)
+      setError(copy.exportError)
     } finally {
       setExporting(false)
     }

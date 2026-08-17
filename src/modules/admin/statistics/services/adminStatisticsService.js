@@ -1,6 +1,7 @@
 import { supabase } from "../../../../config/supabase.js"
 import {
   EMPTY_STATISTICS_DATA,
+  expandWodResultsWithParticipants,
   buildActivitySeries,
   buildAthleteDetail,
   buildAthleteStatistics,
@@ -16,6 +17,7 @@ import {
   getStatisticsRange,
   getWeekRange,
   normalizeRole,
+  parseLocalDate,
   startOfDay,
 } from "../utils/adminStatisticsUtils.js"
 
@@ -29,6 +31,76 @@ async function optionalQuery(label, queryFn, diagnostics, fallback = []) {
   }
 }
 
+const PAGE_SIZE = 1000
+const IN_QUERY_CHUNK = 200
+
+const WOD_FIELD_SETS = [
+  "id,nombre,descripcion,fecha,modo_ranking,modalidad,activo,publicado,fecha_publicacion,created_at",
+  "id,nombre,descripcion,fecha,modo_ranking,modalidad,activo,publicado,fecha_publicacion",
+  "id,nombre,fecha,modo_ranking,modalidad,activo,publicado,fecha_publicacion",
+  "id,nombre,fecha,activo,publicado,fecha_publicacion",
+]
+
+const WOD_RESULT_FIELD_SETS = [
+  "id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,tiempo_texto,repeticiones,resultado,calorias_estimadas,created_at",
+  "id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,tiempo_texto,repeticiones,calorias_estimadas,created_at",
+  "id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,repeticiones,calorias_estimadas,created_at",
+]
+
+function chunkValues(values = [], size = IN_QUERY_CHUNK) {
+  const unique = [...new Set(values.map((value) => String(value || "")).filter(Boolean))]
+  const chunks = []
+  for (let index = 0; index < unique.length; index += size) {
+    chunks.push(unique.slice(index, index + size))
+  }
+  return chunks
+}
+
+async function fetchPagedRows(buildQuery) {
+  const rows = []
+  let from = 0
+
+  while (true) {
+    const { data, error } = await buildQuery(from, from + PAGE_SIZE - 1)
+    if (error) throw error
+
+    const page = data || []
+    rows.push(...page)
+    if (page.length < PAGE_SIZE) break
+    from += PAGE_SIZE
+  }
+
+  return rows
+}
+
+async function fetchWithFieldFallback(fieldSets, buildQuery) {
+  let lastError = null
+
+  for (const fields of fieldSets) {
+    try {
+      return await fetchPagedRows((from, to) => buildQuery(fields, from, to))
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  throw lastError || new Error("No se pudo completar la consulta.")
+}
+
+function resultChronologicalTime(row) {
+  const day = parseLocalDate(row?.fecha)
+  const dayTime = day?.getTime() || 0
+  const createdAt = new Date(row?.created_at || 0)
+  const createdTime = Number.isNaN(createdAt.getTime()) ? 0 : createdAt.getTime()
+  return [dayTime, createdTime]
+}
+
+function sortResultsChronologically(a, b) {
+  const [aDay, aCreated] = resultChronologicalTime(a)
+  const [bDay, bCreated] = resultChronologicalTime(b)
+  return aDay - bDay || aCreated - bCreated
+}
+
 async function fetchUsers() {
   const fieldSets = [
     "id,nombre,email,role,sexo,foto_url,fecha_nacimiento,telefono,created_at",
@@ -37,15 +109,16 @@ async function fetchUsers() {
     "id,nombre,email,role,sexo,foto_url",
   ]
 
-  let lastError = null
-  for (const fields of fieldSets) {
-    const result = await supabase.from("usuarios").select(fields).order("nombre", { ascending: true })
-    if (!result.error) return result.data || []
-    lastError = result.error
-  }
-
-  throw lastError || new Error("No se pudieron cargar los usuarios.")
+  return fetchWithFieldFallback(fieldSets, (fields, from, to) => (
+    supabase
+      .from("usuarios")
+      .select(fields)
+      .order("nombre", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
+
 
 async function fetchUserById(userId) {
   const fieldSets = [
@@ -66,27 +139,30 @@ async function fetchUserById(userId) {
 }
 
 async function fetchMemberships() {
-  const { data, error } = await supabase
-    .from("mensualidades")
-    .select("id,usuario_id,fecha_inicio,fecha_fin,estado,created_at")
-    .order("fecha_fin", { ascending: false })
-    .order("created_at", { ascending: false })
-
-  if (error) throw error
-  return data || []
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("mensualidades")
+      .select("id,usuario_id,fecha_inicio,fecha_fin,estado,created_at")
+      .order("fecha_fin", { ascending: false })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
 
 async function fetchMembershipsByAthlete(athleteId) {
-  const { data, error } = await supabase
-    .from("mensualidades")
-    .select("id,usuario_id,fecha_inicio,fecha_fin,estado,created_at")
-    .eq("usuario_id", athleteId)
-    .order("fecha_fin", { ascending: false })
-    .order("created_at", { ascending: false })
-
-  if (error) throw error
-  return data || []
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("mensualidades")
+      .select("id,usuario_id,fecha_inicio,fecha_fin,estado,created_at")
+      .eq("usuario_id", athleteId)
+      .order("fecha_fin", { ascending: false })
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
+
 
 async function fetchNutritionProfiles() {
   const fieldSets = [
@@ -96,26 +172,26 @@ async function fetchNutritionProfiles() {
     "usuario_id,meta",
   ]
 
-  let lastError = null
-
-  for (const fields of fieldSets) {
-    const result = await supabase.from("nutricion_perfil").select(fields)
-    if (!result.error) return result.data || []
-    lastError = result.error
-  }
-
-  throw lastError || new Error("No se pudieron cargar los perfiles nutricionales.")
+  return fetchWithFieldFallback(fieldSets, (fields, from, to) => (
+    supabase
+      .from("nutricion_perfil")
+      .select(fields)
+      .order("usuario_id", { ascending: true })
+      .range(from, to)
+  ))
 }
 
 async function fetchExercises() {
-  const { data, error } = await supabase
-    .from("ejercicios")
-    .select("id,nombre")
-    .order("nombre", { ascending: true })
-
-  if (error) throw error
-  return data || []
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("ejercicios")
+      .select("id,nombre")
+      .order("nombre", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
+
 
 async function fetchPrRecords(startIso = null, endIso = null) {
   const pageSize = 1000
@@ -128,6 +204,7 @@ async function fetchPrRecords(startIso = null, endIso = null) {
       .select("id,usuario,ejercicio_id,peso_libras,fecha,created_at")
       .order("fecha", { ascending: true })
       .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
       .range(from, from + pageSize - 1)
 
     if (startIso) query = query.gte("fecha", startIso)
@@ -146,124 +223,178 @@ async function fetchPrRecords(startIso = null, endIso = null) {
 }
 
 async function fetchPrRecordsByAthlete(athleteId) {
-  const { data, error } = await supabase
-    .from("rm")
-    .select("id,usuario,ejercicio_id,peso_libras,fecha,created_at")
-    .eq("usuario", athleteId)
-    .order("fecha", { ascending: true })
-    .order("created_at", { ascending: true })
-
-  if (error) throw error
-  return data || []
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("rm")
+      .select("id,usuario,ejercicio_id,peso_libras,fecha,created_at")
+      .eq("usuario", athleteId)
+      .order("fecha", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
 
 async function fetchWods(startIso, endIso) {
-  const fieldSets = [
-    "id,nombre,descripcion,fecha,modo_ranking,modalidad,activo,publicado,fecha_publicacion,created_at",
-    "id,nombre,descripcion,fecha,modo_ranking,modalidad,activo,publicado,fecha_publicacion",
-    "id,nombre,fecha,modo_ranking,modalidad,activo,publicado,fecha_publicacion",
-    "id,nombre,fecha,activo,publicado,fecha_publicacion",
-  ]
-
-  let lastError = null
-  for (const fields of fieldSets) {
-    const result = await supabase
+  return fetchWithFieldFallback(WOD_FIELD_SETS, (fields, from, to) => {
+    let query = supabase
       .from("wod")
       .select(fields)
-      .gte("fecha", startIso)
-      .lte("fecha", endIso)
       .order("fecha", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
 
-    if (!result.error) return result.data || []
-    lastError = result.error
+    if (startIso) query = query.gte("fecha", startIso)
+    if (endIso) query = query.lte("fecha", endIso)
+    return query
+  })
+}
+
+async function fetchWodsByIds(wodIds = []) {
+  const rows = []
+
+  for (const ids of chunkValues(wodIds)) {
+    const chunkRows = await fetchWithFieldFallback(WOD_FIELD_SETS, (fields, from, to) => (
+      supabase
+        .from("wod")
+        .select(fields)
+        .in("id", ids)
+        .order("fecha", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to)
+    ))
+    rows.push(...chunkRows)
   }
 
-  throw lastError || new Error("No se pudieron cargar los WODs.")
+  return rows
 }
 
 async function fetchWodResults(startIso, endIso) {
-  const fieldSets = [
-    "id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,tiempo_texto,repeticiones,resultado,calorias_estimadas,created_at",
-    "id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,tiempo_texto,repeticiones,calorias_estimadas,created_at",
-    "id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,repeticiones,calorias_estimadas,created_at",
-  ]
-
-  let lastError = null
-  for (const fields of fieldSets) {
-    const result = await supabase
+  return fetchWithFieldFallback(WOD_RESULT_FIELD_SETS, (fields, from, to) => {
+    let query = supabase
       .from("wod_resultados")
       .select(fields)
-      .gte("fecha", startIso)
-      .lte("fecha", endIso)
       .order("fecha", { ascending: true })
       .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
 
-    if (!result.error) return result.data || []
-    lastError = result.error
+    if (startIso) query = query.gte("fecha", startIso)
+    if (endIso) query = query.lte("fecha", endIso)
+    return query
+  })
+}
+
+async function fetchOwnedWodResultsByAthlete(athleteId, endIso = null) {
+  return fetchWithFieldFallback(WOD_RESULT_FIELD_SETS, (fields, from, to) => {
+    let query = supabase
+      .from("wod_resultados")
+      .select(fields)
+      .eq("usuario_id", athleteId)
+      .order("fecha", { ascending: true })
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+
+    if (endIso) query = query.lte("fecha", endIso)
+    return query
+  })
+}
+
+async function fetchWodResultsByIds(resultIds = [], endIso = null) {
+  const rows = []
+
+  for (const ids of chunkValues(resultIds)) {
+    const chunkRows = await fetchWithFieldFallback(WOD_RESULT_FIELD_SETS, (fields, from, to) => {
+      let query = supabase
+        .from("wod_resultados")
+        .select(fields)
+        .in("id", ids)
+        .order("fecha", { ascending: true })
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to)
+
+      if (endIso) query = query.lte("fecha", endIso)
+      return query
+    })
+    rows.push(...chunkRows)
   }
 
-  throw lastError || new Error("No se pudieron cargar los resultados WOD.")
+  return rows
 }
 
-async function fetchWodResultsByAthlete(athleteId, startIso, endIso) {
-  const { data, error } = await supabase
-    .from("wod_resultados")
-    .select("id,wod_id,usuario_id,fecha,modalidad,tiempo_segundos,repeticiones,calorias_estimadas,created_at")
-    .eq("usuario_id", athleteId)
-    .gte("fecha", startIso)
-    .lte("fecha", endIso)
-    .order("fecha", { ascending: true })
+async function fetchWodParticipantLinksByResultIds(resultIds = []) {
+  const rows = []
 
-  if (error) throw error
-  return data || []
+  for (const ids of chunkValues(resultIds)) {
+    const chunkRows = await fetchPagedRows((from, to) => (
+      supabase
+        .from("wod_resultado_participantes")
+        .select("id,wod_resultado_id,usuario_id,created_at")
+        .in("wod_resultado_id", ids)
+        .order("created_at", { ascending: true })
+        .order("id", { ascending: true })
+        .range(from, to)
+    ))
+    rows.push(...chunkRows)
+  }
+
+  return rows
 }
 
-async function fetchWodResultCountByAthlete(athleteId) {
-  const { count, error } = await supabase
-    .from("wod_resultados")
-    .select("id", { count: "exact", head: true })
-    .eq("usuario_id", athleteId)
-
-  if (error) throw error
-  return count || 0
+async function fetchWodParticipantLinksByAthlete(athleteId) {
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("wod_resultado_participantes")
+      .select("id,wod_resultado_id,usuario_id,created_at")
+      .eq("usuario_id", athleteId)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
 
-async function fetchLatestWodResultByAthlete(athleteId) {
-  const { data, error } = await supabase
-    .from("wod_resultados")
-    .select("id,fecha,created_at")
-    .eq("usuario_id", athleteId)
-    .order("fecha", { ascending: false })
-    .order("created_at", { ascending: false })
-    .limit(1)
+function mergeAthleteWodParticipation(athleteId, ownedResults = [], linkedResults = []) {
+  const map = new Map()
 
-  if (error) throw error
-  return data?.[0] || null
+  ;[...ownedResults, ...linkedResults].forEach((row) => {
+    if (!row?.id) return
+    map.set(String(row.id), {
+      ...row,
+      source_usuario_id: row.usuario_id,
+      usuario_id: athleteId,
+    })
+  })
+
+  return [...map.values()].sort(sortResultsChronologically)
 }
 
 async function fetchAttendance(startIso, endIso) {
-  const { data, error } = await supabase
-    .from("asistencia")
-    .select("id,usuario_id,fecha")
-    .gte("fecha", startIso)
-    .lte("fecha", endIso)
-    .order("fecha", { ascending: true })
-
-  if (error) throw error
-  return data || []
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("asistencia")
+      .select("id,usuario_id,fecha")
+      .gte("fecha", startIso)
+      .lte("fecha", endIso)
+      .order("fecha", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
 
 async function fetchAttendanceByAthlete(athleteId, startIso, endIso) {
-  const { data, error } = await supabase
-    .from("asistencia")
-    .select("id,usuario_id,fecha")
-    .eq("usuario_id", athleteId)
-    .gte("fecha", startIso)
-    .lte("fecha", endIso)
-    .order("fecha", { ascending: true })
-
-  if (error) throw error
-  return data || []
+  return fetchPagedRows((from, to) => (
+    supabase
+      .from("asistencia")
+      .select("id,usuario_id,fecha")
+      .eq("usuario_id", athleteId)
+      .gte("fecha", startIso)
+      .lte("fecha", endIso)
+      .order("fecha", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, to)
+  ))
 }
 
 async function fetchLatestAttendanceByAthlete(athleteId) {
@@ -272,6 +403,7 @@ async function fetchLatestAttendanceByAthlete(athleteId) {
     .select("id,usuario_id,fecha")
     .eq("usuario_id", athleteId)
     .order("fecha", { ascending: false })
+    .order("id", { ascending: false })
     .limit(1)
 
   if (error) throw error
@@ -279,8 +411,8 @@ async function fetchLatestAttendanceByAthlete(athleteId) {
 }
 
 function isVisiblePublishedWod(wod, now = new Date()) {
-  if (wod?.activo === false) return false
-  if (wod?.publicado === false) return false
+  if (wod?.activo !== true) return false
+  if (wod?.publicado !== true) return false
   if (wod?.fecha_publicacion && new Date(wod.fecha_publicacion) > now) return false
   return true
 }
@@ -288,8 +420,8 @@ function isVisiblePublishedWod(wod, now = new Date()) {
 function isRowInRange(row, range) {
   const raw = row?.fecha || row?.created_at
   if (!raw) return false
-  const date = new Date(String(raw).length === 10 ? `${raw}T00:00:00` : raw)
-  return !Number.isNaN(date.getTime()) && date >= range.start && date <= range.end
+  const date = parseLocalDate(raw)
+  return Boolean(date && date >= range.start && date <= range.end)
 }
 
 async function assertAdmin(locale = "es") {
@@ -350,55 +482,86 @@ export async function loadAdminStatisticsData({ days = 30, locale = "es" } = {})
   const athletes = users.filter((user) => normalizeRole(user.role) === "alumno")
   const membershipData = buildMembershipSummary(athletes, memberships, now)
   const prRecords = prAll.filter((row) => isRowInRange(row, range))
-  const wodResults = wodResultsHistory.filter((row) => isRowInRange(row, range))
   const attendance = attendanceAll.filter((row) => isRowInRange(row, range))
-  const visibleWodHistory = wodHistory.filter((wod) => isVisiblePublishedWod(wod, now))
-  const visibleWods = visibleWodHistory.filter((wod) => isRowInRange(wod, range))
 
-  const activitySeries = buildActivitySeries({ range, locale, wodResults, prRecords, attendance })
-  const weekResults = wodResultsHistory.filter((row) => {
-    const date = new Date(`${String(row.fecha || "").slice(0, 10)}T00:00:00`)
-    return !Number.isNaN(date.getTime()) && date >= week.start && date <= week.end
+  const visibleWodHistory = wodHistory.filter((wod) => isVisiblePublishedWod(wod, now))
+  const visibleWodIds = new Set(visibleWodHistory.map((wod) => String(wod.id || "")).filter(Boolean))
+  const visibleWodResultsHistory = wodResultsHistory.filter((row) => visibleWodIds.has(String(row?.wod_id || "")))
+  const participantLinks = await optionalQuery(
+    "wod_resultado_participantes",
+    () => fetchWodParticipantLinksByResultIds(visibleWodResultsHistory.map((row) => row.id)),
+    diagnostics,
+  )
+  const wodParticipationHistory = expandWodResultsWithParticipants(visibleWodResultsHistory, participantLinks)
+  const visibleWods = visibleWodHistory.filter((wod) => isRowInRange(wod, range))
+  const wodResults = visibleWodResultsHistory.filter((row) => isRowInRange(row, range))
+  const wodParticipationResults = wodParticipationHistory.filter((row) => isRowInRange(row, range))
+
+  const activitySeries = buildActivitySeries({
+    range,
+    locale,
+    wodResults: wodParticipationResults,
+    prRecords,
+    attendance,
   })
+
+  const weekResults = visibleWodResultsHistory.filter((row) => {
+    const date = parseLocalDate(row?.fecha || row?.created_at)
+    return Boolean(date && date >= week.start && date <= week.end)
+  })
+
   const wodWeekSeries = buildWodWeekSeries(weekResults, locale, now)
-  const prMovementSeries = buildPrMovementSeries(prRecords, exercises, 5)
-  const highlightedAthletes = buildHighlightedAthletes({ users: athletes, wodResults, prRecords, attendance, limit: 5 })
+  const prMovementSeries = buildPrMovementSeries(prRecords, exercises, 5, locale)
+  const highlightedAthletes = buildHighlightedAthletes({
+    users: athletes,
+    wodResults: wodParticipationResults,
+    prRecords,
+    attendance,
+    limit: 5,
+    locale,
+  })
+
   const inactiveAthletes = buildInactiveAthletes({
     athletes,
     activeIds: membershipData.activeIds,
-    recentWodResults: wodResultsHistory,
+    recentWodResults: wodParticipationHistory,
     recentPrRecords: prAll,
     recentAttendance: attendanceAll,
+    now,
+    thresholdDays: 14,
   })
+
   const athleteStats = buildAthleteStatistics({
     athletes,
     memberships,
     nutritionProfiles,
-    wodResults,
+    wodResults: wodParticipationResults,
     prRecords,
     attendance,
-    recentWodResults: wodResultsHistory,
+    recentWodResults: wodParticipationHistory,
     recentPrRecords: prAll,
     recentAttendance: attendanceAll,
     range,
     locale,
     now,
   })
+
   const prStats = buildPrStatistics({ prRecords, historyRecords: prAll, exercises, athletes, range, locale })
   const wodStats = buildWodStatistics({
     wods: visibleWods,
     results: wodResults,
-    historyWods: visibleWodHistory,
-    historyResults: wodResultsHistory,
+    participationResults: wodParticipationResults,
     users: athletes,
     activeAthleteCount: membershipData.activeIds.size,
-    range,
+    activeAthleteIds: membershipData.activeIds,
+    locale,
   })
 
   const wodParticipationRate = calculateWodParticipationRate({
     activeAthleteCount: membershipData.activeIds.size,
+    activeAthleteIds: membershipData.activeIds,
     publishedWodCount: visibleWods.length,
-    wodResults,
+    wodResults: wodParticipationResults,
   })
 
   return {
@@ -451,16 +614,40 @@ export async function loadAdminAthleteStatisticsDetail({ athleteId, days = 30, l
     throw new Error(locale === "en" ? "The selected athlete was not found." : "No se encontró el atleta seleccionado.")
   }
 
-  const [memberships, exercises, prRecords, wodResults, totalWodCount, latestWod, attendance, latestAttendance] = await Promise.all([
+  const [memberships, exercises, prRecords, ownedWodHistory, participantLinks, attendance, latestAttendance] = await Promise.all([
     optionalQuery("mensualidades_atleta", () => fetchMembershipsByAthlete(athleteId), diagnostics),
     optionalQuery("ejercicios", fetchExercises, diagnostics),
     optionalQuery("rm_atleta", () => fetchPrRecordsByAthlete(athleteId), diagnostics),
-    optionalQuery("wod_resultados_atleta", () => fetchWodResultsByAthlete(athleteId, range.startIso, range.endIso), diagnostics),
-    optionalQuery("wod_resultados_total_atleta", () => fetchWodResultCountByAthlete(athleteId), diagnostics, 0),
-    optionalQuery("wod_resultado_ultimo_atleta", () => fetchLatestWodResultByAthlete(athleteId), diagnostics, null),
+    optionalQuery("wod_resultados_propios_atleta", () => fetchOwnedWodResultsByAthlete(athleteId, range.endIso), diagnostics),
+    optionalQuery("wod_participantes_atleta", () => fetchWodParticipantLinksByAthlete(athleteId), diagnostics),
     optionalQuery("asistencia_atleta", () => fetchAttendanceByAthlete(athleteId, range.startIso, range.endIso), diagnostics),
     optionalQuery("asistencia_ultima_atleta", () => fetchLatestAttendanceByAthlete(athleteId), diagnostics, null),
   ])
+
+  const linkedResultIds = participantLinks.map((row) => row?.wod_resultado_id).filter(Boolean)
+  const linkedWodHistory = await optionalQuery(
+    "wod_resultados_equipo_atleta",
+    () => fetchWodResultsByIds(linkedResultIds, range.endIso),
+    diagnostics,
+  )
+
+  const athleteWodHistory = mergeAthleteWodParticipation(athleteId, ownedWodHistory, linkedWodHistory)
+  const athleteWods = await optionalQuery(
+    "wods_atleta",
+    () => fetchWodsByIds(athleteWodHistory.map((row) => row?.wod_id)),
+    diagnostics,
+  )
+
+  const visibleWodIds = new Set(
+    athleteWods
+      .filter((wod) => isVisiblePublishedWod(wod, now))
+      .map((wod) => String(wod.id || ""))
+      .filter(Boolean)
+  )
+
+  const visibleWodHistory = athleteWodHistory.filter((row) => visibleWodIds.has(String(row?.wod_id || "")))
+  const wodResults = visibleWodHistory.filter((row) => isRowInRange(row, range))
+  const latestWod = visibleWodHistory.length ? visibleWodHistory.at(-1) : null
 
   return buildAthleteDetail({
     athlete,
@@ -468,7 +655,7 @@ export async function loadAdminAthleteStatisticsDetail({ athleteId, days = 30, l
     exercises,
     prRecords,
     wodResults,
-    totalWodCount,
+    totalWodCount: visibleWodHistory.length,
     latestWod,
     attendance,
     latestAttendance,

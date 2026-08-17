@@ -1,6 +1,6 @@
 const FIELDS = [
   ["resumen", "summary"],
-  ["diagnostico", "diagnosis"],
+  ["diagnostico", "assessment"],
   ["nutricion", "nutrition"],
   ["entrenamiento", "training"],
   ["pre_wod", "preWod"],
@@ -20,7 +20,7 @@ export default function StudentAiRecommendationCard({
     <article className="student-progress-card student-ai-card">
       <header>
         <div><p>✦ {copy.recommendation}</p><h2>{goalLabel || copy.goalTitle}</h2></div>
-        <span>IA</span>
+        <span>{copy.aiBadge}</span>
       </header>
 
       {translating ? (

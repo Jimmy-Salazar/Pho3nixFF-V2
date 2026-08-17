@@ -61,7 +61,8 @@ export function MembershipPanel({ copy, summary, visible = true }) {
   const activeEnd = (Number(summary.active || 0) / total) * 100
   const expiringEnd = activeEnd + (Number(summary.expiring || 0) / total) * 100
   const expiredEnd = expiringEnd + (Number(summary.expired || 0) / total) * 100
-  const background = `conic-gradient(#39d98a 0 ${activeEnd}%, var(--admin-primary) ${activeEnd}% ${expiringEnd}%, #ff5d68 ${expiringEnd}% ${expiredEnd}%, rgba(255,255,255,.12) ${expiredEnd}% 100%)`
+  const upcomingEnd = expiredEnd + (Number(summary.upcoming || 0) / total) * 100
+  const background = `conic-gradient(#39d98a 0 ${activeEnd}%, var(--admin-primary) ${activeEnd}% ${expiringEnd}%, #ff5d68 ${expiringEnd}% ${expiredEnd}%, var(--statistics-upcoming) ${expiredEnd}% ${upcomingEnd}%, rgba(255,255,255,.12) ${upcomingEnd}% 100%)`
 
   return (
     <article className="admin-statistics-panel admin-statistics-membership-panel">
@@ -74,6 +75,7 @@ export function MembershipPanel({ copy, summary, visible = true }) {
           <div><i className="is-green" /><span>{copy.active}</span><strong>{summary.active || 0}</strong></div>
           <div><i className="is-orange" /><span>{copy.expiring}</span><strong>{summary.expiring || 0}</strong></div>
           <div><i className="is-red" /><span>{copy.expired}</span><strong>{summary.expired || 0}</strong></div>
+          <div><i className="is-blue" /><span>{copy.upcoming}</span><strong>{summary.upcoming || 0}</strong></div>
           <div><i className="is-muted" /><span>{copy.missing}</span><strong>{summary.missing || 0}</strong></div>
         </div>
       </div>
