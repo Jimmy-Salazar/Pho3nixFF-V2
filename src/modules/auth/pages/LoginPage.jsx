@@ -4,6 +4,7 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router-dom"
 import PublicShell from "../../../shared/layouts/PublicShell.jsx"
 import { useI18n } from "../../../i18n/I18nProvider.jsx"
 import { useAuth } from "../context/AuthContext.jsx"
+import { getPasswordRecoveryCopy } from "../i18n/passwordRecoveryCopy.js"
 
 const COPY = {
   es: {
@@ -45,6 +46,10 @@ function getCopy(locale) {
 export default function LoginPage() {
   const { locale } = useI18n()
   const copy = useMemo(() => getCopy(locale), [locale])
+  const recoveryCopy = useMemo(
+    () => getPasswordRecoveryCopy(locale),
+    [locale]
+  )
   const location = useLocation()
   const navigate = useNavigate()
   const { signIn, loading, isAuthenticated, role, getRoleDestination, authError } = useAuth()
@@ -127,6 +132,12 @@ export default function LoginPage() {
                 required
               />
             </label>
+
+            <div className="phx-login-forgot">
+              <Link to="/recuperar-contrasena">
+                {recoveryCopy.forgotPassword}
+              </Link>
+            </div>
 
             <button type="submit" className="phx-login-submit" disabled={loading}>
               {loading ? copy.submitting : copy.submit}

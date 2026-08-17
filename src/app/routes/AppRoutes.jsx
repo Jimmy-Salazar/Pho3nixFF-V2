@@ -4,6 +4,8 @@ import ProtectedRoute from "../../modules/auth/components/ProtectedRoute.jsx"
 import RoleRedirect from "../../modules/auth/components/RoleRedirect.jsx"
 import HomePage from "../../modules/public/pages/HomePage.jsx"
 import LoginPage from "../../modules/auth/pages/LoginPage.jsx"
+import ForgotPasswordPage from "../../modules/auth/pages/ForgotPasswordPage.jsx"
+import ResetPasswordPage from "../../modules/auth/pages/ResetPasswordPage.jsx"
 import AdminDashboardPage from "../../modules/admin/pages/AdminDashboardPage.jsx"
 import AdminThemesPage from "../../modules/admin/pages/AdminThemesPage.jsx"
 import AdminAthletesPage from "../../modules/admin/pages/AdminAthletesPage.jsx"
@@ -27,6 +29,14 @@ export default function AppRoutes() {
     <Routes>
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/recuperar-contrasena"
+        element={<ForgotPasswordPage />}
+      />
+      <Route
+        path="/restablecer-contrasena"
+        element={<ResetPasswordPage />}
+      />
       <Route path="/app" element={<RoleRedirect />} />
 
       <Route path="/admin" element={<ProtectedRoute allowedRoles={["admin", "coach"]}><Navigate to="/admin/dashboard" replace /></ProtectedRoute>} />

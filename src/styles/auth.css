@@ -290,3 +290,72 @@
     gap: 8px;
   }
 }
+/* PHO3NIX PASSWORD RECOVERY */
+
+.phx-login-brand > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.phx-login-card-recovery .phx-login-brand h1 {
+  max-width: 100%;
+  font-size: clamp(2rem, 6vw, 2.85rem);
+  line-height: 0.94;
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.phx-login-forgot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
+}
+
+.phx-login-forgot a {
+  color: var(--phx-color-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.phx-login-forgot a:hover {
+  opacity: 0.82;
+}
+
+.phx-login-success {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--phx-color-primary) 38%,
+      transparent
+    );
+  border-radius: 14px;
+  background:
+    color-mix(
+      in srgb,
+      var(--phx-color-primary) 10%,
+      transparent
+    );
+  color: var(--phx-color-text);
+}
+
+.phx-login-success strong {
+  color: var(--phx-color-primary);
+}
+
+.phx-login-success span {
+  color: var(--phx-color-text-muted);
+  line-height: 1.5;
+}
+@media (max-width: 640px) {
+  .phx-login-card-recovery .phx-login-brand h1 {
+    font-size: clamp(1.75rem, 9vw, 2.35rem);
+    line-height: 0.96;
+  }
+}
