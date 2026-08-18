@@ -53,6 +53,14 @@ const WOD_SELECT = [
   "intensidad_estimada",
   "duracion_estimada",
   "calorias_nota",
+  "ai_intensity_score",
+  "ai_metabolic_load",
+  "ai_cardio_score",
+  "ai_strength_score",
+  "calorie_met_estimate",
+  "ai_analysis_version",
+  "scored_duration_seconds",
+  "scored_duration_source",
 ].join(",")
 
 export async function fetchCurrentAdminProfile(user, fallback = {}) {

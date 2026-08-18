@@ -57,6 +57,15 @@ function normalizeAiEstimate(input, locale) {
     gimnasia: clamp(input?.gimnasia ?? input?.gymnastics, 0, 100),
     intensidadScore: intensityScore,
     intensidadPuntos: getIntensityPoints(intensityScore),
+    metEstimate: normalizeMetEstimate(input?.met_estimate),
+    scoredDurationSeconds: normalizeScoredDurationSeconds(
+      input?.scored_duration_seconds
+    ),
+    scoredDurationSource:
+      normalizeScoredDurationSeconds(input?.scored_duration_seconds) !== null
+        ? "ai_analysis"
+        : null,
+    analysisVersion: input?.analysis_version || null,
     nota:
       input?.calorias_nota ||
       (english
@@ -70,6 +79,27 @@ function normalizeAiEstimate(input, locale) {
     fallback: false,
     source: "gemini",
   }
+}
+
+function normalizeMetEstimate(value) {
+  if (value === null || value === undefined || value === "") return null
+  const number = Number(value)
+  if (!Number.isFinite(number) || number < 3.5 || number > 12) return null
+  return Math.round(number * 10) / 10
+}
+
+function normalizeScoredDurationSeconds(value) {
+  if (value === null || value === undefined || value === "") {
+    return null
+  }
+
+  const number = Number(value)
+
+  if (!Number.isFinite(number)) return null
+  if (!Number.isInteger(number)) return null
+  if (number < 30 || number > 7200) return null
+
+  return number
 }
 
 function getIntensityPoints(score) {

@@ -268,6 +268,28 @@ export function buildStoredEstimate(wod, locale = "es") {
   const hasStoredEstimate = Number.isFinite(Number(wod?.calorias_min)) || Number.isFinite(Number(wod?.calorias_max))
   if (!hasStoredEstimate) return local
 
+  const storedIntensityScore = readStoredNumber(wod?.ai_intensity_score)
+  const storedMetabolicLoad = readStoredNumber(wod?.ai_metabolic_load)
+  const storedCardioScore = readStoredNumber(wod?.ai_cardio_score)
+  const storedStrengthScore = readStoredNumber(wod?.ai_strength_score)
+  const storedMetEstimate = readStoredNumber(wod?.calorie_met_estimate)
+  const storedScoredDurationSeconds = readStoredPositiveInteger(
+    wod?.scored_duration_seconds
+  )
+  const storedScoredDurationSource =
+    wod?.scored_duration_source || null
+
+  const hasStructuredAnalysis = [
+    storedIntensityScore,
+    storedMetabolicLoad,
+    storedCardioScore,
+    storedStrengthScore,
+    storedMetEstimate,
+    storedScoredDurationSeconds,
+  ].some((value) => value !== null) || Boolean(wod?.ai_analysis_version)
+
+  const intensityScore = storedIntensityScore ?? local.intensidadScore
+
   return {
     ...local,
     caloriasMin: Number(wod.calorias_min) || local.caloriasMin,
@@ -275,11 +297,24 @@ export function buildStoredEstimate(wod, locale = "es") {
     intensidad: wod.intensidad_estimada || local.intensidad,
     duracion: wod.duracion_estimada || local.duracion,
     nota: wod.calorias_nota || local.nota,
+    cargaMetabolica: storedMetabolicLoad ?? local.cargaMetabolica,
+    cardio: storedCardioScore ?? local.cardio,
+    fuerza: storedStrengthScore ?? local.fuerza,
+    intensidadScore: intensityScore,
+    intensidadPuntos: getIntensityPoints(intensityScore),
+    metEstimate: storedMetEstimate,
+    scoredDurationSeconds: storedScoredDurationSeconds,
+    scoredDurationSource: storedScoredDurationSource,
+    analysisVersion: wod?.ai_analysis_version || null,
+    structuredAnalysis: hasStructuredAnalysis,
     source: "stored",
   }
 }
 
 export function buildWodPayload(form, estimate) {
+  const hasStructuredAnalysis =
+    estimate?.source === "gemini" || Boolean(estimate?.structuredAnalysis)
+
   return {
     nombre: String(form.nombre || "").trim() || null,
     descripcion: String(form.descripcion || "").trim(),
@@ -290,7 +325,69 @@ export function buildWodPayload(form, estimate) {
     intensidad_estimada: estimate?.intensidad || null,
     duracion_estimada: estimate?.duracion || null,
     calorias_nota: estimate?.nota || null,
+    ai_intensity_score: hasStructuredAnalysis ? toOptionalScore(estimate?.intensidadScore) : null,
+    ai_metabolic_load: hasStructuredAnalysis ? toOptionalScore(estimate?.cargaMetabolica) : null,
+    ai_cardio_score: hasStructuredAnalysis ? toOptionalScore(estimate?.cardio) : null,
+    ai_strength_score: hasStructuredAnalysis ? toOptionalScore(estimate?.fuerza) : null,
+    calorie_met_estimate: hasStructuredAnalysis
+      ? toOptionalNumber(estimate?.metEstimate)
+      : null,
+    scored_duration_seconds: hasStructuredAnalysis
+      ? toOptionalPositiveInteger(estimate?.scoredDurationSeconds)
+      : null,
+    scored_duration_source:
+      hasStructuredAnalysis &&
+      toOptionalPositiveInteger(estimate?.scoredDurationSeconds) !== null
+        ? estimate?.scoredDurationSource || "ai_analysis"
+        : null,
+    ai_analysis_version: hasStructuredAnalysis
+      ? estimate?.analysisVersion || "pho3nix-wod-analysis-1.0"
+      : null,
   }
+}
+
+function toOptionalPositiveInteger(value) {
+  if (value === null || value === undefined || value === "") {
+    return null
+  }
+
+  const number = Number(value)
+
+  if (!Number.isFinite(number)) return null
+  if (!Number.isInteger(number)) return null
+  if (number <= 0) return null
+
+  return number
+}
+
+function readStoredPositiveInteger(value) {
+  return toOptionalPositiveInteger(value)
+}
+
+function readStoredNumber(value) {
+  if (value === null || value === undefined || value === "") return null
+  const number = Number(value)
+  return Number.isFinite(number) ? number : null
+}
+
+function toOptionalScore(value) {
+  const number = readStoredNumber(value)
+  if (number === null) return null
+  return Math.max(0, Math.min(100, Math.round(number)))
+}
+
+function toOptionalNumber(value) {
+  return readStoredNumber(value)
+}
+
+function getIntensityPoints(score) {
+  const value = Number(score)
+  if (!Number.isFinite(value)) return 1
+  if (value >= 85) return 5
+  if (value >= 68) return 4
+  if (value >= 48) return 3
+  if (value >= 30) return 2
+  return 1
 }
 
 function formatMonthLabel(date, locale) {

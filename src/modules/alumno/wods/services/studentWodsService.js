@@ -372,7 +372,6 @@ export async function saveStudentWodResult({ wod, result, estimatedCalories }) {
     tiempo_texto: result.tiempo_texto || null,
     repeticiones: Number(result.repeticiones || 0),
     notas: result.notas || null,
-    calorias_estimadas: getWodCaloriesValue(wod, estimatedCalories?.value || 0),
   }
 
   const { data, error } = await supabase
@@ -404,7 +403,6 @@ export async function updateStudentWodResult({ resultId, wod, result, estimatedC
     tiempo_texto: result.tiempo_texto || null,
     repeticiones: Number(result.repeticiones || 0),
     notas: result.notas || null,
-    calorias_estimadas: getWodCaloriesValue(wod, estimatedCalories?.value || 0),
   }
 
   if (wod?.fecha) payload.fecha = wod.fecha

@@ -34,9 +34,9 @@ export function buildWeeklyWodStats(rows = []) {
   const caloriesByDay = [0, 0, 0, 0, 0, 0, 0]
 
   const caloriesTotal = uniqueRows.reduce((sum, item) => {
-    const maxCalories = Number(item.wod?.calorias_max || 0)
     const savedCalories = Number(item.calorias_estimadas || 0)
-    const value = maxCalories > 0 ? maxCalories : savedCalories
+    const maxCalories = Number(item.wod?.calorias_max || 0)
+    const value = savedCalories > 0 ? savedCalories : maxCalories
 
     if (item.fecha) {
       const date = new Date(`${String(item.fecha).slice(0, 10)}T00:00:00`)

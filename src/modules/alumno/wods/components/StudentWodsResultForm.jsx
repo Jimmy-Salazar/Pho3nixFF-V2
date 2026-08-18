@@ -35,19 +35,11 @@ export default function StudentWodsResultForm({
   function handleSubmit(event) {
     event.preventDefault()
 
-    const normalizedTime = String(timeValue || "").trim()
-    const parsedTime = isTime ? parseTimeToSeconds(normalizedTime) : null
-
-    if (isTime && normalizedTime && parsedTime === null) {
-      setFormError(copy.invalidResult)
-      return
-    }
-
     const payload = {
       id: initialResult?.id || null,
       modalidad,
-      tiempo_segundos: parsedTime,
-      tiempo_texto: isTime ? normalizedTime : "",
+      tiempo_segundos: isTime ? parseTimeToSeconds(timeValue) : null,
+      tiempo_texto: isTime ? timeValue : "",
       repeticiones: Number(repeticiones || 0),
       notas,
     }
