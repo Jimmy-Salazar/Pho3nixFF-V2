@@ -29,18 +29,49 @@ export function WodEditorModal({ copy, locale, wod, saving, onClose, onSave }) {
   )
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState("")
+  const [scoredDurationOverride, setScoredDurationOverride] = useState(null)
+  const [scoredDurationTouched, setScoredDurationTouched] = useState(false)
 
   const localEstimate = useMemo(
     () => estimateWodCaloriesFromForm(form, locale),
     [form, locale]
   )
+
   const estimate = estimateOverride || localEstimate
   const editing = Boolean(wod?.id)
-  const disabled = saving || !form.descripcion.trim()
+
+  const fixedDurationMode = [
+    "mayor_es_mejor",
+    "sin_ranking",
+  ].includes(form.modoRanking)
+
+  const scoredDurationMinutes = scoredDurationTouched
+    ? scoredDurationOverride
+    : formatScoredDurationMinutes(estimate?.scoredDurationSeconds)
+
+  const scoredDurationSeconds = fixedDurationMode
+    ? parseScoredDurationMinutes(scoredDurationMinutes)
+    : null
+
+  const scoredDurationInvalid =
+    fixedDurationMode &&
+    scoredDurationMinutes !== "" &&
+    scoredDurationSeconds === null
+
+  const scoredDurationSource = scoredDurationTouched
+    ? "admin"
+    : estimate?.scoredDurationSource || null
+
+  const disabled =
+    saving ||
+    !form.descripcion.trim() ||
+    scoredDurationInvalid
 
   function setField(key, value) {
     setForm((current) => ({ ...current, [key]: value }))
     setEstimateOverride(null)
+    setScoredDurationOverride(null)
+    setScoredDurationTouched(false)
     setAiError("")
   }
 
@@ -61,6 +92,9 @@ export function WodEditorModal({ copy, locale, wod, saving, onClose, onSave }) {
         locale,
       })
       setEstimateOverride(result)
+      setScoredDurationOverride(null)
+      setScoredDurationTouched(false)
+
       if (result.fallback) setAiError(copy.localFallbackNote)
     } catch (error) {
       setAiError(error?.message || copy.operationError)
@@ -72,7 +106,16 @@ export function WodEditorModal({ copy, locale, wod, saving, onClose, onSave }) {
   function handleSubmit(event) {
     event.preventDefault()
     if (disabled) return
-    onSave(buildWodPayload(form, estimate))
+    onSave(
+      buildWodPayload(
+        {
+          ...form,
+          scoredDurationMinutes,
+          scoredDurationTouched,
+        },
+        estimate
+      )
+    )
   }
 
   return (
@@ -126,6 +169,37 @@ export function WodEditorModal({ copy, locale, wod, saving, onClose, onSave }) {
             />
           </div>
 
+          {fixedDurationMode ? (
+            <>
+              <TextField
+                label={copy.scoredDuration}
+                type="number"
+                value={scoredDurationMinutes}
+                onChange={(value) => {
+                  setScoredDurationOverride(value)
+                  setScoredDurationTouched(true)
+                }}
+                placeholder={copy.scoredDurationPlaceholder}
+                min="0.5"
+                max="120"
+                step="0.5"
+                disabled={saving || aiLoading}
+              />
+
+              <div className="admin-wod-inline-note">
+                {scoredDurationInvalid
+                  ? copy.scoredDurationInvalid
+                  : scoredDurationSeconds !== null
+                    ? `${getScoredDurationSourceLabel(scoredDurationSource, copy)} · ${copy.scoredDurationHint}`
+                    : copy.scoredDurationMissing}
+              </div>
+            </>
+          ) : (
+            <div className="admin-wod-inline-note">
+              {copy.scoredDurationForTime}
+            </div>
+          )}
+
           <button
             type="button"
             className="admin-wod-ai-button"
@@ -156,6 +230,12 @@ export function WodEditorModal({ copy, locale, wod, saving, onClose, onSave }) {
 export function ScheduleWodModal({ copy, locale, wod, saving, error, onClose, onSchedule }) {
   const [date, setDate] = useState(wod?.fecha || "")
   const publicationAt = date ? buildPreviousDay1930(date) : ""
+
+  const missingScoredDuration =
+    ["mayor_es_mejor", "sin_ranking"].includes(
+      String(wod?.modo_ranking || "")
+    ) &&
+    !(Number(wod?.scored_duration_seconds) > 0)
 
   function handleSubmit(event) {
     event.preventDefault()
@@ -190,6 +270,12 @@ export function ScheduleWodModal({ copy, locale, wod, saving, error, onClose, on
             <strong>{publicationAt ? formatDateTime(publicationAt, locale) : copy.previousDayAt}</strong>
           </div>
         </div>
+
+        {missingScoredDuration ? (
+          <div className="admin-wod-form-error">
+            {copy.scoredDurationScheduleWarning}
+          </div>
+        ) : null}
 
         {error ? <div className="admin-wod-form-error">{error}</div> : null}
 
@@ -347,7 +433,19 @@ function ModalActions({ copy, busy, disabled, submitLabel, onClose, onSubmit, da
   )
 }
 
-function TextField({ label, value, onChange, type = "text", placeholder, min, disabled, required, autoFocus = false }) {
+function TextField({
+  label,
+  value,
+  onChange,
+  type = "text",
+  placeholder,
+  min,
+  max,
+  step,
+  disabled,
+  required,
+  autoFocus = false,
+}) {
   return (
     <label className="admin-wod-field">
       <small>{label}{required ? " *" : ""}</small>
@@ -357,6 +455,8 @@ function TextField({ label, value, onChange, type = "text", placeholder, min, di
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         min={min}
+        max={max}
+        step={step}
         disabled={disabled}
         required={required}
         autoFocus={autoFocus}
@@ -392,6 +492,49 @@ function SelectField({ label, value, onChange, options }) {
 
 function DetailItem({ label, value }) {
   return <div><small>{label}</small><strong>{value}</strong></div>
+}
+
+function formatScoredDurationMinutes(value) {
+  const seconds = Number(value)
+
+  if (!Number.isFinite(seconds) || seconds < 30 || seconds > 7200) {
+    return ""
+  }
+
+  const minutes = seconds / 60
+
+  return String(
+    Math.round(minutes * 100) / 100
+  )
+}
+
+function parseScoredDurationMinutes(value) {
+  if (value === null || value === undefined || value === "") {
+    return null
+  }
+
+  const minutes = Number(value)
+
+  if (!Number.isFinite(minutes)) return null
+  if (minutes < 0.5 || minutes > 120) return null
+
+  const seconds = Math.round(minutes * 60)
+
+  if (seconds < 30 || seconds > 7200) return null
+
+  return seconds
+}
+
+function getScoredDurationSourceLabel(source, copy) {
+  if (source === "admin") {
+    return copy.scoredDurationSourceAdmin
+  }
+
+  if (source === "ai_analysis") {
+    return copy.scoredDurationSourceAi
+  }
+
+  return copy.scoredDurationSourceStored
 }
 
 function estimateWodCaloriesFromForm(form, locale) {

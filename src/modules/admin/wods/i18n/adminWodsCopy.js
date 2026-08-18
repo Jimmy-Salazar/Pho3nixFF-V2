@@ -85,6 +85,21 @@ const COPY = {
     calories: "Calorías estimadas",
     intensity: "Intensidad estimada",
     duration: "Duración estimada",
+    scoredDuration: "Duración puntuable (min)",
+    scoredDurationPlaceholder: "Ej: 20",
+    scoredDurationMissing:
+      "Define la duración del segmento puntuado. Si la IA no pudo determinarla, puedes corregirla manualmente antes de programar el WOD.",
+    scoredDurationInvalid:
+      "La duración puntuable debe estar entre 0,5 y 120 minutos.",
+    scoredDurationHint:
+      "Incluye los descansos programados que pertenecen al segmento puntuado.",
+    scoredDurationForTime:
+      "En Menor tiempo (For Time), la duración la determina el resultado de cada atleta y no se configura aquí.",
+    scoredDurationSourceAi: "Fuente: IA",
+    scoredDurationSourceAdmin: "Fuente: ajuste manual",
+    scoredDurationSourceStored: "Fuente: valor guardado",
+    scoredDurationScheduleWarning:
+      "Advertencia: este WOD no tiene duración puntuable estructurada. Puede programarse, pero las calorías personalizadas usarán el valor de referencia hasta que se defina.",
     metabolicLoad: "Carga metabólica",
     effortDistribution: "Distribución del esfuerzo",
     cardio: "Cardio",
@@ -215,6 +230,21 @@ const COPY = {
     calories: "Estimated calories",
     intensity: "Estimated intensity",
     duration: "Estimated duration",
+    scoredDuration: "Scored duration (min)",
+    scoredDurationPlaceholder: "E.g. 20",
+    scoredDurationMissing:
+      "Define the duration of the scored segment. If AI could not determine it, you can correct it manually before scheduling the WOD.",
+    scoredDurationInvalid:
+      "Scored duration must be between 0.5 and 120 minutes.",
+    scoredDurationHint:
+      "Includes programmed rests that belong to the scored segment.",
+    scoredDurationForTime:
+      "For Lower time (For Time), duration is determined by each athlete's result and is not configured here.",
+    scoredDurationSourceAi: "Source: AI",
+    scoredDurationSourceAdmin: "Source: manual adjustment",
+    scoredDurationSourceStored: "Source: saved value",
+    scoredDurationScheduleWarning:
+      "Warning: this WOD has no structured scored duration. It can still be scheduled, but personalized calories will use the reference value until a duration is defined.",
     metabolicLoad: "Metabolic load",
     effortDistribution: "Effort distribution",
     cardio: "Cardio",

@@ -315,35 +315,117 @@ export function buildWodPayload(form, estimate) {
   const hasStructuredAnalysis =
     estimate?.source === "gemini" || Boolean(estimate?.structuredAnalysis)
 
+  const fixedDurationMode = [
+    "mayor_es_mejor",
+    "sin_ranking",
+  ].includes(form?.modoRanking)
+
+  const manualDuration =
+    Boolean(form?.scoredDurationTouched)
+
+  const manualScoredDurationSeconds =
+    manualDuration
+      ? toScoredDurationSecondsFromMinutes(
+          form?.scoredDurationMinutes
+        )
+      : null
+
+  const analyzedScoredDurationSeconds =
+    hasStructuredAnalysis
+      ? toOptionalPositiveInteger(
+          estimate?.scoredDurationSeconds
+        )
+      : null
+
+  const scoredDurationSeconds =
+    fixedDurationMode
+      ? manualDuration
+        ? manualScoredDurationSeconds
+        : analyzedScoredDurationSeconds
+      : null
+
+  const scoredDurationSource =
+    scoredDurationSeconds !== null
+      ? manualDuration
+        ? "admin"
+        : estimate?.scoredDurationSource ||
+          (estimate?.source === "gemini"
+            ? "ai_analysis"
+            : "stored")
+      : null
+
   return {
     nombre: String(form.nombre || "").trim() || null,
     descripcion: String(form.descripcion || "").trim(),
     modo_ranking: form.modoRanking || "sin_ranking",
     modalidad: form.modalidad || "single",
-    calorias_min: Number.isFinite(Number(estimate?.caloriasMin)) ? Number(estimate.caloriasMin) : null,
-    calorias_max: Number.isFinite(Number(estimate?.caloriasMax)) ? Number(estimate.caloriasMax) : null,
+
+    calorias_min: Number.isFinite(Number(estimate?.caloriasMin))
+      ? Number(estimate.caloriasMin)
+      : null,
+
+    calorias_max: Number.isFinite(Number(estimate?.caloriasMax))
+      ? Number(estimate.caloriasMax)
+      : null,
+
     intensidad_estimada: estimate?.intensidad || null,
     duracion_estimada: estimate?.duracion || null,
     calorias_nota: estimate?.nota || null,
-    ai_intensity_score: hasStructuredAnalysis ? toOptionalScore(estimate?.intensidadScore) : null,
-    ai_metabolic_load: hasStructuredAnalysis ? toOptionalScore(estimate?.cargaMetabolica) : null,
-    ai_cardio_score: hasStructuredAnalysis ? toOptionalScore(estimate?.cardio) : null,
-    ai_strength_score: hasStructuredAnalysis ? toOptionalScore(estimate?.fuerza) : null,
+
+    ai_intensity_score: hasStructuredAnalysis
+      ? toOptionalScore(estimate?.intensidadScore)
+      : null,
+
+    ai_metabolic_load: hasStructuredAnalysis
+      ? toOptionalScore(estimate?.cargaMetabolica)
+      : null,
+
+    ai_cardio_score: hasStructuredAnalysis
+      ? toOptionalScore(estimate?.cardio)
+      : null,
+
+    ai_strength_score: hasStructuredAnalysis
+      ? toOptionalScore(estimate?.fuerza)
+      : null,
+
     calorie_met_estimate: hasStructuredAnalysis
       ? toOptionalNumber(estimate?.metEstimate)
       : null,
-    scored_duration_seconds: hasStructuredAnalysis
-      ? toOptionalPositiveInteger(estimate?.scoredDurationSeconds)
-      : null,
+
+    scored_duration_seconds:
+      scoredDurationSeconds,
+
     scored_duration_source:
-      hasStructuredAnalysis &&
-      toOptionalPositiveInteger(estimate?.scoredDurationSeconds) !== null
-        ? estimate?.scoredDurationSource || "ai_analysis"
-        : null,
+      scoredDurationSource,
+
     ai_analysis_version: hasStructuredAnalysis
-      ? estimate?.analysisVersion || "pho3nix-wod-analysis-1.0"
+      ? estimate?.analysisVersion ||
+        "pho3nix-wod-analysis-1.0"
       : null,
   }
+}
+
+function toScoredDurationSecondsFromMinutes(value) {
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return null
+  }
+
+  const minutes = Number(value)
+
+  if (!Number.isFinite(minutes)) return null
+  if (minutes < 0.5 || minutes > 120) return null
+
+  const seconds = Math.round(minutes * 60)
+
+  if (seconds < 30 || seconds > 7200) {
+    return null
+  }
+
+  return seconds
 }
 
 function toOptionalPositiveInteger(value) {
